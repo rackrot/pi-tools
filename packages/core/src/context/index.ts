@@ -1,5 +1,5 @@
 import { getCurrentSystemMessage } from "@earendil-works/pi-ai";
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { estimateTokens } from "@earendil-works/pi-coding-agent";
 
 const tok = (s: string) => Math.ceil(s.length / 4);
@@ -8,6 +8,68 @@ const sum = (xs: { tokens: number }[]) => xs.reduce((a, x) => a + x.tokens, 0);
 
 const SKILL_SECTIONS = ["skills", "skill_index", "skill_full"];
 const BASE_SECTIONS = ["preamble", "tools", "rules", "docs", "addendum", "cwd"];
+
+type Ctx = Pick<ExtensionContext, "sessionManager">;
+
+/** Estimated token breakdown of what the model currently has in context. */
+export function measure(pi: ExtensionAPI, ctx: Ctx) {
+	const all = ctx.sessionManager.buildSessionProjection().messages;
+	const system = getCurrentSystemMessage(all);
+	const sections = Object.entries(system?.sections ?? {}).map(([name, text]) => ({
+		name,
+		tokens: tok(text ?? ""),
+	}));
+	const pick = (names: string[]) => sections.filter((s) => names.includes(s.name));
+
+	const base = [
+		...pick(BASE_SECTIONS),
+		...(system?.content ? [{ name: "content", tokens: tok(JSON.stringify(system.content)) }] : []),
+	];
+	const skills = pick(SKILL_SECTIONS);
+	const ctxFiles = pick(["project_context"]);
+	const extra = sections.filter(
+		(s) => ![...BASE_SECTIONS, ...SKILL_SECTIONS, "project_context"].includes(s.name),
+	);
+	const source = new Map(pi.getAllTools().map((t) => [t.name, t.sourceInfo]));
+	const groups = new Map<string, { n: number; tokens: number }>();
+	for (const t of system?.toolsAdded ?? []) {
+		const si = source.get(t.name);
+		const group =
+			!si || si.source === "builtin"
+				? "built-in"
+				: si.path.replace(/^.*node_modules\//, "").replace(/\/(src|dist)\/.*$/, "");
+		const g = groups.get(group) ?? { n: 0, tokens: 0 };
+		groups.set(group, { n: g.n + 1, tokens: g.tokens + tok(JSON.stringify(t)) });
+	}
+	const groupRows = [...groups].sort((a, b) => b[1].tokens - a[1].tokens);
+	const toolsTotal = groupRows.reduce((a, [, v]) => a + v.tokens, 0);
+	const toolCount = groupRows.reduce((a, [, v]) => a + v.n, 0);
+
+	// System messages are the prompt and tools above, so leave them out here.
+	const byRole = new Map<string, number>();
+	for (const m of all) {
+		if (m.role === "system") continue;
+		const role = m.role === "toolResult" ? "tool results" : `${m.role} messages`;
+		byRole.set(role, (byRole.get(role) ?? 0) + estimateTokens(m));
+	}
+	const msgTotal = [...byRole.values()].reduce((a, b) => a + b, 0);
+
+	const estimated =
+		sum(sections) + sum(base.filter((b) => b.name === "content")) + toolsTotal + msgTotal;
+	return {
+		sections,
+		base,
+		skills,
+		ctxFiles,
+		extra,
+		groupRows,
+		toolsTotal,
+		toolCount,
+		byRole,
+		msgTotal,
+		estimated,
+	};
+}
 
 /**
  * `/context`: estimated breakdown of what fills the context window (like Claude Code's /context).
@@ -18,56 +80,13 @@ export default function (pi: ExtensionAPI) {
 	pi.registerCommand("context", {
 		description: "Show a breakdown of context window usage",
 		handler: async (_args, ctx) => {
-			const all = ctx.sessionManager.buildSessionProjection().messages;
-			const system = getCurrentSystemMessage(all);
-			const sections = Object.entries(system?.sections ?? {}).map(([name, text]) => ({
-				name,
-				tokens: tok(text ?? ""),
-			}));
-			const pick = (names: string[]) => sections.filter((s) => names.includes(s.name));
-
-			const base = [
-				...pick(BASE_SECTIONS),
-				...(system?.content
-					? [{ name: "content", tokens: tok(JSON.stringify(system.content)) }]
-					: []),
-			];
-			const skills = pick(SKILL_SECTIONS);
-			const ctxFiles = pick(["project_context"]);
-			const extra = sections.filter(
-				(s) => ![...BASE_SECTIONS, ...SKILL_SECTIONS, "project_context"].includes(s.name),
-			);
+			const m = measure(pi, ctx);
 			const files = (ctx.getSystemPromptOptions().contextFiles ?? []).map((f) => ({
 				name: f.path.replace(/^.*\/(?=[^/]+\/[^/]+$)/, ""),
 				tokens: tok(f.content),
 			}));
-
-			const source = new Map(pi.getAllTools().map((t) => [t.name, t.sourceInfo]));
-			const groups = new Map<string, { n: number; tokens: number }>();
-			for (const t of system?.toolsAdded ?? []) {
-				const si = source.get(t.name);
-				const group =
-					!si || si.source === "builtin"
-						? "built-in"
-						: si.path.replace(/^.*node_modules\//, "").replace(/\/(src|dist)\/.*$/, "");
-				const g = groups.get(group) ?? { n: 0, tokens: 0 };
-				groups.set(group, { n: g.n + 1, tokens: g.tokens + tok(JSON.stringify(t)) });
-			}
-			const groupRows = [...groups].sort((a, b) => b[1].tokens - a[1].tokens);
-			const toolsTotal = groupRows.reduce((a, [, v]) => a + v.tokens, 0);
-			const toolCount = groupRows.reduce((a, [, v]) => a + v.n, 0);
-
-			// System messages are the prompt and tools above, so leave them out here.
-			const byRole = new Map<string, number>();
-			for (const m of all) {
-				if (m.role === "system") continue;
-				const role = m.role === "toolResult" ? "tool results" : `${m.role} messages`;
-				byRole.set(role, (byRole.get(role) ?? 0) + estimateTokens(m));
-			}
-			const msgTotal = [...byRole.values()].reduce((a, b) => a + b, 0);
-
-			const estimated =
-				sum(sections) + sum(base.filter((b) => b.name === "content")) + toolsTotal + msgTotal;
+			const { base, skills, ctxFiles, extra, groupRows, toolsTotal, toolCount } = m;
+			const { byRole, msgTotal, estimated } = m;
 			const usage = ctx.getContextUsage();
 			const window = usage?.contextWindow ?? 0;
 			const pct = (n: number) => (window ? ` (${((n / window) * 100).toFixed(1)}%)` : "");
