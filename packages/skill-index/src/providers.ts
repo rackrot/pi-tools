@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { getAgentDir } from "@earendil-works/pi-coding-agent";
 import { TypeSafeClient } from "@typesafe-ai/sdk";
@@ -148,16 +149,23 @@ const questions = (candidates: { name: string; description: string }[]): Questio
 
 type Answers = Record<string, { noul: number }>;
 
-const scores = (answers: Answers, n: number) =>
-	Array.from({ length: n }, (_, i) => answers[`c${i}`]?.noul ?? 1);
+const scores = (answers: Answers | undefined, n: number) =>
+	Array.from({ length: n }, (_, i) => {
+		const noul = answers?.[`c${i}`]?.noul;
+		if (typeof noul !== "number") throw new Error(`decision model returned no answer for c${i}`);
+		return noul;
+	});
 
 export function createJudge(cfg: DecisionConfig): Judge | undefined {
 	if (!cfg.enabled) return;
 	if (cfg.provider === "typesafe") {
+		// The SDK zstd-compresses bodies of 1 KB or more, which llama-swap can't read the model id from (404).
 		const client = new TypeSafeClient({
-			baseUrl: cfg.baseUrl,
-			apiKey: apiKey(cfg.apiKeyEnv),
-		} as ConstructorParameters<typeof TypeSafeClient>[0]);
+			baseURL: cfg.baseUrl,
+			// The SDK throws without a key, but self-hosted servers ignore it: use a random one unless set.
+			apiKey: apiKey(cfg.apiKeyEnv) ?? process.env.TYPESAFE_API_KEY ?? randomUUID(),
+			compression: false,
+		});
 		return {
 			async judge(task, candidates) {
 				const r = await client.systemOne({
