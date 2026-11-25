@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/rackrot/pi-tools/compare/pi-model-aliases-v0.1.0...pi-model-aliases-v0.2.0) (2026-11-25)
+
+
+### Features
+
+* **model-aliases:** take limits, thinking levels and image input from the first entry ([f73e7ac](https://github.com/rackrot/pi-tools/commit/f73e7ace8896a24d074ddf61b9f7efcb65d8fcf8))
+
 ## [0.1.0](https://github.com/rackrot/pi-tools/compare/pi-model-aliases-v0.0.1...pi-model-aliases-v0.1.0) (2026-11-25)
 
 
