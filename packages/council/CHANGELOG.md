@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/rackrot/pi-tools/compare/pi-council-v0.1.0...pi-council-v0.2.0) (2026-11-25)
+
+
+### Features
+
+* **core:** filterable pickers and left/right cycling in config UIs ([1960ee0](https://github.com/rackrot/pi-tools/commit/1960ee0a350cebe3ca850c488f5a210e0f7782cc))
+
 ## [0.1.0](https://github.com/rackrot/pi-tools/compare/pi-council-v0.0.1...pi-council-v0.1.0) (2026-11-25)
 
 
