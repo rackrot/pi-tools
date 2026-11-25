@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0](https://github.com/rackrot/pi-tools/compare/pi-agents-v0.1.0...pi-agents-v0.2.0) (2026-11-25)
+
+
+### Features
+
+* **agents:** add security-auditor, dependency-auditor, research-analyst; tighten reviewer ([fe91c89](https://github.com/rackrot/pi-tools/commit/fe91c89d92e113e2ac65f58f4c4ce19222296222))
+* **core:** filterable pickers and left/right cycling in config UIs ([1960ee0](https://github.com/rackrot/pi-tools/commit/1960ee0a350cebe3ca850c488f5a210e0f7782cc))
+
 ## [0.1.0](https://github.com/rackrot/pi-tools/compare/pi-agents-v0.0.1...pi-agents-v0.1.0) (2026-11-25)
 
 
