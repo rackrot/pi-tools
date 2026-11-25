@@ -5,6 +5,8 @@ import { getAgentDir } from "@earendil-works/pi-coding-agent";
 export type Exposure = "direct" | "codemode" | "deferred" | "hidden";
 
 export interface ForgejoConfig {
+	/** Off unless a settings layer sets `enabled: true` (typically the project's .pi/settings.json). */
+	enabled: boolean;
 	/** Bare hostname serving forgejo-mcp at /mcp, e.g. git.example.com. */
 	host: string;
 	/** Access token: literal, `${ENV}`, or `!command` printing the token. Default `${FORGEJO_TOKEN}`. */
@@ -53,7 +55,7 @@ function readJson(path: string): Record<string, unknown> {
 	}
 }
 
-/** Parses the merged `forgejoMcp` settings object; `undefined` when no host is set. */
+/** Parses the merged `forgejoMcp` settings object; `undefined` when no host is set. Global settings can hold defaults (host, token, ...) while each project opts in with `enabled`. */
 export function parseConfig(raw: unknown): ForgejoConfig | undefined {
 	if (!raw || typeof raw !== "object") return undefined;
 	const r = raw as Record<string, unknown>;
@@ -70,6 +72,7 @@ export function parseConfig(raw: unknown): ForgejoConfig | undefined {
 		if (typeof v === "string" && EXPOSURES.has(v)) toolExposure[k] = v as Exposure;
 	}
 	return {
+		enabled: r.enabled === true,
 		host,
 		token: typeof r.token === "string" && r.token ? r.token : "${FORGEJO_TOKEN}",
 		exposure:
@@ -86,7 +89,8 @@ export function loadConfig(cwd: string = process.cwd()): ForgejoConfig | undefin
 	const project = readJson(join(cwd, ".pi", "settings.json")).forgejoMcp;
 	const g = global && typeof global === "object" ? global : {};
 	const p = project && typeof project === "object" ? project : {};
-	return parseConfig({ ...g, ...p });
+	const c = parseConfig({ ...g, ...p });
+	return c?.enabled ? c : undefined;
 }
 
 /** `!command` tokens are wrapped so the whole header value is still one command, as pi requires. */

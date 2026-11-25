@@ -10,6 +10,7 @@ export FORGEJO_TOKEN=...   # Settings > Applications on your instance; grant lea
 ```json
 {
 	"forgejoMcp": {
+		"enabled": true,
 		"host": "git.example.com",
 		"token": "${FORGEJO_TOKEN}",
 		"exposure": "deferred",
@@ -19,7 +20,8 @@ export FORGEJO_TOKEN=...   # Settings > Applications on your instance; grant lea
 }
 ```
 
-- `host` (required): bare hostname. Without it the extension does nothing.
+- `enabled`: default `false`. The extension does nothing until a layer sets it to `true`. Put `host`, `token` etc. in the global `~/.pi/agent/settings.json` as defaults and set `"forgejoMcp": { "enabled": true }` in a project's `.pi/settings.json` to opt that project in (project keys override global ones).
+- `host` (required): bare hostname.
 - `token`: literal, `${ENV}` or `!command` printing the token. Default `${FORGEJO_TOKEN}`.
 - `exposure`: `deferred` (default, found via `tool_search`), `codemode`, `direct` or `hidden`.
 - `curate`: `false` exposes all ~163 tools.

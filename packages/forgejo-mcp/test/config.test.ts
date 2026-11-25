@@ -7,6 +7,12 @@ test("no host means no config", () => {
 	assert.equal(parseConfig({ token: "x" }), undefined);
 });
 
+test("disabled unless enabled: true", () => {
+	assert.equal(parseConfig({ host: "h" })?.enabled, false);
+	assert.equal(parseConfig({ host: "h", enabled: "yes" })?.enabled, false);
+	assert.equal(parseConfig({ host: "h", enabled: true })?.enabled, true);
+});
+
 test("host is normalised and defaults apply", () => {
 	const c = parseConfig({ host: "https://git.example.com/mcp" });
 	assert.equal(c?.host, "git.example.com");
