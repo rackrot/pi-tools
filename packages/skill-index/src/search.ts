@@ -1,12 +1,5 @@
-export interface Doc {
-	name: string;
-	description: string;
-}
-
-export interface Hit {
-	name: string;
-	score: number;
-}
+import type { Scope, SkillDb, Stored } from "./db.ts";
+import type { Embedder, Judge, Reranker } from "./providers.ts";
 
 const STOP = new Set([
 	"a",
@@ -34,53 +27,95 @@ const STOP = new Set([
 	"with",
 ]);
 
-const stem = (t: string) =>
-	t.length > 4 && t.endsWith("ies")
-		? `${t.slice(0, -3)}y`
-		: t.length > 3 && t.endsWith("s") && !t.endsWith("ss")
-			? t.slice(0, -1)
-			: t;
+/** Candidates taken from each of BM25 and vector search before fusion. */
+const POOL = 50;
+/** Fused candidates sent to the reranker and decision model. */
+const RERANK_POOL = 20;
+const RRF_K = 60;
+const BODY_CHARS = 1500;
 
-/** Lowercase words, identifier boundaries split, stop words dropped, naive singular form. */
-export function tokenize(text: string): string[] {
-	return text
-		.replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+/** Words of the query as an FTS5 OR query; each word is quoted so punctuation cannot break the syntax. */
+export function ftsQuery(query: string): string {
+	const words = query
 		.toLowerCase()
 		.split(/[^\p{L}\p{N}]+/u)
-		.filter((w) => w && !STOP.has(w))
-		.map(stem);
+		.filter((w) => w && !STOP.has(w));
+	return [...new Set(words)].map((w) => `"${w}"`).join(" OR ");
 }
 
-const K1 = 1.5;
-const B = 0.75;
-/** A skill's name is repeated so a name match outranks the same word in a description. */
-const NAME_WEIGHT = 3;
+/** Text that represents a skill to the embedder and reranker. */
+export const skillText = (s: Stored) =>
+	`${s.name}: ${s.description}\n${s.body.slice(0, BODY_CHARS)}`;
 
-/** BM25 over name and description. Returns hits with a positive score, best first. */
-export function search(docs: Doc[], query: string, limit: number): Hit[] {
-	const terms = [...new Set(tokenize(query))];
-	if (!terms.length || !docs.length) return [];
-	const tokenized = docs.map((d) => [
-		...Array(NAME_WEIGHT).fill(tokenize(d.name)).flat(),
-		...tokenize(d.description),
-	]);
-	const avg = tokenized.reduce((n, t) => n + t.length, 0) / docs.length || 1;
-	const df = new Map<string, number>();
-	for (const toks of tokenized) for (const t of new Set(toks)) df.set(t, (df.get(t) ?? 0) + 1);
+/** Reciprocal rank fusion of ranked lists. */
+export function fuse(lists: Stored[][]): Stored[] {
+	const score = new Map<number, number>();
+	const byId = new Map<number, Stored>();
+	for (const list of lists)
+		list.forEach((s, rank) => {
+			byId.set(s.id, s);
+			score.set(s.id, (score.get(s.id) ?? 0) + 1 / (RRF_K + rank + 1));
+		});
+	return [...byId.values()].sort(
+		(a, b) => (score.get(b.id) ?? 0) - (score.get(a.id) ?? 0) || a.name.localeCompare(b.name),
+	);
+}
 
-	const hits: Hit[] = [];
-	tokenized.forEach((toks, i) => {
-		const tf = new Map<string, number>();
-		for (const t of toks) tf.set(t, (tf.get(t) ?? 0) + 1);
-		let score = 0;
-		for (const term of terms) {
-			const f = tf.get(term);
-			if (!f) continue;
-			const n = df.get(term) ?? 0;
-			const idf = Math.log(1 + (docs.length - n + 0.5) / (n + 0.5));
-			score += (idf * (f * (K1 + 1))) / (f + K1 * (1 - B + (B * toks.length) / avg));
+export interface Pipeline {
+	db: SkillDb;
+	embedder?: Embedder;
+	reranker?: Reranker;
+	judge?: Judge;
+	threshold: number;
+}
+
+export interface Result {
+	skills: Stored[];
+	/** Stages that failed and were skipped. */
+	errors: string[];
+}
+
+/**
+ * BM25 and vector search, fused, then reranked and filtered by the decision model when those
+ * are configured. A failing stage is skipped so the search still answers.
+ */
+export async function searchSkills(
+	p: Pipeline,
+	scope: Scope,
+	query: string,
+	limit: number,
+): Promise<Result> {
+	const errors: string[] = [];
+	const lists = [p.db.bm25(scope, ftsQuery(query), POOL)];
+	if (p.embedder) {
+		try {
+			const [q] = await p.embedder.embed([query]);
+			lists.push(p.db.nearest(scope, p.embedder.id, q, POOL));
+		} catch (e) {
+			errors.push(`embedding: ${(e as Error).message}`);
 		}
-		if (score > 0) hits.push({ name: docs[i].name, score });
-	});
-	return hits.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name)).slice(0, limit);
+	}
+	let skills = fuse(lists).slice(0, RERANK_POOL);
+
+	if (p.reranker && skills.length > 1) {
+		try {
+			const scores = await p.reranker.rerank(query, skills.map(skillText));
+			skills = skills
+				.map((s, i) => ({ s, score: scores[i] }))
+				.sort((a, b) => b.score - a.score)
+				.map((x) => x.s);
+		} catch (e) {
+			errors.push(`reranker: ${(e as Error).message}`);
+		}
+	}
+
+	if (p.judge && skills.length) {
+		try {
+			const probs = await p.judge.judge(query, skills);
+			skills = skills.filter((_, i) => probs[i] >= p.threshold);
+		} catch (e) {
+			errors.push(`decision: ${(e as Error).message}`);
+		}
+	}
+	return { skills: skills.slice(0, limit), errors };
 }
