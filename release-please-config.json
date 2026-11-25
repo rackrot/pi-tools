@@ -19,6 +19,9 @@
 		},
 		"packages/skills": {
 			"component": "pi-skills"
+		},
+		"packages/forgejo-mcp": {
+			"component": "pi-forgejo-mcp"
 		}
 	},
 	"changelog-sections": [

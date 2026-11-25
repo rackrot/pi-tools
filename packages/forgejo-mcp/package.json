@@ -1,0 +1,34 @@
+{
+	"name": "@rackrot/pi-forgejo-mcp",
+	"version": "0.0.1",
+	"description": "Connects pi to a forgejo-mcp server (https://<host>/mcp) with a curated, repo-focused tool set",
+	"type": "module",
+	"keywords": [
+		"pi-package",
+		"pi-extension"
+	],
+	"license": "MIT",
+	"files": [
+		"src",
+		"README.md"
+	],
+	"scripts": {
+		"test": "node --test test/*.test.ts"
+	},
+	"pi": {
+		"extensions": [
+			"./src/index.ts"
+		]
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": "*"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/rackrot/pi-tools.git",
+		"directory": "packages/forgejo-mcp"
+	}
+}
