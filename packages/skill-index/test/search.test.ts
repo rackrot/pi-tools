@@ -1,37 +1,66 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { search, tokenize } from "../src/search.ts";
+import { SkillDb } from "../src/db.ts";
+import { searchSkills } from "../src/search.ts";
 
-const docs = [
-	{ name: "git-commit", description: "Writes Git commits in the repository's message convention" },
-	{
-		name: "playwright-cli",
-		description: "Drives a headless browser to inspect pages and take screenshots",
-	},
-	{ name: "postgres", description: "Diagnoses PostgreSQL queries, indexes and locks" },
-	{ name: "pr-comments", description: "Pulls PR review comments into context and fixes them" },
-];
-
-test("tokenize splits identifiers, drops stop words, stems plurals", () => {
-	assert.deepEqual(tokenize("The commits of camelCase"), ["commit", "camel", "case"]);
+const skill = (name: string, description: string, body = "") => ({
+	filePath: `/s/${name}/SKILL.md`,
+	name,
+	description,
+	body,
 });
 
-test("ranks the relevant skill first", () => {
-	assert.equal(search(docs, "write a commit message", 3)[0].name, "git-commit");
-	assert.equal(search(docs, "screenshot a web page", 3)[0].name, "playwright-cli");
-	assert.equal(search(docs, "slow sql index", 3)[0].name, "postgres");
+function seed() {
+	const db = new SkillDb(":memory:");
+	db.sync("global", null, [
+		skill("git-commit", "Writes Git commits in the repository's message convention"),
+		skill("postgres", "Diagnoses queries", "Look at indexes and locks when a sql query is slow"),
+	]);
+	db.sync("project", "/proj-a", [skill("deploy-a", "Deploys project a with commit hooks")]);
+	db.sync("project", "/proj-b", [skill("deploy-b", "Deploys project b with commit hooks")]);
+	return db;
+}
+
+const names = (r: { skills: { name: string }[] }) => r.skills.map((s) => s.name).sort();
+
+test("search only returns global skills and the current project's skills", async () => {
+	const db = seed();
+	const r = await searchSkills({ db, threshold: 0.5 }, { projectRoot: "/proj-a" }, "commit", 10);
+	assert.deepEqual(names(r), ["deploy-a", "git-commit"]);
 });
 
-test("a name match outranks a description match", () => {
-	const d = [
-		{ name: "alpha", description: "mentions postgres once" },
-		{ name: "postgres", description: "unrelated words here" },
-	];
-	assert.equal(search(d, "postgres", 2)[0].name, "postgres");
+test("body text is searchable and a changed body drops its embedding", async () => {
+	const db = seed();
+	const scope = { projectRoot: "/x" };
+	const r = await searchSkills({ db, threshold: 0.5 }, scope, "slow sql", 3);
+	assert.equal(r.skills[0].name, "postgres");
+
+	for (const s of db.pendingEmbeddings(scope, "m")) db.setEmbedding(s.id, "m", [1, 0]);
+	assert.equal(db.pendingEmbeddings(scope, "m").length, 0);
+	assert.equal(db.pendingEmbeddings(scope, "other").length, 2);
+	db.sync("global", null, [skill("postgres", "Diagnoses queries", "changed body")]);
+	assert.deepEqual(
+		db.pendingEmbeddings(scope, "m").map((s) => s.name),
+		["postgres"],
+	);
 });
 
-test("no match and empty query return nothing; limit applies", () => {
-	assert.deepEqual(search(docs, "zzzz", 3), []);
-	assert.deepEqual(search(docs, "the of", 3), []);
-	assert.equal(search(docs, "comments commit queries browser", 2).length, 2);
+test("a failing provider is skipped; the decision model filters by threshold", async () => {
+	const db = seed();
+	const scope = { projectRoot: "/proj-a" };
+	const boom = () => Promise.reject(new Error("down"));
+	const r = await searchSkills(
+		{
+			db,
+			threshold: 0.5,
+			embedder: { id: "m", embed: boom },
+			reranker: { rerank: boom },
+			judge: { judge: async (_q, c) => c.map((x) => (x.name === "deploy-a" ? 0.9 : 0.1)) },
+		},
+		scope,
+		"commit",
+		10,
+	);
+	assert.deepEqual(names(r), ["deploy-a"]);
+	assert.equal(r.errors.length, 2);
 });
