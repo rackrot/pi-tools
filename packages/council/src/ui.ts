@@ -1,48 +1,21 @@
 import {
 	type ExtensionCommandContext,
-	getSelectListTheme,
 	getSettingsListTheme,
 } from "@earendil-works/pi-coding-agent";
-import {
-	type Component,
-	Container,
-	Input,
-	SelectList,
-	type SettingItem,
-	SettingsList,
-	Text,
-} from "@earendil-works/pi-tui";
+import { type Component, Container, Input, type SettingItem, Text } from "@earendil-works/pi-tui";
 import { configPath } from "@rackrot/pi-core/config";
+import { CycleSettingsList, filterPicker } from "@rackrot/pi-core/config-ui";
 import { loadConfig } from "./config.ts";
 import { buildRows, type Row, readLayer, saveLayer, UNSET } from "./edit.ts";
 
 type Scope = "global" | "project";
 
-/** Filterable model list: type to narrow, arrows to move, enter to pick, escape to cancel. */
 function modelPicker(models: string[], current: string, done: (v?: string) => void): Component {
 	const items = [UNSET, ...models].map((value) => ({
 		value,
 		label: value === UNSET ? "unset (use the session's model)" : value,
 	}));
-	const list = new SelectList(items, 12, getSelectListTheme());
-	list.setSelectedIndex(
-		Math.max(
-			0,
-			items.findIndex((i) => i.value === current),
-		),
-	);
-	list.onSelect = (i) => done(i.value);
-	list.onCancel = () => done();
-	const input = new Input({ prompt: "filter: " });
-	return {
-		render: (w) => [...input.render(w), ...list.render(w)],
-		invalidate: () => list.invalidate(),
-		handleInput: (data) => {
-			list.handleInput(data);
-			input.handleInput(data);
-			list.setFilter(input.getValue());
-		},
-	} as Component;
+	return filterPicker(items, done, current);
 }
 
 function textEditor(initial: string, done: (v?: string) => void): Component {
@@ -101,10 +74,10 @@ export async function openSettings(ctx: ExtensionCommandContext): Promise<boolea
 			file.setText(theme.fg("muted", `   ${pathOf(scope)} · pi reloads on close to apply changes`));
 		};
 
-		let list: SettingsList;
+		let list: CycleSettingsList;
 		const makeList = () => {
 			rebuild();
-			list = new SettingsList(
+			list = new CycleSettingsList(
 				rows.map(toItem),
 				Math.max(5, Math.min(tui.terminal.rows - 10, rows.length)),
 				getSettingsListTheme(),
@@ -120,6 +93,7 @@ export async function openSettings(ctx: ExtensionCommandContext): Promise<boolea
 						status.setText(theme.fg("error", `   ${e instanceof Error ? e.message : String(e)}`));
 					}
 					makeList();
+					list.selectItem(id);
 					renderHeader();
 				},
 				() => done(),

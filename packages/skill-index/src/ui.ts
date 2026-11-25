@@ -2,14 +2,9 @@ import {
 	type ExtensionCommandContext,
 	getSettingsListTheme,
 } from "@earendil-works/pi-coding-agent";
-import {
-	type Component,
-	Container,
-	type SettingItem,
-	SettingsList,
-	Text,
-} from "@earendil-works/pi-tui";
+import { type Component, Container, type SettingItem, Text } from "@earendil-works/pi-tui";
 import { configPath, readConfig } from "@rackrot/pi-core/config";
+import { CycleSettingsList } from "@rackrot/pi-core/config-ui";
 import {
 	DEFAULT_MODE,
 	MODES,
@@ -88,7 +83,7 @@ export async function openSettings(ctx: ExtensionCommandContext, skills: Entry[]
 			renderHeader();
 			list.invalidate();
 		};
-		const list = new SettingsList(
+		const list = new CycleSettingsList(
 			items,
 			Math.min(Math.max(5, tui.terminal.rows - 10), items.length),
 			getSettingsListTheme(),

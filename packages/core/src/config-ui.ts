@@ -8,7 +8,10 @@ import {
 import {
 	type Component,
 	Container,
+	fuzzyFilter,
 	Input,
+	Key,
+	matchesKey,
 	SelectList,
 	type SettingItem,
 	SettingsList,
@@ -16,6 +19,29 @@ import {
 } from "@earendil-works/pi-tui";
 import { configPath, editConfig, readConfig, type Scope } from "./config.ts";
 import { isObject, type Json, writeTextAtomic } from "./json.ts";
+
+/** SettingsList where left/right step through a setting's fixed values (enter still cycles forward). */
+export class CycleSettingsList extends SettingsList {
+	override handleInput(data: string): void {
+		const dir = matchesKey(data, Key.left) ? -1 : matchesKey(data, Key.right) ? 1 : 0;
+		// SettingsList keeps its state private; reach in only to find the focused item.
+		const self = this as unknown as {
+			submenuComponent: unknown;
+			selectedIndex: number;
+			getDisplayItems(): SettingItem[];
+			onChange(id: string, value: string): void;
+		};
+		const item =
+			dir && !self.submenuComponent ? self.getDisplayItems()[self.selectedIndex] : undefined;
+		if (item?.values?.length && !item.submenu) {
+			const i = item.values.indexOf(item.currentValue);
+			item.currentValue = item.values[(i + dir + item.values.length) % item.values.length];
+			self.onChange(item.id, item.currentValue);
+			return;
+		}
+		super.handleInput(data);
+	}
+}
 
 /** A simple scalar setting at `path` inside the rackrot config. */
 export interface ConfigField {
@@ -35,7 +61,8 @@ export interface ConfigSection {
 	id: string;
 	label: string;
 	fields?: ConfigField[];
-	open?: (ctx: ExtensionCommandContext) => Promise<void>;
+	/** Custom editor. Resolve true when something was saved that needs a pi reload. */
+	open?: (ctx: ExtensionCommandContext) => Promise<boolean | undefined | void>;
 	summary?: (ctx: ExtensionCommandContext) => string;
 	/** Top-level config keys with their defaults and sample values; `/rackrot-init` writes it commented out. */
 	example?: Json;
@@ -146,7 +173,7 @@ async function openFields(ctx: ExtensionCommandContext, s: ConfigSection): Promi
 			renderHeader();
 			list.invalidate();
 		};
-		const list = new SettingsList(
+		const list = new CycleSettingsList(
 			items,
 			Math.min(Math.max(5, tui.terminal.rows - 10), Math.max(items.length, 1)),
 			getSettingsListTheme(),
@@ -186,16 +213,48 @@ async function openFields(ctx: ExtensionCommandContext, s: ConfigSection): Promi
 	return dirty;
 }
 
-async function openSection(ctx: ExtensionCommandContext, s: ConfigSection): Promise<void> {
-	if (s.open) return s.open(ctx);
-	if (s.fields && (await openFields(ctx, s))) await ctx.reload();
+/** Opens one section. Resolves true when it saved something that needs a reload. */
+async function openSection(ctx: ExtensionCommandContext, s: ConfigSection): Promise<boolean> {
+	if (s.open) return (await s.open(ctx)) === true;
+	return s.fields ? openFields(ctx, s) : false;
 }
 
-function picker(items: { value: string; label: string }[], done: (v?: string) => void): Component {
-	const list = new SelectList(items, Math.min(items.length, 12), getSelectListTheme());
-	list.onSelect = (i) => done(i.value);
-	list.onCancel = () => done();
-	return list;
+/** Fuzzy-filterable list: type to narrow (any order, substring or scattered), arrows to move, enter to pick, escape to cancel. */
+export function filterPicker(
+	items: { value: string; label: string }[],
+	done: (v?: string) => void,
+	current?: string,
+): Component {
+	const input = new Input({ prompt: "filter: " });
+	const build = (shown: typeof items) => {
+		const list = new SelectList(
+			shown,
+			Math.max(1, Math.min(shown.length, 12)),
+			getSelectListTheme(),
+		);
+		list.onSelect = (i) => done(i.value);
+		list.onCancel = () => done();
+		return list;
+	};
+	let list = build(items);
+	list.setSelectedIndex(
+		Math.max(
+			0,
+			items.findIndex((i) => i.value === current),
+		),
+	);
+	return {
+		render: (w) => [...input.render(w), ...list.render(w)],
+		invalidate: () => list.invalidate(),
+		handleInput: (data) => {
+			list.handleInput(data);
+			const before = input.getValue();
+			input.handleInput(data);
+			const q = input.getValue();
+			// Rebuild only when the text changed, so arrow keys keep their selection.
+			if (q !== before) list = build(q ? fuzzyFilter(items, q, (i) => i.label) : items);
+		},
+	} as Component;
 }
 
 /** Registers `/rackrot-config`: pick a section (or name one as the argument), or `show` for summaries. */
@@ -211,28 +270,34 @@ export function registerConfigCommand(pi: ExtensionAPI): void {
 				ctx.ui.notify(lines.join("\n") || "No rackrot config sections registered.", "info");
 				return;
 			}
-			let section = all.find((s) => s.id === arg);
-			if (!section) {
-				if (arg) {
-					ctx.ui.notify(
-						`Unknown section "${arg}". Sections: ${all.map((s) => s.id).join(", ")}`,
-						"warning",
-					);
-					return;
-				}
-				if (!all.length) {
-					ctx.ui.notify("No rackrot config sections registered.", "info");
-					return;
-				}
-				const id = await ctx.ui.custom<string | undefined>((_tui, _theme, _kb, done) =>
-					picker(
-						all.map((s) => ({ value: s.id, label: s.label })),
-						done,
-					),
+			const named = all.find((s) => s.id === arg);
+			if (arg && !named) {
+				ctx.ui.notify(
+					`Unknown section "${arg}". Sections: ${all.map((s) => s.id).join(", ")}`,
+					"warning",
 				);
-				section = all.find((s) => s.id === id);
+				return;
 			}
-			if (section) await openSection(ctx, section);
+			if (!all.length) {
+				ctx.ui.notify("No rackrot config sections registered.", "info");
+				return;
+			}
+			// Escape in a section returns to the picker; escape in the picker (or a named section) exits.
+			let changed = false;
+			let section = named;
+			do {
+				if (!named) {
+					const id = await ctx.ui.custom<string | undefined>((_tui, _theme, _kb, done) =>
+						filterPicker(
+							all.map((x) => ({ value: x.id, label: x.label })),
+							done,
+						),
+					);
+					section = all.find((x) => x.id === id);
+				}
+				if (section && (await openSection(ctx, section))) changed = true;
+			} while (!named && section);
+			if (changed) await ctx.reload();
 		},
 	});
 }

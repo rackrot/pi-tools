@@ -1,18 +1,11 @@
 import {
 	type ExtensionCommandContext,
 	getAgentDir,
-	getSelectListTheme,
 	getSettingsListTheme,
 } from "@earendil-works/pi-coding-agent";
-import {
-	type Component,
-	Container,
-	SelectList,
-	type SettingItem,
-	SettingsList,
-	Text,
-} from "@earendil-works/pi-tui";
+import { type Component, Container, type SettingItem, Text } from "@earendil-works/pi-tui";
 import { configPath } from "@rackrot/pi-core/config";
+import { CycleSettingsList, filterPicker } from "@rackrot/pi-core/config-ui";
 import {
 	configuredNames,
 	loadLayers,
@@ -59,7 +52,12 @@ export async function openSettings(
 	const cwd = ctx.cwd;
 	let scope: Scope = "global";
 	let layers: Overrides[] = loadLayers(packageDir, agentDir, cwd);
-	const models = readEnabledModels(agentDir, cwd);
+	// enabledModels is only a subset; always offer every model alias too.
+	const aliases = ctx.modelRegistry
+		.getAvailable()
+		.filter((m) => m.api === "pi-virtual")
+		.map((m) => `${m.provider}/${m.id}`);
+	const models = [...new Set([...readEnabledModels(agentDir, cwd), ...aliases])];
 
 	const agentNames = () => discoverAgents(packageDir, agentDir, cwd, configuredNames(layers));
 
@@ -110,19 +108,7 @@ export async function openSettings(
 		values: cycleValues(name, row),
 		submenu:
 			row === "model"
-				? (current, done) => {
-						const items = modelItems(current);
-						const list = new SelectList(items, Math.min(12, items.length), getSelectListTheme());
-						list.setSelectedIndex(
-							Math.max(
-								0,
-								items.findIndex((i) => i.value === current),
-							),
-						);
-						list.onSelect = (item) => done(item.value);
-						list.onCancel = () => done();
-						return list;
-					}
+				? (current, done) => filterPicker(modelItems(current), done, current)
 				: undefined,
 	});
 
@@ -184,7 +170,7 @@ export async function openSettings(
 
 		const status = new Text("", 0, 0);
 		const rows = Math.max(5, tui.terminal.rows - 10);
-		const list = new SettingsList(
+		const list = new CycleSettingsList(
 			items,
 			Math.min(rows, items.length),
 			getSettingsListTheme(),

@@ -69,9 +69,7 @@ export default function (pi: ExtensionAPI) {
 				},
 			},
 		},
-		open: async (ctx) => {
-			if (await openSettings(ctx)) await ctx.reload();
-		},
+		open: (ctx) => openSettings(ctx),
 		summary: (ctx) => {
 			const cfg = loadConfig(ctx.cwd);
 			return `second_opinion ${cfg.secondOpinion.enabled ? "on" : "off"}, default ${cfg.secondOpinion.default?.model ?? "session model"}, ${cfg.secondOpinion.options.length} options; council ${cfg.council.enabled ? "on" : "off"}, presets ${Object.keys(cfg.council.presets).join(", ") || "none"}`;
