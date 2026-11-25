@@ -15,11 +15,14 @@ name overrides them.
 
 ## Agents
 
-| Name          | Purpose                                                     |
-| ------------- | ----------------------------------------------------------- |
-| `reviewer`    | Diff review against a spec; read-only                       |
-| `test-runner` | Runs tests/typecheck/lint, returns only failures; read-only |
-| `docs-lookup` | Current library docs with sources                           |
+| Name                 | Purpose                                                     |
+| -------------------- | ----------------------------------------------------------- |
+| `reviewer`           | Diff review against a spec; read-only                       |
+| `test-runner`        | Runs tests/typecheck/lint, returns only failures; read-only |
+| `docs-lookup`        | Current library docs with sources                           |
+| `security-auditor`   | Read-only security sweep; returns findings only             |
+| `dependency-auditor` | Vets a package against our maintenance criteria             |
+| `research-analyst`   | Multi-source web research with citations                    |
 
 ## Overrides
 
