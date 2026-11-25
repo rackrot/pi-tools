@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/rackrot/pi-tools/compare/pi-core-v0.2.0...pi-core-v0.3.0) (2026-11-25)
+
+
+### Features
+
+* **core:** start codebase-memory daemon and index cwd on session start ([749fb1b](https://github.com/rackrot/pi-tools/commit/749fb1b7c567c88ab1de0e4d869201c4f64945be))
+
 ## [0.2.0](https://github.com/rackrot/pi-tools/compare/pi-core-v0.1.1...pi-core-v0.2.0) (2026-11-25)
 
 
