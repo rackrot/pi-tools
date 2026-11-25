@@ -6,7 +6,8 @@
 			"!**/node_modules",
 			"!**/dist",
 			"!packages/skills/skills",
-			"!packages/skills/evals"
+			"!packages/skills/evals",
+			"!**/CHANGELOG.md"
 		]
 	},
 	"formatter": {
