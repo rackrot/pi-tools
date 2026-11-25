@@ -1,0 +1,16 @@
+node_modules
+dist
+*.tgz
+*.tsbuildinfo
+*.log
+.env
+.env.*
+.DS_Store
+# editor and tool-generated
+.vscode/
+# local pi project config and runtime state
+.pi/
+# skill eval run output
+evals/results/
+__pycache__/
+*.pyc

@@ -1,0 +1,21 @@
+{
+	"name": "@rackrot/pi-skills",
+	"version": "0.1.0",
+	"description": "Skills imported from claude-plugins and adapted for pi",
+	"type": "module",
+	"keywords": [
+		"pi-package",
+		"pi-skills"
+	],
+	"license": "SEE LICENSE IN NOTICE",
+	"files": [
+		"skills",
+		"NOTICE",
+		"README.md"
+	],
+	"pi": {
+		"skills": [
+			"./skills"
+		]
+	}
+}

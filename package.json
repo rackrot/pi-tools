@@ -1,0 +1,21 @@
+{
+	"name": "pi-tools",
+	"private": true,
+	"type": "module",
+	"packageManager": "pnpm@10.0.0",
+	"scripts": {
+		"lint": "biome check .",
+		"fix": "biome check --write .",
+		"typecheck": "tsc --noEmit",
+		"check": "pnpm lint && pnpm typecheck",
+		"changelog": "git cliff -o CHANGELOG.md"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.0.0",
+		"@earendil-works/pi-coding-agent": "^1.6.0",
+		"@earendil-works/pi-tui": "^1.6.0",
+		"@types/node": "^22.0.0",
+		"typebox": "^1.4.7",
+		"typescript": "^5.6.0"
+	}
+}

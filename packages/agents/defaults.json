@@ -1,0 +1,5 @@
+{
+	"reviewer": { "thinking": "medium", "maxTurns": 25 },
+	"test-runner": { "thinking": "low", "maxTurns": 15 },
+	"docs-lookup": { "thinking": "low", "maxTurns": 20 }
+}

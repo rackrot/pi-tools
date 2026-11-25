@@ -1,0 +1,4 @@
+[
+  {"state": "CHANGES_REQUESTED", "user": {"login": "alice", "type": "User"}, "body": "Needs tests before merge."},
+  {"state": "APPROVED", "user": {"login": "bob", "type": "User"}, "body": "Looks fine."}
+]

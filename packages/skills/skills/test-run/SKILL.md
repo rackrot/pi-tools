@@ -1,0 +1,69 @@
+---
+name: test-run
+description: Run the project's tests, show only compact failures, and fix them in a bounded loop. Manual command (`/test-run:test-run`). Only the detected-runner script is pre-approved; a custom `--cmd` goes through `run_custom.py` and prompts.
+disable-model-invocation: true
+---
+
+# Test run
+
+`run_tests.py` detects the runner, picks the tests, runs them, and prints only the failures. Work from its output. Open the raw log only when a failure block isn't enough to diagnose.
+
+## 1. Run
+
+From the project root, run this with a Bash timeout of 600000 ms:
+
+```sh
+python3 scripts/run_tests.py the arguments given with the command
+```
+
+- With no arguments it runs the tests affected by changes against the default branch, or the full suite when nothing maps. The `scope:` line says which.
+- `run_tests.py` rejects `--cmd` (exit 2). For a command the user gave, run `python3 scripts/run_custom.py --cmd "…" [targets]`. It shares the parse and plan code but is not pre-approved, so each call prompts.
+- This closes the arbitrary-command escape hatch. A detected runner such as `npm test` still runs project code, which is inherent, so use this skill on trusted projects only.
+- Run `--help` for the other flags.
+
+Detected runners, scanning the repo root and two levels down:
+
+- pytest, Go, jest, vitest, an npm `test` script, cargo, and `make test` at the root.
+- .NET: a `*.slnx`, `*.sln` or `*.csproj` that has a test project means `dotnet test`. A `global.json` `test.runner` of `Microsoft.Testing.Platform` selects native MTP (`--solution`/`--project`). A project that sets `TestingPlatformDotnetTestSupport` with an MTP runner, or uses TUnit, selects the bridge, which puts MTP args after `--`. Otherwise VSTest. Name filters follow the mode: `--filter FullyQualifiedName~`, xUnit v3 `--filter-method`, TUnit `--treenode-filter`.
+- Godot: `project.godot` plus `addons/gut` runs GUT, plus `addons/gdUnit4` runs gdUnit4's `GdUnitCmdTool.gd`, and plus `test/test_runner.gd` runs that SceneTree script. All run headless with a 540 s timeout. The binary is `GODOT_BIN`, else `godot`, `godot4` or `godot-mono` on `PATH`. A checkout with no `.godot/` is imported first. gdUnit4 selects by suite, so a `path::test` id reruns the whole suite. The bare runner reports only its exit code and output tail.
+
+Output starts with `runner:` (the exact command) and `scope:`, then a summary line and one `### n. <id>` block per failure with its location, message, and user-code trace. The last line is `log: <path>` to the full raw output.
+
+| Exit | Meaning | Next step |
+| --- | --- | --- |
+| 0 | All selected tests passed | Report the result and its scope. Stop. |
+| 1 | Test failures | Go to step 2. |
+| 2 | Usage, detection, or runner error (collection or compile error, no tests ran) | Read the `error:` block. Fix a code error like a failure. For detection problems, rerun with a target path or ask the user for a command to pass to `run_custom.py --cmd`. Treat a missing tool or dependency as environmental. |
+
+## 2. Fix loop
+
+For each failure:
+
+1. Diagnose the root cause before editing. Read the failing line and the code under test. Treat production code as the suspect first.
+2. Make the smallest fix. Never weaken assertions, broaden matchers, delete tests, or add skips.
+3. Rerun only the failing tests. Each `### n.` id is a valid target:
+
+   ```sh
+   python3 scripts/run_tests.py "<id>" ["<id>" ...]
+   ```
+
+   If the first run used `run_custom.py --cmd "…"`, rerun with the same script and `--cmd`.
+4. Allow at most 3 materially distinct attempts per failure. After the third, stop working on it and record it as remaining.
+
+Stop and ask the user with AskUserQuestion, explaining each option, when:
+
+- the fix would change intended behavior;
+- the test itself looks wrong (say what it asserts and why that seems incorrect);
+- the failure is environmental or flaky (missing service, credentials, network, timing, or a failure that changes between identical runs).
+
+For deeper method, use `problem-solving` for hard diagnoses and `unit-testing` for test-quality questions, if installed.
+
+## 3. Confirm
+
+Once every targeted failure passes, run the full suite once with `--all`. Treat new failures from it with the same loop, within the same attempt budget.
+
+## 4. Report
+
+- Each failure: id, root cause, fix (file), result.
+- Remaining failures and why they remain.
+- Checks not run, such as the full suite when the loop stopped early, or tests skipped by scope.

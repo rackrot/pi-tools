@@ -1,0 +1,198 @@
+import {
+	existsSync,
+	mkdirSync,
+	readdirSync,
+	readFileSync,
+	renameSync,
+	unlinkSync,
+	writeFileSync,
+} from "node:fs";
+import { basename, dirname, join } from "node:path";
+import { SETTINGS_KEY, type Tuning } from "./config.ts";
+
+export type Scope = "global" | "project";
+export type Field = keyof Tuning;
+
+/** Agents pi-subagents registers itself. */
+export const BUILTIN_AGENTS = ["general-purpose", "Explore", "Plan"];
+
+export const settingsPath = (scope: Scope, agentDir: string, cwd: string) =>
+	scope === "global" ? join(agentDir, "settings.json") : join(cwd, ".pi", "settings.json");
+
+export const agentsDir = (scope: Scope, agentDir: string, cwd: string) =>
+	scope === "global" ? join(agentDir, "agents") : join(cwd, ".pi", "agents");
+
+type Json = Record<string, unknown>;
+
+/** Reads a settings file. A missing file is empty; an unparseable one throws so it is never overwritten. */
+export function readSettings(path: string): { data: Json; indent: string } {
+	if (!existsSync(path)) return { data: {}, indent: "\t" };
+	const text = readFileSync(path, "utf8");
+	if (!text.trim()) return { data: {}, indent: "\t" };
+	const data = JSON.parse(text) as unknown;
+	if (!data || typeof data !== "object" || Array.isArray(data)) {
+		throw new Error(`${path} is not a JSON object`);
+	}
+	const indent = /^\{\r?\n(\t| +)/.exec(text)?.[1] ?? "\t";
+	return { data: data as Json, indent };
+}
+
+/** Returns a copy of `data` with one override field set, or removed when `value` is undefined. */
+export function applyOverride(
+	data: Json,
+	name: string,
+	field: Field,
+	value: string | number | undefined,
+): Json {
+	const next: Json = { ...data };
+	const all: Record<string, Record<string, unknown>> = {
+		...((next[SETTINGS_KEY] as Record<string, Record<string, unknown>> | undefined) ?? {}),
+	};
+	const existing = Object.keys(all).find((k) => k.toLowerCase() === name.toLowerCase()) ?? name;
+	const entry = { ...(all[existing] ?? {}) };
+	if (value === undefined) delete entry[field];
+	else entry[field] = value;
+	if (Object.keys(entry).length) all[existing] = entry;
+	else delete all[existing];
+	if (Object.keys(all).length) next[SETTINGS_KEY] = all;
+	else delete next[SETTINGS_KEY];
+	return next;
+}
+
+function writeAtomic(path: string, text: string) {
+	mkdirSync(dirname(path), { recursive: true });
+	const tmp = `${path}.tmp-${process.pid}`;
+	writeFileSync(tmp, text);
+	renameSync(tmp, path);
+}
+
+export function saveOverride(
+	path: string,
+	name: string,
+	field: Field,
+	value: string | number | undefined,
+) {
+	const { data, indent } = readSettings(path);
+	writeAtomic(path, `${JSON.stringify(applyOverride(data, name, field, value), null, indent)}\n`);
+}
+
+/** `enabledModels`: project value if it is a list, else global. */
+export function readEnabledModels(agentDir: string, cwd: string): string[] {
+	for (const scope of ["project", "global"] as const) {
+		try {
+			const v = readSettings(settingsPath(scope, agentDir, cwd)).data.enabledModels;
+			if (Array.isArray(v)) return v.filter((m): m is string => typeof m === "string");
+		} catch {
+			// unreadable settings are skipped for listing purposes
+		}
+	}
+	return [];
+}
+
+// ---- enable / disable ----
+//
+// pi-subagents has no setting for this. Its own /agents Disable writes a local file with
+// `enabled: false`, which shadows a built-in or package agent of the same name. Same mechanism here.
+
+const FENCE = /^---[ \t]*$/;
+const ENABLED_FALSE = /^enabled:[ \t]*false[ \t]*$/;
+const STUB = "---\nenabled: false\n---\n";
+
+function frontmatterBounds(lines: string[]): { open: number; close: number } | undefined {
+	if (!lines.length || !FENCE.test(lines[0].replace(/\r?\n$/, ""))) return undefined;
+	const close = lines.findIndex((l, i) => i > 0 && FENCE.test(l.replace(/\r?\n$/, "")));
+	return close === -1 ? undefined : { open: 0, close };
+}
+
+const splitLines = (s: string) => s.split(/(?<=\n)/);
+
+export function isDisabledContent(content: string): boolean {
+	const lines = splitLines(content);
+	const b = frontmatterBounds(lines);
+	return !!b && lines.slice(1, b.close).some((l) => ENABLED_FALSE.test(l.replace(/\r?\n$/, "")));
+}
+
+export function disableContent(content: string): string {
+	if (isDisabledContent(content)) return content;
+	const lines = splitLines(content);
+	if (!frontmatterBounds(lines)) return `---\nenabled: false\n---\n${content}`;
+	const eol = lines[0].endsWith("\r\n") ? "\r\n" : "\n";
+	lines.splice(1, 0, `enabled: false${eol}`);
+	return lines.join("");
+}
+
+/** Removes `enabled: false`. `remove` is true when what remains is the empty stub, so the file can go. */
+export function enableContent(content: string): { content: string; remove: boolean } {
+	const lines = splitLines(content);
+	const b = frontmatterBounds(lines);
+	if (!b) return { content, remove: false };
+	const kept = lines.filter(
+		(l, i) => !(i > 0 && i < b.close && ENABLED_FALSE.test(l.replace(/\r?\n$/, ""))),
+	);
+	const out = kept.join("");
+	return { content: out, remove: out.replace(/\r\n/g, "\n").trim() === "---\n---" };
+}
+
+export function isAgentDisabled(dir: string, name: string): boolean {
+	const file = join(dir, `${name}.md`);
+	return existsSync(file) && isDisabledContent(readFileSync(file, "utf8"));
+}
+
+export function setAgentEnabled(dir: string, name: string, enabled: boolean) {
+	const file = join(dir, `${name}.md`);
+	if (!enabled) {
+		writeAtomic(file, existsSync(file) ? disableContent(readFileSync(file, "utf8")) : STUB);
+		return;
+	}
+	if (!existsSync(file)) return;
+	const { content, remove } = enableContent(readFileSync(file, "utf8"));
+	if (remove) unlinkSync(file);
+	else writeAtomic(file, content);
+}
+
+// ---- discovery ----
+
+function agentNamesIn(dir: string): string[] {
+	if (!existsSync(dir)) return [];
+	const names: string[] = [];
+	for (const f of readdirSync(dir)) {
+		if (!f.endsWith(".md")) continue;
+		const stem = basename(f, ".md");
+		let name = stem;
+		try {
+			const m = /^name:[ \t]*["']?([^"'\r\n]+?)["']?[ \t]*$/m.exec(
+				readFileSync(join(dir, f), "utf8").slice(0, 2000),
+			);
+			if (m) name = m[1];
+		} catch {
+			// fall back to the file stem
+		}
+		names.push(name);
+	}
+	return names;
+}
+
+/**
+ * Agents worth listing: built-ins, this package's, local ones in the global, project and
+ * workspace dirs, and any already named in overrides. Agents shipped by other packages appear
+ * only once they have an override; add one in settings.json to list a new one.
+ */
+export function discoverAgents(
+	packageDir: string,
+	agentDir: string,
+	cwd: string,
+	extra: string[],
+): string[] {
+	const seen = new Map<string, string>();
+	for (const n of [
+		...BUILTIN_AGENTS,
+		...agentNamesIn(join(packageDir, "agents")),
+		...agentNamesIn(join(agentDir, "agents")),
+		...agentNamesIn(join(cwd, ".pi", "agents")),
+		...agentNamesIn(join(cwd, ".agents", "agents")),
+		...extra,
+	]) {
+		if (!seen.has(n.toLowerCase())) seen.set(n.toLowerCase(), n);
+	}
+	return [...seen.values()].sort((a, b) => a.localeCompare(b));
+}

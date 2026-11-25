@@ -1,0 +1,27 @@
+{
+	"name": "@rackrot/pi-model-aliases",
+	"version": "0.1.0",
+	"description": "Model aliases with automatic account/provider failover when usage runs out",
+	"type": "module",
+	"keywords": [
+		"pi-package",
+		"pi-extension"
+	],
+	"license": "MIT",
+	"files": [
+		"src",
+		"README.md"
+	],
+	"scripts": {
+		"test": "node --test test/*.test.ts"
+	},
+	"pi": {
+		"extensions": [
+			"./src/index.ts"
+		]
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-ai": "*",
+		"@earendil-works/pi-coding-agent": "*"
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.6.9/schema.json",
+	"files": {
+		"includes": [
+			"**",
+			"!**/node_modules",
+			"!**/dist",
+			"!packages/skills/skills",
+			"!packages/skills/evals"
+		]
+	},
+	"formatter": {
+		"indentStyle": "tab",
+		"lineWidth": 100
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "none"
+		}
+	}
+}

@@ -1,0 +1,11 @@
+[extend]
+useDefault = true
+
+# Synthetic values inside eval fixtures and documentation examples. None is a real credential.
+[[allowlists]]
+description = "fake NPM_TOKEN in a devcontainer routing eval prompt; sample JSON in GO Feature Flag docs"
+paths = [
+  '''packages/skills/evals/devcontainer/devcontainer-routing/prompt\.md''',
+  '''packages/skills/skills/goff/references/flags-fields\.md''',
+  '''packages/skills/skills/goff-flags/references/fields\.md''',
+]

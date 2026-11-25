@@ -1,0 +1,28 @@
+{
+	"name": "@rackrot/pi-skill-index",
+	"version": "0.1.0",
+	"description": "Per-skill system-prompt exposure levels and a BM25 skill_search tool",
+	"type": "module",
+	"keywords": [
+		"pi-package",
+		"pi-extension"
+	],
+	"license": "MIT",
+	"files": [
+		"src",
+		"README.md"
+	],
+	"scripts": {
+		"test": "node --test test/*.test.ts"
+	},
+	"pi": {
+		"extensions": [
+			"./src/index.ts"
+		]
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": "*",
+		"@earendil-works/pi-tui": "*",
+		"typebox": "*"
+	}
+}

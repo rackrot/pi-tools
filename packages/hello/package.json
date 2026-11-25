@@ -1,0 +1,21 @@
+{
+	"name": "@rackrot/pi-hello",
+	"version": "0.1.0",
+	"description": "Example pi extension",
+	"type": "module",
+	"keywords": [
+		"pi-package"
+	],
+	"license": "MIT",
+	"files": [
+		"src"
+	],
+	"pi": {
+		"extensions": [
+			"./src/index.ts"
+		]
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": "*"
+	}
+}
