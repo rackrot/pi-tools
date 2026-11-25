@@ -5,6 +5,7 @@ export interface SkillInfo {
 	description: string;
 	filePath: string;
 	disableModelInvocation?: boolean;
+	sourceInfo?: { scope: string };
 }
 
 export interface Plan<T extends SkillInfo = SkillInfo> {

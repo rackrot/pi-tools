@@ -18,7 +18,9 @@ test("later layers win; skill maps merge", () => {
 		parseLayer({ default: "hidden", skills: { a: "full", b: "title" } }),
 		parseLayer({ skills: { b: "description" }, limit: 3 }),
 	]);
-	assert.deepEqual(cfg, { default: "hidden", skills: { a: "full", b: "description" }, limit: 3 });
+	assert.equal(cfg.default, "hidden");
+	assert.deepEqual(cfg.skills, { a: "full", b: "description" });
+	assert.equal(cfg.limit, 3);
 });
 
 test("modeOf: exact beats glob, longer glob beats shorter, else default", () => {

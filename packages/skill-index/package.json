@@ -21,12 +21,15 @@
 		]
 	},
 	"dependencies": {
-		"@rackrot/pi-core": "workspace:*"
+		"@huggingface/transformers": "^4.3.2",
+		"@rackrot/pi-core": "workspace:*",
+		"@typesafe-ai/sdk": "^0.7.0"
 	},
 	"peerDependencies": {
 		"@earendil-works/pi-coding-agent": "*",
 		"@earendil-works/pi-tui": "*",
-		"typebox": "*"
+		"typebox": "*",
+		"@receptron/laya": "*"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -35,5 +38,13 @@
 		"type": "git",
 		"url": "git+https://github.com/rackrot/pi-tools.git",
 		"directory": "packages/skill-index"
+	},
+	"peerDependenciesMeta": {
+		"@receptron/laya": {
+			"optional": true
+		}
+	},
+	"engines": {
+		"node": ">=22.13"
 	}
 }
