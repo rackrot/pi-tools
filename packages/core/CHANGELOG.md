@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/rackrot/pi-tools/compare/pi-core-v0.1.0...pi-core-v0.1.1) (2026-11-25)
+
+
+### Miscellaneous Chores
+
+* license all packages under MIT ([681a44a](https://github.com/rackrot/pi-tools/commit/681a44a9971beb471dbc7472925d0734cc52cd73))
+
 ## [0.1.0](https://github.com/rackrot/pi-tools/compare/pi-core-v0.0.1...pi-core-v0.1.0) (2026-11-25)
 
 
