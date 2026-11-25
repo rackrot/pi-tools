@@ -42,8 +42,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
       - run: pnpm --dir ${{ matrix.path }} --if-present test
-      - run: pnpm publish --access public --no-git-checks
+      # Trusted publishing (OIDC): no token needed, provenance is automatic.
+      - run: npm publish --access public
         working-directory: ${{ matrix.path }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: "true"
