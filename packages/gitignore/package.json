@@ -1,0 +1,35 @@
+{
+	"name": "@rackrot/pi-gitignore",
+	"version": "0.0.0",
+	"description": "Create and update .gitignore from toptal/gitignore.io templates plus custom entries (tool and /gitignore command)",
+	"type": "module",
+	"keywords": [
+		"pi-package",
+		"pi-extension"
+	],
+	"license": "MIT",
+	"files": [
+		"src",
+		"README.md"
+	],
+	"scripts": {
+		"test": "node --test test/*.test.ts"
+	},
+	"pi": {
+		"extensions": [
+			"./src/index.ts"
+		]
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": "*",
+		"typebox": "*"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/rackrot/pi-tools.git",
+		"directory": "packages/gitignore"
+	}
+}

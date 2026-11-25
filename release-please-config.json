@@ -25,6 +25,9 @@
 		},
 		"packages/council": {
 			"component": "pi-council"
+		},
+		"packages/gitignore": {
+			"component": "pi-gitignore"
 		}
 	},
 	"changelog-sections": [
