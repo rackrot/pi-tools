@@ -1,5 +1,6 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { registerConfigCommand, registerInitCommand } from "./config-ui.ts";
+import contextCommand from "./context/index.ts";
 import thinkingBinding from "./thinking-binding/index.ts";
 
 /**
@@ -9,6 +10,7 @@ import thinkingBinding from "./thinking-binding/index.ts";
  */
 export default function (pi: ExtensionAPI) {
 	thinkingBinding(pi);
+	contextCommand(pi);
 	registerConfigCommand(pi);
 	registerInitCommand(pi);
 }
