@@ -1,0 +1,31 @@
+{
+	"name": "@rackrot/pi-core",
+	"version": "0.1.0",
+	"description": "Core rackrot pi extension and shared utilities for the other @rackrot packages",
+	"type": "module",
+	"keywords": [
+		"pi-package",
+		"pi-extension"
+	],
+	"license": "MIT",
+	"files": [
+		"src",
+		"README.md"
+	],
+	"exports": {
+		".": "./src/lib.ts",
+		"./json": "./src/json.ts",
+		"./settings": "./src/settings.ts"
+	},
+	"scripts": {
+		"test": "node --test test/*.test.ts"
+	},
+	"pi": {
+		"extensions": [
+			"./src/index.ts"
+		]
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": "*"
+	}
+}

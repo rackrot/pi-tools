@@ -13,17 +13,19 @@ Restart pi (or run `/reload`) after installing. Pin a version with `npm:@rackrot
 
 ## Packages
 
-| Package | What it does | Install |
-| ------- | ------------ | ------- |
-| [`@rackrot/pi-model-aliases`](packages/model-aliases) | Model aliases with automatic account/provider failover when usage runs out | `pi install npm:@rackrot/pi-model-aliases` |
-| [`@rackrot/pi-skill-index`](packages/skill-index) | Per-skill system-prompt exposure levels and a BM25 `skill_search` tool | `pi install npm:@rackrot/pi-skill-index` |
-| [`@rackrot/pi-skills`](packages/skills) | 170 skills imported from claude-plugins and adapted for pi | `pi install npm:@rackrot/pi-skills` |
-| [`@rackrot/pi-agents`](packages/agents) | Curated [pi-subagents](https://github.com/tintinweb/pi-subagents) agents with settings-driven model/thinking overrides | `pi install npm:@rackrot/pi-agents` |
+| Package                                               | What it does                                                                                                           | Install                                    |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| [`@rackrot/pi-core`](packages/core)                   | Core extension to always install, plus shared utilities used by the other packages                                     | `pi install npm:@rackrot/pi-core`          |
+| [`@rackrot/pi-model-aliases`](packages/model-aliases) | Model aliases with automatic account/provider failover when usage runs out                                             | `pi install npm:@rackrot/pi-model-aliases` |
+| [`@rackrot/pi-skill-index`](packages/skill-index)     | Per-skill system-prompt exposure levels and a BM25 `skill_search` tool                                                 | `pi install npm:@rackrot/pi-skill-index`   |
+| [`@rackrot/pi-skills`](packages/skills)               | 170 skills imported from claude-plugins and adapted for pi                                                             | `pi install npm:@rackrot/pi-skills`        |
+| [`@rackrot/pi-agents`](packages/agents)               | Curated [pi-subagents](https://github.com/tintinweb/pi-subagents) agents with settings-driven model/thinking overrides | `pi install npm:@rackrot/pi-agents`        |
 
 Each package README documents its configuration (usually in `~/.pi/agent/settings.json` or `.pi/settings.json`).
 
 ### Notes
 
+- **`pi-core`**: install it alongside everything else. It is where always-on behavior lives and where shared code for the other packages is kept.
 - **`pi-skills` + `pi-skill-index`**: 170 skills is a lot of system prompt. Install both and set
   `skillIndex.default` to `title` or `hidden`.
 - **`pi-agents`** requires [`@tintinweb/pi-subagents`](https://github.com/tintinweb/pi-subagents).

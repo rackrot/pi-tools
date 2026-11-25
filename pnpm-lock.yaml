@@ -36,6 +36,12 @@ importers:
         specifier: '*'
         version: 0.26.3(@earendil-works/pi-ai@1.6.0(@aws-sdk/credential-provider-node@3.972.99)(@smithy/signature-v4@5.7.5)(google-auth-library@10.9.1)(undici@8.12.4)(ws@8.23.0))(@earendil-works/pi-coding-agent@1.6.0(@aws-sdk/credential-provider-node@3.972.99)(@smithy/signature-v4@5.7.5)(google-auth-library@10.9.1)(ws@8.23.0))(@earendil-works/pi-tui@1.6.0)(typebox@1.4.7)
 
+  packages/core:
+    dependencies:
+      '@earendil-works/pi-coding-agent':
+        specifier: '*'
+        version: 1.6.0(@aws-sdk/credential-provider-node@3.972.99)(@smithy/signature-v4@5.7.5)(google-auth-library@10.9.1)(ws@8.23.0)
+
   packages/model-aliases:
     dependencies:
       '@earendil-works/pi-ai':
