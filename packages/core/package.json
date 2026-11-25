@@ -15,7 +15,8 @@
 	"exports": {
 		".": "./src/lib.ts",
 		"./json": "./src/json.ts",
-		"./settings": "./src/settings.ts"
+		"./settings": "./src/settings.ts",
+		"./thinking-binding": "./src/thinking-binding/binding.ts"
 	},
 	"scripts": {
 		"test": "node --test test/*.test.ts"
@@ -26,6 +27,7 @@
 		]
 	},
 	"peerDependencies": {
+		"@earendil-works/pi-agent-core": "*",
 		"@earendil-works/pi-coding-agent": "*"
 	}
 }

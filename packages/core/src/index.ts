@@ -1,8 +1,11 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import thinkingBinding from "./thinking-binding/index.ts";
 
 /**
  * Core rackrot extension: things we always want installed and enabled.
- * Nothing here yet; add always-on behavior in this file. Shared code for the other
+ * Each feature lives in its own directory and is registered here. Shared code for the other
  * packages lives in `lib.ts` and its submodules, not here.
  */
-export default function (_pi: ExtensionAPI) {}
+export default function (pi: ExtensionAPI) {
+	thinkingBinding(pi);
+}
