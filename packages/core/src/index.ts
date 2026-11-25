@@ -1,5 +1,6 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import cacheTtl from "./cache-ttl/index.ts";
+import codebaseMemory from "./codebase-memory/index.ts";
 import { registerConfigCommand, registerInitCommand } from "./config-ui.ts";
 import contextBar from "./context/bar.ts";
 import contextCommand from "./context/index.ts";
@@ -13,6 +14,7 @@ import thinkingBinding from "./thinking-binding/index.ts";
 export default function (pi: ExtensionAPI) {
 	thinkingBinding(pi);
 	cacheTtl(pi);
+	codebaseMemory(pi);
 	contextCommand(pi);
 	contextBar(pi);
 	registerConfigCommand(pi);
