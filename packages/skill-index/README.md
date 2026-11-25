@@ -4,6 +4,12 @@ pi lists every loaded skill's name, description and path in the system prompt on
 package lets you choose, per skill, how much of it the prompt carries, and adds a `skill_search`
 tool for the rest. Skills stay loaded, so `/skill:name` and reading a `SKILL.md` path still work.
 
+## Install
+
+```bash
+pi install npm:@rackrot/pi-skill-index
+```
+
 ## Modes
 
 | Mode          | In the system prompt                                    |

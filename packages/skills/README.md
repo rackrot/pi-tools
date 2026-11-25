@@ -3,7 +3,7 @@
 Skills imported from the adminhead claude-plugins marketplace and adapted for pi. 170 skills, 413 eval cases.
 
 ```bash
-pi install /path/to/pi-tools/packages/skills
+pi install npm:@rackrot/pi-skills
 ```
 
 The package only declares `pi.skills`. pi lists every loaded skill's description in the system prompt, so with

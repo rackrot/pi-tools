@@ -4,6 +4,12 @@ Define model aliases backed by an ordered list of `provider/model` entries. When
 the active entry runs out of usage, requests move to the next entry automatically, mid-run, with no
 user action. The exhausted entry is remembered across requests and sessions.
 
+## Install
+
+```bash
+pi install npm:@rackrot/pi-model-aliases
+```
+
 ## Config (`~/.pi/agent/settings.json` or `.pi/settings.json`)
 
 ```json

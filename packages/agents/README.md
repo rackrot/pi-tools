@@ -6,7 +6,7 @@ overrides for `model`, `thinking` and `max_turns`.
 ## Install
 
 ```bash
-pi install /path/to/pi-tools/packages/agents
+pi install npm:@rackrot/pi-agents
 ```
 
 Requires `@tintinweb/pi-subagents`. The package declares `pi.subagents.agents`, so the agents
