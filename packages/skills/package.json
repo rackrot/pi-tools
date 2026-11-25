@@ -17,5 +17,13 @@
 		"skills": [
 			"./skills"
 		]
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/rackrot/pi-tools.git",
+		"directory": "packages/skills"
 	}
 }

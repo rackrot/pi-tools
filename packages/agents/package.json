@@ -31,5 +31,13 @@
 	"peerDependencies": {
 		"@earendil-works/pi-coding-agent": "*",
 		"@tintinweb/pi-subagents": "*"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/rackrot/pi-tools.git",
+		"directory": "packages/agents"
 	}
 }
