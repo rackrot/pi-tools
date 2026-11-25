@@ -22,6 +22,9 @@
 		},
 		"packages/forgejo-mcp": {
 			"component": "pi-forgejo-mcp"
+		},
+		"packages/council": {
+			"component": "pi-council"
 		}
 	},
 	"changelog-sections": [
