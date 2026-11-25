@@ -81,6 +81,15 @@ importers:
         specifier: workspace:*
         version: link:../core
 
+  packages/gitignore:
+    dependencies:
+      '@earendil-works/pi-coding-agent':
+        specifier: '*'
+        version: 1.6.0(@aws-sdk/credential-provider-node@3.972.99)(@smithy/signature-v4@5.7.5)(google-auth-library@10.9.1)(ws@8.23.0)
+      typebox:
+        specifier: '*'
+        version: 1.4.7
+
   packages/model-aliases:
     dependencies:
       '@earendil-works/pi-ai':
