@@ -1,5 +1,5 @@
-import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { configPath, readConfig } from "@rackrot/pi-core/config";
 
 export const THINKING_LEVELS = ["off", "minimal", "low", "medium", "high", "xhigh", "max"] as const;
 export type ThinkingLevel = (typeof THINKING_LEVELS)[number];
@@ -35,7 +35,7 @@ export function parseOverrides(raw: unknown): Overrides {
 	return out;
 }
 
-/** Field-by-field merge; later layers win. Layers: package defaults, global settings, project settings. */
+/** Field-by-field merge; later layers win. Layers: package defaults, global config, project config. */
 export function resolveTuning(name: string, layers: Overrides[]): Tuning {
 	const merged: Tuning = {};
 	for (const layer of layers) Object.assign(merged, layer[key(name)]);
@@ -55,22 +55,13 @@ export function configuredNames(layers: Overrides[]): string[] {
 	return [...new Set(layers.flatMap((l) => Object.keys(l)))].sort();
 }
 
-function readJson(path: string): Record<string, unknown> {
-	if (!existsSync(path)) return {};
-	try {
-		return JSON.parse(readFileSync(path, "utf8")) as Record<string, unknown>;
-	} catch {
-		return {};
-	}
-}
-
 export const SETTINGS_KEY = "agentOverrides";
 
 /** Layers in precedence order, lowest first. */
 export function loadLayers(packageDir: string, agentDir: string, cwd: string): Overrides[] {
 	return [
-		parseOverrides(readJson(join(packageDir, "defaults.json"))),
-		parseOverrides(readJson(join(agentDir, "settings.json"))[SETTINGS_KEY]),
-		parseOverrides(readJson(join(cwd, ".pi", "settings.json"))[SETTINGS_KEY]),
+		parseOverrides(readConfig(join(packageDir, "defaults.json"))),
+		parseOverrides(readConfig(configPath("global", cwd, agentDir))[SETTINGS_KEY]),
+		parseOverrides(readConfig(configPath("project", cwd, agentDir))[SETTINGS_KEY]),
 	];
 }

@@ -1,6 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { getAgentDir } from "@earendil-works/pi-coding-agent";
+import { readConfigLayers } from "@rackrot/pi-core/config";
 
 export const THINKING = ["minimal", "low", "medium", "high", "xhigh", "max"] as const;
 export type Thinking = (typeof THINKING)[number];
@@ -142,19 +140,9 @@ export function parseConfig(raw: unknown): Config {
 	};
 }
 
-function readJson(path: string): Record<string, unknown> {
-	if (!existsSync(path)) return {};
-	try {
-		return JSON.parse(readFileSync(path, "utf8")) as Record<string, unknown>;
-	} catch {
-		return {};
-	}
-}
-
-/** Merges the `council` settings key: project over global, per top-level section. */
+/** Merges the `council` config key: project over global, per top-level section. */
 export function loadConfig(cwd: string = process.cwd()): Config {
-	const g = readJson(join(getAgentDir(), "settings.json")).council;
-	const p = readJson(join(cwd, ".pi", "settings.json")).council;
+	const [g, p] = readConfigLayers("council", cwd);
 	const gg = isObj(g) ? g : {};
 	const pp = isObj(p) ? p : {};
 	const merged: Record<string, unknown> = { ...gg, ...pp };

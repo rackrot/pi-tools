@@ -130,7 +130,7 @@ export async function runOnce(
 				args.push("-e", ctx.skillIndexPath, "--approve");
 				mkdirSync(join(ws, ".pi"), { recursive: true });
 				writeFileSync(
-					join(ws, ".pi", "settings.json"),
+					join(ws, ".pi", "rackrot.json"),
 					JSON.stringify({ skillIndex: { default: ctx.listing } }),
 				);
 			}

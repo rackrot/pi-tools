@@ -8,6 +8,7 @@ import {
 	writeFileSync,
 } from "node:fs";
 import { basename, dirname, join } from "node:path";
+import { editConfig, readConfig } from "@rackrot/pi-core/config";
 import { SETTINGS_KEY, type Tuning } from "./config.ts";
 
 export type Scope = "global" | "project";
@@ -16,26 +17,10 @@ export type Field = keyof Tuning;
 /** Agents pi-subagents registers itself. */
 export const BUILTIN_AGENTS = ["general-purpose", "Explore", "Plan"];
 
-export const settingsPath = (scope: Scope, agentDir: string, cwd: string) =>
-	scope === "global" ? join(agentDir, "settings.json") : join(cwd, ".pi", "settings.json");
-
 export const agentsDir = (scope: Scope, agentDir: string, cwd: string) =>
 	scope === "global" ? join(agentDir, "agents") : join(cwd, ".pi", "agents");
 
 type Json = Record<string, unknown>;
-
-/** Reads a settings file. A missing file is empty; an unparseable one throws so it is never overwritten. */
-export function readSettings(path: string): { data: Json; indent: string } {
-	if (!existsSync(path)) return { data: {}, indent: "\t" };
-	const text = readFileSync(path, "utf8");
-	if (!text.trim()) return { data: {}, indent: "\t" };
-	const data = JSON.parse(text) as unknown;
-	if (!data || typeof data !== "object" || Array.isArray(data)) {
-		throw new Error(`${path} is not a JSON object`);
-	}
-	const indent = /^\{\r?\n(\t| +)/.exec(text)?.[1] ?? "\t";
-	return { data: data as Json, indent };
-}
 
 /** Returns a copy of `data` with one override field set, or removed when `value` is undefined. */
 export function applyOverride(
@@ -72,19 +57,16 @@ export function saveOverride(
 	field: Field,
 	value: string | number | undefined,
 ) {
-	const { data, indent } = readSettings(path);
-	writeAtomic(path, `${JSON.stringify(applyOverride(data, name, field, value), null, indent)}\n`);
+	editConfig(path, (data) => applyOverride(data, name, field, value));
 }
 
-/** `enabledModels`: project value if it is a list, else global. */
+/** `enabledModels` is a pi setting: project value if it is a list, else global. */
 export function readEnabledModels(agentDir: string, cwd: string): string[] {
 	for (const scope of ["project", "global"] as const) {
-		try {
-			const v = readSettings(settingsPath(scope, agentDir, cwd)).data.enabledModels;
-			if (Array.isArray(v)) return v.filter((m): m is string => typeof m === "string");
-		} catch {
-			// unreadable settings are skipped for listing purposes
-		}
+		const file =
+			scope === "global" ? join(agentDir, "settings.json") : join(cwd, ".pi", "settings.json");
+		const v = readConfig(file).enabledModels;
+		if (Array.isArray(v)) return v.filter((m): m is string => typeof m === "string");
 	}
 	return [];
 }

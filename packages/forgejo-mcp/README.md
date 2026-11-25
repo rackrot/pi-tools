@@ -20,7 +20,7 @@ export FORGEJO_TOKEN=...   # Settings > Applications on your instance; grant lea
 }
 ```
 
-- `enabled`: default `false`. The extension does nothing until a layer sets it to `true`. Put `host`, `token` etc. in the global `~/.pi/agent/settings.json` as defaults and set `"forgejoMcp": { "enabled": true }` in a project's `.pi/settings.json` to opt that project in (project keys override global ones).
+- `enabled`: default `false`. The extension does nothing until a layer sets it to `true`. Put `host`, `token` etc. in the global `~/.pi/agent/rackrot/config.json` as defaults and set `"forgejoMcp": { "enabled": true }` in a project's `.pi/rackrot.json` to opt that project in (project keys override global ones).
 - `host` (required): bare hostname.
 - `token`: literal, `${ENV}` or `!command` printing the token. Default `${FORGEJO_TOKEN}`.
 - `exposure`: `deferred` (default, found via `tool_search`), `codemode`, `direct` or `hidden`.

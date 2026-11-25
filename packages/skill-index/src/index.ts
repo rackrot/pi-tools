@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
-import { type ExtensionAPI, getAgentDir } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { registerConfigSection } from "@rackrot/pi-core/config-ui";
 import { Type } from "typebox";
 import { loadLayers, MODES, mergeLayers, modeOf } from "./config.ts";
 import { indexSection, plan, type SkillInfo, skillBody } from "./plan.ts";
@@ -13,7 +14,7 @@ import { openSettings } from "./ui.ts";
 export default function (pi: ExtensionAPI) {
 	/** Every skill seen this session, by name. The prompt hook sees the full set before it trims it. */
 	const known = new Map<string, SkillInfo>();
-	const config = (cwd: string) => mergeLayers(loadLayers(getAgentDir(), cwd));
+	const config = (cwd: string) => mergeLayers(loadLayers(cwd));
 
 	pi.on("session_start", () => known.clear());
 
@@ -80,24 +81,28 @@ export default function (pi: ExtensionAPI) {
 		},
 	});
 
-	pi.registerCommand("skill-index", {
-		description: "Choose how much of each skill the prompt carries. `show` prints a summary.",
-		handler: async (args, ctx) => {
-			const skills = pi
-				.getCommands()
-				.filter((c) => c.source === "skill")
-				.map((c) => ({ name: c.name.replace(/^skill:/, ""), description: c.description ?? "" }));
-			if (ctx.hasUI && args.trim() !== "show") {
-				await openSettings(ctx, skills);
-				return;
-			}
+	const skillEntries = () =>
+		pi
+			.getCommands()
+			.filter((c) => c.source === "skill")
+			.map((c) => ({ name: c.name.replace(/^skill:/, ""), description: c.description ?? "" }));
+
+	registerConfigSection({
+		id: "skill-index",
+		label: "Skill index",
+		example: {
+			skillIndex: {
+				default: "title",
+				limit: 5,
+				skills: { "my-skill": "full", "internal-*": "hidden" },
+			},
+		},
+		open: (ctx) => openSettings(ctx, skillEntries()),
+		summary: (ctx) => {
 			const cfg = config(ctx.cwd);
 			const counts = Object.fromEntries(MODES.map((m) => [m, 0]));
-			for (const s of skills) counts[modeOf(s.name, cfg)]++;
-			ctx.ui.notify(
-				`default: ${cfg.default}; ${MODES.map((m) => `${m} ${counts[m]}`).join(", ")}; search limit ${cfg.limit}`,
-				"info",
-			);
+			for (const s of skillEntries()) counts[modeOf(s.name, cfg)]++;
+			return `default ${cfg.default}; ${MODES.map((m) => `${m} ${counts[m]}`).join(", ")}; search limit ${cfg.limit}`;
 		},
 	});
 }

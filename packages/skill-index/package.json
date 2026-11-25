@@ -20,6 +20,9 @@
 			"./src/index.ts"
 		]
 	},
+	"dependencies": {
+		"@rackrot/pi-core": "workspace:*"
+	},
 	"peerDependencies": {
 		"@earendil-works/pi-coding-agent": "*",
 		"@earendil-works/pi-tui": "*",

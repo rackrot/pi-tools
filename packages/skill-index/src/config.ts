@@ -1,5 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { configPath, editConfig, readConfig } from "@rackrot/pi-core/config";
 
 /**
  * How much of a skill the system prompt carries.
@@ -26,17 +25,7 @@ const isMode = (v: unknown): v is Mode => MODES.includes(v as Mode);
 
 type Json = Record<string, unknown>;
 
-export function readSettings(path: string): { data: Json; indent: string } {
-	if (!existsSync(path)) return { data: {}, indent: "\t" };
-	const text = readFileSync(path, "utf8");
-	if (!text.trim()) return { data: {}, indent: "\t" };
-	const data = JSON.parse(text) as unknown;
-	if (!data || typeof data !== "object" || Array.isArray(data))
-		throw new Error(`${path} is not a JSON object`);
-	return { data: data as Json, indent: /^\{\r?\n(\t| +)/.exec(text)?.[1] ?? "\t" };
-}
-
-/** One settings layer; invalid parts are dropped. */
+/** One config layer; invalid parts are dropped. */
 export function parseLayer(raw: unknown): Partial<Config> {
 	const out: Partial<Config> = {};
 	if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
@@ -61,15 +50,10 @@ export function mergeLayers(layers: Partial<Config>[]): Config {
 	return cfg;
 }
 
-export function loadLayers(agentDir: string, cwd: string): Partial<Config>[] {
-	const read = (p: string) => {
-		try {
-			return parseLayer(readSettings(p).data[SETTINGS_KEY]);
-		} catch {
-			return {};
-		}
-	};
-	return [read(join(agentDir, "settings.json")), read(join(cwd, ".pi", "settings.json"))];
+export function loadLayers(cwd: string): Partial<Config>[] {
+	return (["global", "project"] as const).map((s) =>
+		parseLayer(readConfig(configPath(s, cwd))[SETTINGS_KEY]),
+	);
 }
 
 const globToRegex = (g: string) =>
@@ -92,7 +76,7 @@ export function modeOf(name: string, cfg: Config): Mode {
 	return best?.mode ?? cfg.default;
 }
 
-/** Returns a copy of settings data with one skill's mode set, or cleared when `mode` is undefined. */
+/** Returns a copy of config data with one skill's mode set, or cleared when `mode` is undefined. */
 export function applySkillMode(
 	data: Json,
 	skill: string | "*default",
@@ -116,9 +100,5 @@ export function applySkillMode(
 }
 
 export function saveSkillMode(path: string, skill: string | "*default", mode: Mode | undefined) {
-	const { data, indent } = readSettings(path);
-	mkdirSync(dirname(path), { recursive: true });
-	const tmp = `${path}.tmp-${process.pid}`;
-	writeFileSync(tmp, `${JSON.stringify(applySkillMode(data, skill, mode), null, indent)}\n`);
-	renameSync(tmp, path);
+	editConfig(path, (data) => applySkillMode(data, skill, mode));
 }

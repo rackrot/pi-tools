@@ -21,7 +21,7 @@ pi install npm:@rackrot/pi-skill-index
 
 Skills with `disable-model-invocation: true` are never shown to the model or returned by search, as in pi.
 
-## Config (`~/.pi/agent/settings.json` or `.pi/settings.json`)
+## Config (`~/.pi/agent/rackrot/config.json(c)` or `.pi/rackrot.json(c)`)
 
 ```json
 {
@@ -40,8 +40,8 @@ Skills with `disable-model-invocation: true` are never shown to the model or ret
 - `default` applies to skills with no entry. Unset means `title`.
 - `skills` keys are exact names or `*` globs. An exact name beats a glob, and a longer glob beats a shorter one.
 - Project settings override global ones per key.
-- `/skill-index` opens a screen to edit modes (Tab switches global and project; type to filter).
-  It takes exact names only. `/skill-index show` prints a summary.
+- `/rackrot-config skill-index` opens a screen to edit modes (Tab switches global and project; type to filter).
+  It takes exact names only. `/rackrot-config show` prints a summary.
 
 ## `skill_search`
 

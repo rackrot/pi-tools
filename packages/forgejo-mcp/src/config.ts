@@ -1,11 +1,9 @@
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { getAgentDir } from "@earendil-works/pi-coding-agent";
+import { readConfigLayers } from "@rackrot/pi-core/config";
 
 export type Exposure = "direct" | "codemode" | "deferred" | "hidden";
 
 export interface ForgejoConfig {
-	/** Off unless a settings layer sets `enabled: true` (typically the project's .pi/settings.json). */
+	/** Off unless a settings layer sets `enabled: true` (typically the project's .pi/rackrot.json). */
 	enabled: boolean;
 	/** Bare hostname serving forgejo-mcp at /mcp, e.g. git.example.com. */
 	host: string;
@@ -46,15 +44,6 @@ export const HIDDEN_BY_DEFAULT = [
 
 const EXPOSURES = new Set<string>(["direct", "codemode", "deferred", "hidden"]);
 
-function readJson(path: string): Record<string, unknown> {
-	if (!existsSync(path)) return {};
-	try {
-		return JSON.parse(readFileSync(path, "utf8")) as Record<string, unknown>;
-	} catch {
-		return {};
-	}
-}
-
 /** Parses the merged `forgejoMcp` settings object; `undefined` when no host is set. Global settings can hold defaults (host, token, ...) while each project opts in with `enabled`. */
 export function parseConfig(raw: unknown): ForgejoConfig | undefined {
 	if (!raw || typeof raw !== "object") return undefined;
@@ -85,8 +74,7 @@ export function parseConfig(raw: unknown): ForgejoConfig | undefined {
 }
 
 export function loadConfig(cwd: string = process.cwd()): ForgejoConfig | undefined {
-	const global = readJson(join(getAgentDir(), "settings.json")).forgejoMcp;
-	const project = readJson(join(cwd, ".pi", "settings.json")).forgejoMcp;
+	const [global, project] = readConfigLayers("forgejoMcp", cwd);
 	const g = global && typeof global === "object" ? global : {};
 	const p = project && typeof project === "object" ? project : {};
 	const c = parseConfig({ ...g, ...p });

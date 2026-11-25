@@ -1,7 +1,5 @@
-import { join } from "node:path";
 import {
 	type ExtensionCommandContext,
-	getAgentDir,
 	getSettingsListTheme,
 } from "@earendil-works/pi-coding-agent";
 import {
@@ -11,6 +9,7 @@ import {
 	SettingsList,
 	Text,
 } from "@earendil-works/pi-tui";
+import { configPath, readConfig } from "@rackrot/pi-core/config";
 import {
 	DEFAULT_MODE,
 	MODES,
@@ -18,7 +17,6 @@ import {
 	mergeLayers,
 	modeOf,
 	parseLayer,
-	readSettings,
 	SETTINGS_KEY,
 	saveSkillMode,
 } from "./config.ts";
@@ -34,19 +32,11 @@ interface Entry {
 
 /** Opens the skill exposure screen. Resolves when the user closes it. */
 export async function openSettings(ctx: ExtensionCommandContext, skills: Entry[]): Promise<void> {
-	const agentDir = getAgentDir();
 	const cwd = ctx.cwd;
 	let scope: Scope = "global";
-	const pathOf = (s: Scope) =>
-		s === "global" ? join(agentDir, "settings.json") : join(cwd, ".pi", "settings.json");
+	const pathOf = (s: Scope) => configPath(s, cwd);
 
-	const explicit = (s: Scope) => {
-		try {
-			return parseLayer(readSettings(pathOf(s)).data[SETTINGS_KEY]);
-		} catch {
-			return {};
-		}
-	};
+	const explicit = (s: Scope) => parseLayer(readConfig(pathOf(s))[SETTINGS_KEY]);
 	const effective = () => mergeLayers([explicit("global"), explicit("project")]);
 
 	const buildItems = (): SettingItem[] => {
@@ -65,7 +55,7 @@ export async function openSettings(ctx: ExtensionCommandContext, skills: Entry[]
 			rows.push({
 				id: s.name,
 				label: s.name,
-				description: `${s.description.slice(0, 160)} · effective: ${modeOf(s.name, cfg)}. Exact names only here; edit settings.json for globs.`,
+				description: `${s.description.slice(0, 160)} · effective: ${modeOf(s.name, cfg)}. Exact names only here; edit the rackrot config for globs.`,
 				currentValue: here.skills?.[s.name] ?? UNSET,
 				values: [UNSET, ...MODES],
 			});

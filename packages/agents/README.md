@@ -23,7 +23,7 @@ name overrides them.
 
 ## Overrides
 
-Add `agentOverrides` to `~/.pi/agent/settings.json` or `.pi/settings.json`:
+Add `agentOverrides` to `~/.pi/agent/rackrot/config.json(c)` or `.pi/rackrot.json(c)`:
 
 ```json
 {
@@ -38,17 +38,17 @@ Add `agentOverrides` to `~/.pi/agent/settings.json` or `.pi/settings.json`:
 - Fields: `model` (`provider/id` or fuzzy name), `thinking` (`off` to `max`), `maxTurns` (integer >= 1).
 - Precedence per field, lowest first: package `defaults.json`, global settings, project settings.
 - Names are case-insensitive and work for any agent type, including built-ins (`Explore`, `Plan`) and agents from other packages.
-- `/subagent-config` opens a settings screen (below). `/subagent-config show` prints the effective values.
+- `/rackrot-config agents` opens a settings screen (below). `/rackrot-config show` prints the effective values.
 
 ### `/subagent-config` screen
 
 Four rows per agent: `enabled`, `model`, `thinking`, `max turns`. Type to search, Enter or Space to
 change a value, Esc to close.
 
-- **Tab** switches the save target between global (`~/.pi/agent/settings.json`) and project
-  (`.pi/settings.json`). Changes write immediately.
+- **Tab** switches the save target between global (`~/.pi/agent/rackrot/config.json`) and project
+  (`.pi/rackrot.json`). Changes write immediately.
 - **model** opens a picker over your `enabledModels` (project list if set, else global), plus `inherit`.
-  For a model outside that list, edit `agentOverrides` in settings.json.
+  For a model outside that list, edit `agentOverrides` in the rackrot config.
 - **inherit** removes the value at the selected scope. A lower layer, such as the package default,
   may still supply one; the row's description says which layer does.
 - **enabled** has no pi-subagents setting behind it. Turning an agent off writes

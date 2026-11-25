@@ -78,7 +78,7 @@ test("presets and councillors can be added, edited and removed", () => {
 });
 
 test("saveLayer keeps other settings and the file's indent", () => {
-	const path = join(mkdtempSync(join(tmpdir(), "council-")), "settings.json");
+	const path = join(mkdtempSync(join(tmpdir(), "council-")), "rackrot.json");
 	writeFileSync(path, '{\n  "theme": "dark"\n}\n');
 	saveLayer(path, (c) => {
 		(c.secondOpinion = {}) as unknown;

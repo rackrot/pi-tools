@@ -15,12 +15,12 @@ pi install npm:@rackrot/pi-council
 
 ## Configure and prompt injection
 
-`/council-config` opens a settings screen for both tools (Tab switches between global and project settings; type to search rows). It edits second_opinion's default model, options (model, id, use when, thinking), and the council's presets, councillors (model, thinking, role prompt), synthesizer and limits, and writes the same `council` settings shown below, then reloads pi. Fallback chains beyond the first model are edited in settings.json. `/council-config show` prints a summary.
+`/rackrot-config council` opens a settings screen for both tools (Tab switches between global and project settings; type to search rows). It edits second_opinion's default model, options (model, id, use when, thinking), and the council's presets, councillors (model, thinking, role prompt), synthesizer and limits, and writes the same `council` config shown below, then reloads pi. Fallback chains beyond the first model are edited in the config file. `/rackrot-config show` prints a summary.
 
-Each tool's description carries its usage guidance, the default model and override options' `useWhen` text, or the preset rosters, and each adds a prompt snippet and guideline. These are fixed when pi loads the extension, so saving in the screen runs `/reload` for you; after editing settings.json by hand run `/reload` yourself. A disabled tool, or `council` with no presets, is not registered. Settings are still re-read on every call, so a model or prompt change takes effect even before the reload.
+Each tool's description carries its usage guidance, the default model and override options' `useWhen` text, or the preset rosters, and each adds a prompt snippet and guideline. These are fixed when pi loads the extension, so saving in the screen runs `/reload` for you; after editing the config by hand run `/reload` yourself. A disabled tool, or `council` with no presets, is not registered. Settings are still re-read on every call, so a model or prompt change takes effect even before the reload.
 
 Models are `provider/model` strings of concrete models (not `alias/...` virtual models). Config goes under
-`council` in `~/.pi/agent/settings.json` or `.pi/settings.json` (project overrides global per section).
+`council` in `~/.pi/agent/rackrot/config.json(c)` or `.pi/rackrot.json(c)` (project overrides global per section).
 Settings are re-read on every call; descriptions refresh on `/reload`.
 
 ```json

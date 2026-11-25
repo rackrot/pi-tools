@@ -1,4 +1,5 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { registerConfigSection } from "@rackrot/pi-core/config-ui";
 import { loadConfig } from "./config.ts";
 import {
 	failoverMessage,
@@ -21,6 +22,33 @@ function usableEntries(entries: string[], ctx: ExtensionContext): string[] {
 
 export default function (pi: ExtensionAPI) {
 	const config = loadConfig();
+
+	registerConfigSection({
+		id: "model-aliases",
+		label: "Model aliases",
+		example: {
+			modelAliases: {
+				"claude-sonnet": ["anthropic/claude-sonnet-4-5", "backup-account/claude-sonnet-4-5"],
+			},
+			modelAliasAccounts: {
+				"backup-account": { from: "anthropic", apiKey: "$BACKUP_ANTHROPIC_API_KEY" },
+			},
+			modelAliasCooldownMinutes: 60,
+		},
+		fields: [
+			{
+				path: ["modelAliasCooldownMinutes"],
+				label: "cooldown minutes",
+				description:
+					"How long an exhausted alias entry is skipped. Aliases and accounts are edited in the config file.",
+				kind: "number",
+			},
+		],
+		summary: (ctx) => {
+			const c = loadConfig(ctx.cwd);
+			return `${Object.keys(c.aliases).length} aliases, ${Object.keys(c.accounts).length} accounts, cooldown ${c.cooldownMs / 60_000}m`;
+		},
+	});
 
 	for (const [name, entries] of Object.entries(config.aliases)) {
 		pi.registerVirtualModel({

@@ -1,6 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { getAgentDir } from "@earendil-works/pi-coding-agent";
+import { configPath, readConfig } from "@rackrot/pi-core/config";
 import { parseEntry } from "./select.ts";
 
 export interface AccountClone {
@@ -18,19 +16,10 @@ export interface AliasConfig {
 
 const DEFAULT_COOLDOWN_MINUTES = 60;
 
-function readJson(path: string): Record<string, unknown> {
-	if (!existsSync(path)) return {};
-	try {
-		return JSON.parse(readFileSync(path, "utf8")) as Record<string, unknown>;
-	} catch {
-		return {};
-	}
-}
-
-/** Reads `modelAliases`, `modelAliasAccounts`, `modelAliasCooldownMinutes` from global then project settings. */
+/** Reads `modelAliases`, `modelAliasAccounts`, `modelAliasCooldownMinutes` from the global then project rackrot config. */
 export function loadConfig(cwd: string = process.cwd()): AliasConfig {
-	const global = readJson(join(getAgentDir(), "settings.json"));
-	const project = readJson(join(cwd, ".pi", "settings.json"));
+	const global = readConfig(configPath("global", cwd));
+	const project = readConfig(configPath("project", cwd));
 	const merged = { ...global, ...project };
 
 	const aliases: Record<string, string[]> = {};

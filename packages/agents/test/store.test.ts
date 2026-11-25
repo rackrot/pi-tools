@@ -10,7 +10,6 @@ import {
 	enableContent,
 	isAgentDisabled,
 	isDisabledContent,
-	readSettings,
 	saveOverride,
 	setAgentEnabled,
 } from "../src/store.ts";
@@ -27,7 +26,7 @@ test("applyOverride sets, reuses existing key case, and prunes empties", () => {
 
 test("saveOverride keeps other keys and indentation; refuses unparseable files", () => {
 	const dir = mkdtempSync(join(tmpdir(), "agents-"));
-	const p = join(dir, "settings.json");
+	const p = join(dir, "rackrot.json");
 	writeFileSync(p, '{\n  "a": 1\n}\n');
 	saveOverride(p, "x", "maxTurns", 5);
 	assert.equal(
@@ -35,7 +34,6 @@ test("saveOverride keeps other keys and indentation; refuses unparseable files",
 		'{\n  "a": 1,\n  "agentOverrides": {\n    "x": {\n      "maxTurns": 5\n    }\n  }\n}\n',
 	);
 	writeFileSync(p, "{ broken");
-	assert.throws(() => readSettings(p));
 	assert.throws(() => saveOverride(p, "x", "maxTurns", 5));
 	assert.equal(readFileSync(p, "utf8"), "{ broken");
 });

@@ -27,21 +27,30 @@ configuration. A message that is only thinking is left as is.
 Adapted from [luan/agents `pi-thinking-binding`](https://github.com/luan/agents/tree/main/harnesses/pi/agent/packages/pi-thinking-binding) (MIT).
 Uninstall that package if you have it, or both will act.
 
+## `/rackrot-config`
+
+One command for every rackrot package's config. With no argument it lists the sections of the installed packages (Subagents, Skill index, Council, Model aliases, Forgejo MCP); `/rackrot-config <id>` opens one, `/rackrot-config show` prints a summary of each. Tab in a screen switches the save target between global (`~/.pi/agent/rackrot/config.json(c)`) and project (`.pi/rackrot.json(c)`); project values win. Packages add a section with `registerConfigSection` from `@rackrot/pi-core/config-ui`: pass `fields` for scalar settings (core draws the screen) or `open` for a custom editor.
+
+`/rackrot-init` writes `~/.pi/agent/rackrot/config.jsonc` with every installed package's defaults and examples, commented out. It is only registered while no global config exists.
+
 ## Shared utilities
 
 Other packages in this repo depend on it (`"@rackrot/pi-core": "workspace:*"` in `dependencies`):
 
 ```ts
-import { readJson, writeJsonAtomic, readSettingsLayers } from "@rackrot/pi-core";
-// or: "@rackrot/pi-core/json", "@rackrot/pi-core/settings", "@rackrot/pi-core/thinking-binding"
+import { readJson, writeJsonAtomic, readConfigLayers } from "@rackrot/pi-core";
+// or: "@rackrot/pi-core/json", "@rackrot/pi-core/config", "@rackrot/pi-core/thinking-binding"
 ```
 
-| Export                         | Purpose                                                           |
-| ------------------------------ | ----------------------------------------------------------------- |
-| `readJson(path)`               | Read a JSON object; `{}` if missing or invalid                    |
-| `readJsonStrict(path)`         | Same, but throws on bad content and returns the file's indent     |
-| `writeJsonAtomic(path, data)`  | Write via temp file + rename, creating parent dirs                |
-| `settingsPaths(cwd)`           | Global and project `settings.json` paths, lowest precedence first |
-| `readSettingsLayers(key, cwd)` | One settings key from each layer                                  |
+| Export                        | Purpose                                                       |
+| ----------------------------- | ------------------------------------------------------------- |
+| `readJson(path)`              | Read a JSON object; `{}` if missing or invalid                |
+| `readJsonStrict(path)`        | Same, but throws on bad content and returns the file's indent |
+| `writeJsonAtomic(path, data)` | Write via temp file + rename, creating parent dirs            |
+| `configPath(scope, cwd)`      | `~/.pi/agent/rackrot/config.json(c)` or `.pi/rackrot.json(c)` |
+| `readConfig(path)`            | Read a JSONC object; `{}` if missing or invalid               |
+| `readConfigStrict(path)`      | Same, but throws on bad content                               |
+| `readConfigLayers(key, cwd)`  | One top-level key from each layer (global, project)           |
+| `editConfig(path, fn)`        | Rewrite changed top-level keys only, keeping comments         |
 
 Put code here only when two or more packages need it.

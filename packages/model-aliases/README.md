@@ -10,7 +10,7 @@ user action. The exhausted entry is remembered across requests and sessions.
 pi install npm:@rackrot/pi-model-aliases
 ```
 
-## Config (`~/.pi/agent/settings.json` or `.pi/settings.json`)
+## Config (`~/.pi/agent/rackrot/config.json(c)` or `.pi/rackrot.json(c)`)
 
 ```json
 {

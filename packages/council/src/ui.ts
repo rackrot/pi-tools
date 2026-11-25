@@ -1,7 +1,5 @@
-import { join } from "node:path";
 import {
 	type ExtensionCommandContext,
-	getAgentDir,
 	getSelectListTheme,
 	getSettingsListTheme,
 } from "@earendil-works/pi-coding-agent";
@@ -14,6 +12,7 @@ import {
 	SettingsList,
 	Text,
 } from "@earendil-works/pi-tui";
+import { configPath } from "@rackrot/pi-core/config";
 import { loadConfig } from "./config.ts";
 import { buildRows, type Row, readLayer, saveLayer, UNSET } from "./edit.ts";
 
@@ -59,8 +58,7 @@ export async function openSettings(ctx: ExtensionCommandContext): Promise<boolea
 	let dirty = false;
 	const cwd = ctx.cwd;
 	let scope: Scope = "global";
-	const pathOf = (s: Scope) =>
-		s === "global" ? join(getAgentDir(), "settings.json") : join(cwd, ".pi", "settings.json");
+	const pathOf = (s: Scope) => configPath(s, cwd);
 	const models = [
 		...new Set(
 			ctx.modelRegistry

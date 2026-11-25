@@ -1,5 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
-import { dirname } from "node:path";
+import { editConfig, readConfig } from "@rackrot/pi-core/config";
 import { type Config, parseChain, THINKING } from "./config.ts";
 
 export type Obj = Record<string, unknown>;
@@ -368,32 +367,16 @@ export function buildRows(layer: Obj, eff: Config): Row[] {
 	return rows;
 }
 
-function readData(path: string): { data: Obj; indent: string } {
-	if (!existsSync(path)) return { data: {}, indent: "\t" };
-	const text = readFileSync(path, "utf8");
-	if (!text.trim()) return { data: {}, indent: "\t" };
-	const data = JSON.parse(text) as unknown;
-	if (!isObj(data)) throw new Error(`${path} is not a JSON object`);
-	return { data, indent: /^\{\r?\n(\t| +)/.exec(text)?.[1] ?? "\t" };
-}
-
-/** The raw `council` object of one settings file; `{}` when missing or unreadable. */
+/** The raw `council` object of one config file; `{}` when missing or unreadable. */
 export function readLayer(path: string): Obj {
-	try {
-		const c = readData(path).data.council;
-		return isObj(c) ? c : {};
-	} catch {
-		return {};
-	}
+	const c = readConfig(path).council;
+	return isObj(c) ? c : {};
 }
 
-/** Applies `fn` to the file's `council` object and writes it back atomically, keeping other settings. */
+/** Applies `fn` to the file's `council` object and writes it back atomically, keeping other keys and comments. */
 export function saveLayer(path: string, fn: (council: Obj) => void) {
-	const { data, indent } = readData(path);
-	const council = child(data, "council");
-	fn(council);
-	mkdirSync(dirname(path), { recursive: true });
-	const tmp = `${path}.tmp-${process.pid}`;
-	writeFileSync(tmp, `${JSON.stringify(data, null, indent)}\n`);
-	renameSync(tmp, path);
+	editConfig(path, (data) => {
+		fn(child(data, "council"));
+		return data;
+	});
 }

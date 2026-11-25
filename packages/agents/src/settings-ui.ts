@@ -12,6 +12,7 @@ import {
 	SettingsList,
 	Text,
 } from "@earendil-works/pi-tui";
+import { configPath } from "@rackrot/pi-core/config";
 import {
 	configuredNames,
 	loadLayers,
@@ -29,7 +30,6 @@ import {
 	type Scope,
 	saveOverride,
 	setAgentEnabled,
-	settingsPath,
 } from "./store.ts";
 
 const INHERIT = "inherit";
@@ -137,7 +137,7 @@ export async function openSettings(
 			setAgentEnabled(agentsDir(scope, agentDir, cwd), name, next === "on");
 			return;
 		}
-		const path = settingsPath(scope, agentDir, cwd);
+		const path = configPath(scope, cwd, agentDir);
 		if (next === INHERIT) return saveOverride(path, name, row, undefined);
 		if (row === "maxTurns") return saveOverride(path, name, row, Number(next));
 		if (row === "thinking") return saveOverride(path, name, row, next as ThinkingLevel);
@@ -161,7 +161,7 @@ export async function openSettings(
 			file.setText(
 				theme.fg(
 					"muted",
-					`   ${settingsPath(scope, agentDir, cwd)} · agent files in ${agentsDir(scope, agentDir, cwd)}`,
+					`   ${configPath(scope, cwd, agentDir)} · agent files in ${agentsDir(scope, agentDir, cwd)}`,
 				),
 			);
 		};

@@ -1,4 +1,5 @@
 import { type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { registerConfigSection } from "@rackrot/pi-core/config-ui";
 import { Type } from "typebox";
 import { loadConfig, type ModelRef } from "./config.ts";
 import { embedFiles } from "./files.ts";
@@ -36,18 +37,44 @@ const CONTEXT_DESC =
 export default function (pi: ExtensionAPI) {
 	const config = loadConfig();
 
-	pi.registerCommand("council-config", {
-		description: "Configure second_opinion and council. `show` prints the effective config.",
-		handler: async (args, ctx) => {
-			if (ctx.hasUI && args.trim() !== "show") {
-				if (await openSettings(ctx)) await ctx.reload();
-				return;
-			}
+	registerConfigSection({
+		id: "council",
+		label: "Council & second opinion",
+		example: {
+			council: {
+				secondOpinion: {
+					enabled: true,
+					model: "provider/model-id",
+					thinking: "high",
+					models: [{ id: "big", model: "provider/big-model", useWhen: "hard design problems" }],
+					timeoutSeconds: 300,
+				},
+				council: {
+					enabled: true,
+					defaultPreset: "default",
+					presets: {
+						default: {
+							useWhen: "important decisions",
+							councillors: {
+								skeptic: {
+									model: ["provider/model-a", "provider/fallback"],
+									thinking: "medium",
+									prompt: "Look for flaws.",
+								},
+							},
+						},
+					},
+					synthesizer: { enabled: true, model: "provider/model-id" },
+					timeoutSeconds: 300,
+				},
+			},
+		},
+		open: async (ctx) => {
+			if (await openSettings(ctx)) await ctx.reload();
+		},
+		summary: (ctx) => {
 			const cfg = loadConfig(ctx.cwd);
-			ctx.ui.notify(
-				`second_opinion: ${cfg.secondOpinion.enabled ? "on" : "off"}, default ${cfg.secondOpinion.default?.model ?? "session model"}, ${cfg.secondOpinion.options.length} options\ncouncil: ${cfg.council.enabled ? "on" : "off"}, presets ${Object.keys(cfg.council.presets).join(", ") || "none"}`,
-				"info",
-			);
+			return `second_opinion ${cfg.secondOpinion.enabled ? "on" : "off"}, default ${cfg.secondOpinion.default?.model ?? "session model"}, ${cfg.secondOpinion.options.length} options; council ${cfg.council.enabled ? "on" : "off"}, presets ${Object.keys(cfg.council.presets).join(", ") || "none"}`;
 		},
 	});
 

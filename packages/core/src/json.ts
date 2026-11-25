@@ -31,9 +31,13 @@ export function readJsonStrict(path: string): { data: Json; indent: string } {
 }
 
 /** Writes via a temp file and rename so concurrent readers never see a partial file. */
-export function writeJsonAtomic(path: string, data: unknown, indent: string | number = "\t"): void {
+export function writeTextAtomic(path: string, text: string): void {
 	mkdirSync(dirname(path), { recursive: true });
 	const tmp = `${path}.${process.pid}.tmp`;
-	writeFileSync(tmp, `${JSON.stringify(data, null, indent)}\n`);
+	writeFileSync(tmp, text);
 	renameSync(tmp, path);
+}
+
+export function writeJsonAtomic(path: string, data: unknown, indent: string | number = "\t"): void {
+	writeTextAtomic(path, `${JSON.stringify(data, null, indent)}\n`);
 }
