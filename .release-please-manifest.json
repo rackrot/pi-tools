@@ -2,6 +2,6 @@
 	"packages/agents": "0.0.1",
 	"packages/core": "0.1.0",
 	"packages/model-aliases": "0.0.1",
-	"packages/skill-index": "0.0.1",
+	"packages/skill-index": "0.1.0",
 	"packages/skills": "0.0.1"
 }
