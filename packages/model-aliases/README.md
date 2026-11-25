@@ -27,6 +27,7 @@ pi install npm:@rackrot/pi-model-aliases
 ```
 
 - Aliases appear as `alias/<name>` models. Bare names work in `enabledModels`.
+- Context window, max output, thinking levels and image input are taken from the alias's first entry.
 - `modelAliasAccounts` clones an API-key provider under a new name with its own key, so one provider
   can have several accounts. Use the clone name in alias entries. OAuth providers can't be cloned;
   list each provider separately instead.

@@ -1,3 +1,4 @@
+import { getSupportedThinkingLevels } from "@earendil-works/pi-ai";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { registerConfigSection } from "@rackrot/pi-core/config-ui";
 import { loadConfig } from "./config.ts";
@@ -50,30 +51,43 @@ export default function (pi: ExtensionAPI) {
 		},
 	});
 
-	for (const [name, entries] of Object.entries(config.aliases)) {
-		pi.registerVirtualModel({
-			provider: ALIAS_PROVIDER,
-			id: name,
-			name: `${name} (alias)`,
-			thinkingLevels: THINKING,
-			route(request, ctx) {
-				const usable = usableEntries(entries, ctx);
-				if (!usable.length) {
-					throw new Error(
-						`Alias "${name}": none of ${entries.join(", ")} is available (missing model or credentials)`,
-					);
-				}
-				const failed = request.failed?.model;
-				const prev = request.reason === "user" ? undefined : (failed ?? request.previous?.model);
-				const sticky = prev ? `${prev.provider}/${prev.id}` : undefined;
-				const choice = pickEntry(usable, loadState(), Date.now(), sticky);
-				const target = choice && parseEntry(choice);
-				const model = target && ctx.modelRegistry.find(target.provider, target.id);
-				if (!model) throw new Error(`Alias "${name}": cannot resolve ${choice}`);
-				return { model, thinkingLevel: request.thinkingLevel };
-			},
-		});
+	/** Registers each alias. With a context, limits/thinking/input come from the first entry's model. */
+	function registerAliases(ctx?: ExtensionContext) {
+		for (const [name, entries] of Object.entries(config.aliases)) {
+			const target = parseEntry(entries[0]);
+			// An account clone is registered lazily, so read its source provider's model instead.
+			const source = target && (config.accounts[target.provider]?.from ?? target.provider);
+			const first = ctx && target ? ctx.modelRegistry.find(source ?? "", target.id) : undefined;
+			pi.registerVirtualModel({
+				provider: ALIAS_PROVIDER,
+				id: name,
+				name: `${name} (alias)`,
+				thinkingLevels: first ? getSupportedThinkingLevels(first) : THINKING,
+				...(first && {
+					contextWindow: first.contextWindow,
+					maxTokens: first.maxTokens,
+					input: first.input,
+				}),
+				route(request, ctx) {
+					const usable = usableEntries(entries, ctx);
+					if (!usable.length) {
+						throw new Error(
+							`Alias "${name}": none of ${entries.join(", ")} is available (missing model or credentials)`,
+						);
+					}
+					const failed = request.failed?.model;
+					const prev = request.reason === "user" ? undefined : (failed ?? request.previous?.model);
+					const sticky = prev ? `${prev.provider}/${prev.id}` : undefined;
+					const choice = pickEntry(usable, loadState(), Date.now(), sticky);
+					const target = choice && parseEntry(choice);
+					const model = target && ctx.modelRegistry.find(target.provider, target.id);
+					if (!model) throw new Error(`Alias "${name}": cannot resolve ${choice}`);
+					return { model, thinkingLevel: request.thinkingLevel };
+				},
+			});
+		}
 	}
+	registerAliases();
 
 	// Extra accounts: clone an API-key provider under a new name with its own key.
 	pi.on("session_start", async (_event, ctx) => {
@@ -94,6 +108,7 @@ export default function (pi: ExtensionAPI) {
 				models: source.map(({ provider: _provider, ...model }) => model) as never,
 			});
 		}
+		registerAliases(ctx);
 	});
 
 	// When the account behind an alias runs out of usage, remember it and rewrite the error into a
