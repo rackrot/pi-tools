@@ -24,7 +24,7 @@ See [MIGRATION.md](MIGRATION.md). In short:
 - `${CLAUDE_SKILL_DIR}` and `${CLAUDE_PLUGIN_ROOT}` paths made relative to the skill directory; `$ARGUMENTS` reworded.
 - `AskUserQuestion` renamed `ask_user_question`; forgejo and AWS MCP tool names changed to `mcp__forgejo__*` and `mcp__aws_mcp__*` (assumes you name those servers `forgejo` and `aws-mcp`).
 - Edited by hand: `handoff` (session recovery removed, `--bg` uses the `Agent` tool), `mcp-server` and `mcp-server-audit` (pi MCP config paths and `pi mcp add`), `scala`, `doubt-review`, `mistake-proof`.
-- Each skill keeps its plugin's `LICENSE` and `NOTICE`; third-party attributions are collected in [NOTICE](NOTICE).
+- Imported skills may carry their original plugin `LICENSE` files.
 
 Skills that still mention Claude Code are listed at the end of MIGRATION.md; most are accurate references
 (`CLAUDE.md` files, other tools) rather than instructions pi cannot follow.

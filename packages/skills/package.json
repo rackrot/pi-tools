@@ -7,10 +7,9 @@
 		"pi-package",
 		"pi-skills"
 	],
-	"license": "SEE LICENSE IN NOTICE",
+	"license": "MIT",
 	"files": [
 		"skills",
-		"NOTICE",
 		"README.md"
 	],
 	"pi": {
