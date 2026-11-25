@@ -200,7 +200,7 @@ export default function (pi: ExtensionAPI) {
 				params.query,
 				limit,
 			);
-			const text = hits.length
+			const body = hits.length
 				? hits
 						.map((s) => {
 							const d =
@@ -209,6 +209,9 @@ export default function (pi: ExtensionAPI) {
 						})
 						.join("\n")
 				: `No skill matches "${params.query}". Try different words.`;
+			const text = errors.length
+				? `${body}\n\nWarning: search stages failed and were skipped:\n${errors.map((e) => `- ${e}`).join("\n")}`
+				: body;
 			return { content: [{ type: "text", text }], details: { hits: hits.length, errors } };
 		},
 	});
