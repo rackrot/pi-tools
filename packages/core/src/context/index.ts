@@ -1,68 +1,73 @@
+import { getCurrentSystemMessage } from "@earendil-works/pi-ai";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { estimateTokens } from "@earendil-works/pi-coding-agent";
 
 const tok = (s: string) => Math.ceil(s.length / 4);
 const fmt = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n));
+const sum = (xs: { tokens: number }[]) => xs.reduce((a, x) => a + x.tokens, 0);
 
-/** `/context`: estimated breakdown of what fills the context window (like Claude Code's /context). */
+const SKILL_SECTIONS = ["skills", "skill_index", "skill_full"];
+const BASE_SECTIONS = ["preamble", "tools", "rules", "docs", "addendum", "cwd"];
+
+/**
+ * `/context`: estimated breakdown of what fills the context window (like Claude Code's /context).
+ * The prompt and tools are read from the session's replayed system messages, i.e. what the model
+ * actually has. `ctx.getSystemPrompt()` is not used: it can be rebuilt from untrimmed options.
+ */
 export default function (pi: ExtensionAPI) {
 	pi.registerCommand("context", {
 		description: "Show a breakdown of context window usage",
 		handler: async (_args, ctx) => {
-			const opts = ctx.getSystemPromptOptions();
-			const prompt = ctx.getSystemPrompt();
-			const promptTokens = tok(prompt);
-			const files = (opts.contextFiles ?? []).map((f) => ({
-				name: f.path,
+			const all = ctx.sessionManager.buildSessionProjection().messages;
+			const system = getCurrentSystemMessage(all);
+			const sections = Object.entries(system?.sections ?? {}).map(([name, text]) => ({
+				name,
+				tokens: tok(text ?? ""),
+			}));
+			const pick = (names: string[]) => sections.filter((s) => names.includes(s.name));
+
+			const base = [
+				...pick(BASE_SECTIONS),
+				...(system?.content
+					? [{ name: "content", tokens: tok(JSON.stringify(system.content)) }]
+					: []),
+			];
+			const skills = pick(SKILL_SECTIONS);
+			const ctxFiles = pick(["project_context"]);
+			const extra = sections.filter(
+				(s) => ![...BASE_SECTIONS, ...SKILL_SECTIONS, "project_context"].includes(s.name),
+			);
+			const files = (ctx.getSystemPromptOptions().contextFiles ?? []).map((f) => ({
+				name: f.path.replace(/^.*\/(?=[^/]+\/[^/]+$)/, ""),
 				tokens: tok(f.content),
 			}));
-			const filesTotal = files.reduce((a, f) => a + f.tokens, 0);
 
-			// Measured from the final prompt text, since extensions rewrite skills and sections per turn.
-			const block = (tag: string) => {
-				const m = prompt.match(new RegExp(`<${tag}>[\\s\\S]*?</${tag}>`));
-				return m ? tok(m[0]) : 0;
-			};
-			const skillBlocks = ["available_skills", "skill_index", "skill_full"]
-				.map((t) => ({ name: t, tokens: block(t) }))
-				.filter((b) => b.tokens > 0);
-			const skillsTotal = skillBlocks.reduce((a, b) => a + b.tokens, 0);
-			const sections = Object.keys(opts.sections ?? {})
-				.filter((k) => k !== "skill_index" && k !== "skill_full")
-				.map((k) => ({ name: k, tokens: block(k) }))
-				.filter((b) => b.tokens > 0);
-			const sectionsTotal = sections.reduce((a, b) => a + b.tokens, 0);
-			const baseTokens = Math.max(0, promptTokens - filesTotal - skillsTotal - sectionsTotal);
-
-			const active = new Set(pi.getActiveTools());
-			const tools = pi
-				.getAllTools()
-				.filter((t) => active.has(t.name))
-				.map((t) => ({
-					group:
-						t.sourceInfo.source === "builtin"
-							? "built-in"
-							: t.sourceInfo.path.replace(/^.*node_modules\//, "").replace(/\/(src|dist)\/.*$/, ""),
-					tokens: tok(
-						JSON.stringify({ name: t.name, description: t.description, parameters: t.parameters }),
-					),
-				}));
-			const toolsTotal = tools.reduce((a, t) => a + t.tokens, 0);
+			const source = new Map(pi.getAllTools().map((t) => [t.name, t.sourceInfo]));
 			const groups = new Map<string, { n: number; tokens: number }>();
-			for (const t of tools) {
-				const g = groups.get(t.group) ?? { n: 0, tokens: 0 };
-				groups.set(t.group, { n: g.n + 1, tokens: g.tokens + t.tokens });
+			for (const t of system?.toolsAdded ?? []) {
+				const si = source.get(t.name);
+				const group =
+					!si || si.source === "builtin"
+						? "built-in"
+						: si.path.replace(/^.*node_modules\//, "").replace(/\/(src|dist)\/.*$/, "");
+				const g = groups.get(group) ?? { n: 0, tokens: 0 };
+				groups.set(group, { n: g.n + 1, tokens: g.tokens + tok(JSON.stringify(t)) });
 			}
 			const groupRows = [...groups].sort((a, b) => b[1].tokens - a[1].tokens);
+			const toolsTotal = groupRows.reduce((a, [, v]) => a + v.tokens, 0);
+			const toolCount = groupRows.reduce((a, [, v]) => a + v.n, 0);
 
+			// System messages are the prompt and tools above, so leave them out here.
 			const byRole = new Map<string, number>();
-			for (const m of ctx.sessionManager.buildSessionProjection().messages) {
+			for (const m of all) {
+				if (m.role === "system") continue;
 				const role = m.role === "toolResult" ? "tool results" : `${m.role} messages`;
 				byRole.set(role, (byRole.get(role) ?? 0) + estimateTokens(m));
 			}
 			const msgTotal = [...byRole.values()].reduce((a, b) => a + b, 0);
 
-			const estimated = promptTokens + toolsTotal + msgTotal;
+			const estimated =
+				sum(sections) + sum(base.filter((b) => b.name === "content")) + toolsTotal + msgTotal;
 			const usage = ctx.getContextUsage();
 			const window = usage?.contextWindow ?? 0;
 			const pct = (n: number) => (window ? ` (${((n / window) * 100).toFixed(1)}%)` : "");
@@ -76,14 +81,14 @@ export default function (pi: ExtensionAPI) {
 					: `Reported: unknown (no response yet) / ${fmt(window)} tokens`,
 				`Estimated (chars/4): ${fmt(estimated)}`,
 				"",
-				row("System prompt (base)", baseTokens),
-				row("Context files", filesTotal),
-				...files.map((f) => row(f.name.replace(/^.*\/(?=[^/]+\/[^/]+$)/, ""), f.tokens, "  ")),
-				row("Skills", skillsTotal),
-				...skillBlocks.map((b) => row(b.name, b.tokens, "  ")),
-				row("Extension prompt sections", sectionsTotal),
-				...sections.map((b) => row(b.name, b.tokens, "  ")),
-				row(`Tools (${tools.length})`, toolsTotal),
+				row("System prompt (base)", sum(base)),
+				row("Context files", sum(ctxFiles)),
+				...files.map((f) => row(f.name, f.tokens, "  ")),
+				row("Skills", sum(skills)),
+				...skills.map((s) => row(s.name, s.tokens, "  ")),
+				row("Extension prompt sections", sum(extra)),
+				...extra.map((s) => row(s.name, s.tokens, "  ")),
+				row(`Tools (${toolCount})`, toolsTotal),
 				...groupRows.map(([g, v]) => row(`${g} (${v.n})`, v.tokens, "  ")),
 				row("Messages", msgTotal),
 				...[...byRole].map(([r, n]) => row(r, n, "  ")),
