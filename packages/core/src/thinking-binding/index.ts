@@ -3,6 +3,7 @@ import {
 	BINDING_ENTRY_TYPE,
 	type BindingState,
 	fingerprintPrefix,
+	isAnthropicRequest,
 	newestAssistantTimestamp,
 	parseAnthropicPayload,
 	readBindingState,
@@ -29,7 +30,7 @@ export default function thinkingBinding(pi: ExtensionAPI): void {
 	const record = (state: BindingState): void => pi.appendEntry(BINDING_ENTRY_TYPE, state);
 
 	pi.on("context", (event, ctx) => {
-		if (ctx.model?.api !== "anthropic-messages") return;
+		if (!isAnthropicRequest(ctx.model, ctx.sessionManager.getBranch())) return;
 		newestAssistant = newestAssistantTimestamp(event.messages);
 		const state = readBindingState(ctx.sessionManager.getBranch());
 		if (state?.staleThrough === undefined) return;
@@ -38,7 +39,7 @@ export default function thinkingBinding(pi: ExtensionAPI): void {
 	});
 
 	pi.on("before_provider_request", (event, ctx) => {
-		if (ctx.model?.api !== "anthropic-messages") return;
+		if (!isAnthropicRequest(ctx.model, ctx.sessionManager.getBranch())) return;
 		const payload = parseAnthropicPayload(event.payload);
 		if (!payload) return;
 		fingerprint = fingerprintPrefix(payload);
@@ -54,7 +55,7 @@ export default function thinkingBinding(pi: ExtensionAPI): void {
 	// trust Anthropic's own drop report once.
 	pi.on("message_end", (event, ctx) => {
 		if (
-			ctx.model?.api !== "anthropic-messages" ||
+			!isAnthropicRequest(ctx.model, ctx.sessionManager.getBranch()) ||
 			fingerprint === undefined ||
 			newestAssistant === undefined
 		)

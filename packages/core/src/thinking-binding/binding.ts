@@ -64,6 +64,26 @@ function isBindingState(value: unknown): value is BindingState {
 	);
 }
 
+const ANTHROPIC_API = "anthropic-messages";
+
+/**
+ * Whether requests go to Anthropic. A virtual model (a model alias) reports `pi-virtual` as its
+ * api, so there the physical model is taken from the latest assistant response on the branch.
+ */
+export function isAnthropicRequest(
+	model: { api: string } | undefined,
+	branch: readonly SessionEntryLike[],
+): boolean {
+	if (model?.api === ANTHROPIC_API) return true;
+	if (model?.api !== "pi-virtual") return false;
+	for (let index = branch.length - 1; index >= 0; index--) {
+		const entry = branch[index] as { type: string; message?: { role?: string; api?: string } };
+		if (entry?.type === "message" && entry.message?.role === "assistant")
+			return entry.message.api === ANTHROPIC_API;
+	}
+	return false;
+}
+
 /** The newest binding state recorded on the active branch. */
 export function readBindingState(branch: readonly SessionEntryLike[]): BindingState | undefined {
 	for (let index = branch.length - 1; index >= 0; index--) {

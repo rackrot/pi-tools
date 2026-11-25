@@ -4,6 +4,7 @@ import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import {
 	BINDING_ENTRY_TYPE,
 	fingerprintPrefix,
+	isAnthropicRequest,
 	newestAssistantTimestamp,
 	parseAnthropicPayload,
 	readBindingState,
@@ -181,5 +182,14 @@ describe("readBindingState", () => {
 		];
 		assert.deepEqual(readBindingState(branch), { version: 1, fingerprint: "b", staleThrough: 5 });
 		assert.equal(readBindingState([{ type: "custom", customType: "other", data: {} }]), undefined);
+	});
+});
+
+describe("isAnthropicRequest", () => {
+	const reply = (api: string) => ({ type: "message", message: { role: "assistant", api } });
+	test("a model alias counts as Anthropic when its latest response was", () => {
+		assert.equal(isAnthropicRequest({ api: "pi-virtual" }, [reply("anthropic-messages")]), true);
+		assert.equal(isAnthropicRequest({ api: "pi-virtual" }, [reply("openai-completions")]), false);
+		assert.equal(isAnthropicRequest({ api: "anthropic-messages" }, []), true);
 	});
 });
