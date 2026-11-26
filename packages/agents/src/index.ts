@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { type ExtensionAPI, getAgentDir } from "@earendil-works/pi-coding-agent";
 import { registerConfigSection } from "@rackrot/pi-core/config-ui";
 import { configuredNames, loadLayers, resolveTuning, SETTINGS_KEY } from "./config.ts";
+import orchestration from "./orchestration/index.ts";
 import { openSettings } from "./settings-ui.ts";
 
 const PACKAGE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -18,6 +19,8 @@ const PACKAGE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
  * cross-extension RPC do not go through it.
  */
 export default function (pi: ExtensionAPI) {
+	orchestration(pi);
+
 	pi.on("tool_call", (event, ctx) => {
 		if (event.toolName !== "Agent") return;
 		const input = event.input as Record<string, unknown>;

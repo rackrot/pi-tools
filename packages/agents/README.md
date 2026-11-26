@@ -74,3 +74,24 @@ with the agent file's own settings, which for these agents means the parent's mo
 If `scopeModels` is on in pi-subagents, a model outside `enabledModels` is rejected.
 
 > Published with `pnpm publish` so the `workspace:` dependency ranges resolve to real versions; earlier releases were not installable from npm.
+
+## Orchestration
+
+Injects delegation guidance into the system prompt on every turn (so compaction cannot drop it)
+and, at the top level, removes tools from the main session. Set `orchestration` in the rackrot
+config, or use `/rackrot-config orchestration` (Tab switches global/project):
+
+```json
+{ "orchestration": { "level": "lean", "deniedTools": ["read", "edit", "write", "bash", "grep", "find", "ls"] } }
+```
+
+| Level          | Behaviour                                                                  |
+| -------------- | -------------------------------------------------------------------------- |
+| `off` (default) | Nothing.                                                                   |
+| `lean`         | Delegate only bulk work (broad searches, logs, test output) to keep context clean. |
+| `delegate`     | Prefer subagents for self-contained multi-step tasks.                      |
+| `orchestrator` | Plan, delegate, verify; do work yourself only when clearly cheaper.        |
+| `strict`       | Main session only orchestrates: `deniedTools` are hidden and calls are blocked. |
+
+`deniedTools` applies to `strict` only; `Agent`, `get_subagent_result`, `steer_subagent` and
+`ask_user` are never denied. Subagent sessions and sessions without the `Agent` tool are left alone.
