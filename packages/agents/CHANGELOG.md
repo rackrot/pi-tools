@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/rackrot/pi-tools/compare/pi-agents-v0.2.1...pi-agents-v0.3.0) (2026-11-26)
+
+
+### Features
+
+* **agents:** add orchestration levels that inject delegation rules and deny main-session tools ([036f1a5](https://github.com/rackrot/pi-tools/commit/036f1a513e11b1240fbd8912db85fb6990e0f8f9))
+
+
+### Styles
+
+* **agents:** format orchestration README section ([4cabc0e](https://github.com/rackrot/pi-tools/commit/4cabc0e64334138bacf59b85be9f5b2c3ec8e0b9))
+
 ## [0.2.1](https://github.com/rackrot/pi-tools/compare/pi-agents-v0.2.0...pi-agents-v0.2.1) (2026-11-26)
 
 
