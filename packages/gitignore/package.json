@@ -1,6 +1,6 @@
 {
 	"name": "@rackrot/pi-gitignore",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Create and update .gitignore from toptal/gitignore.io templates plus custom entries (tool and /gitignore command)",
 	"type": "module",
 	"keywords": [
