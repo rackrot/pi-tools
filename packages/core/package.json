@@ -1,6 +1,6 @@
 {
 	"name": "@rackrot/pi-core",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "Core rackrot pi extension and shared utilities for the other @rackrot packages",
 	"type": "module",
 	"keywords": [
