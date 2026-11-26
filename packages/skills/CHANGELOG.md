@@ -7,6 +7,11 @@
 
 * publish with pnpm so workspace: ranges resolve on npm ([f89c869](https://github.com/rackrot/pi-tools/commit/f89c869bf8c721b836bd8276e0ccdad3f9dc2413))
 
+
+### Miscellaneous Chores
+
+* **main:** release pi-skills 0.1.1 ([#24](https://github.com/rackrot/pi-tools/issues/24)) ([677860a](https://github.com/rackrot/pi-tools/commit/677860a0c97eb423dbe8cdb428bde3107c7b869e))
+
 ## [0.1.0](https://github.com/rackrot/pi-tools/compare/pi-skills-v0.0.1...pi-skills-v0.1.0) (2026-11-25)
 
 
