@@ -2,7 +2,7 @@
 	"packages/agents": "0.2.1",
 	"packages/core": "0.3.1",
 	"packages/model-aliases": "0.2.1",
-	"packages/skill-index": "0.2.1",
+	"packages/skill-index": "0.2.2",
 	"packages/skills": "0.1.2",
 	"packages/forgejo-mcp": "0.2.1",
 	"packages/council": "0.2.1",
