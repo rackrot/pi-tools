@@ -1,6 +1,6 @@
 {
 	"name": "@rackrot/pi-skills",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "Skills imported from claude-plugins and adapted for pi",
 	"type": "module",
 	"keywords": [

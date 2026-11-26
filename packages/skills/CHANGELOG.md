@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/rackrot/pi-tools/compare/pi-skills-v0.1.1...pi-skills-v0.1.2) (2026-11-26)
+
+
+### Miscellaneous Chores
+
+* **main:** release pi-skills 0.1.1 ([#27](https://github.com/rackrot/pi-tools/issues/27)) ([7abb368](https://github.com/rackrot/pi-tools/commit/7abb3685a5842590321a75cff9839e3d6df3c6ff))
+
 ## [0.1.1](https://github.com/rackrot/pi-tools/compare/pi-skills-v0.1.0...pi-skills-v0.1.1) (2026-11-26)
 
 
