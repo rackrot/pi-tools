@@ -1,6 +1,6 @@
 {
 	"name": "@rackrot/pi-model-aliases",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Model aliases with automatic account/provider failover when usage runs out",
 	"type": "module",
 	"keywords": [
