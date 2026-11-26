@@ -12,5 +12,6 @@ dist
 .pi/
 # skill eval run output
 evals/results/
+packages/*/evals/results/
 __pycache__/
 *.pyc

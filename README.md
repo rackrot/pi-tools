@@ -23,6 +23,7 @@ Restart pi (or run `/reload`) after installing. Pin a version with `npm:@rackrot
 | [`@rackrot/pi-council`](packages/council)             | Second-opinion and multi-model council tools                                                                                | `pi install npm:@rackrot/pi-council`       |
 | [`@rackrot/pi-forgejo-mcp`](packages/forgejo-mcp)     | Connects pi to a forgejo-mcp server with a curated, repo-focused tool set                                                   | `pi install npm:@rackrot/pi-forgejo-mcp`   |
 | [`@rackrot/pi-gitignore`](packages/gitignore)         | Create and update `.gitignore` from gitignore.io templates plus custom entries (tool and `/gitignore` command)              | `pi install npm:@rackrot/pi-gitignore`     |
+| [`@rackrot/pi-jj`](packages/jj)                       | Native Jujutsu support: conditional skill, prompt hint, git nudge, confirmations and footer status                          | `pi install npm:@rackrot/pi-jj`            |
 
 Each package README documents its configuration (usually in `~/.pi/agent/settings.json` or `.pi/settings.json`).
 

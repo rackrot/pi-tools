@@ -1,0 +1,41 @@
+{
+	"name": "@rackrot/pi-jj",
+	"version": "0.0.0",
+	"description": "Native Jujutsu (jj) support for pi: a conditional skill, system-prompt hint, git nudge and bash env",
+	"type": "module",
+	"keywords": [
+		"pi-package",
+		"pi-extension"
+	],
+	"license": "MIT",
+	"files": [
+		"src",
+		"skills",
+		"README.md"
+	],
+	"scripts": {
+		"test": "node --test test/*.test.ts"
+	},
+	"pi": {
+		"extensions": [
+			"./src/index.ts"
+		]
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": "*"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/rackrot/pi-tools.git",
+		"directory": "packages/jj"
+	},
+	"dependencies": {
+		"shell-quote": "^1.12.0"
+	},
+	"devDependencies": {
+		"@types/shell-quote": "^1.7.5"
+	}
+}

@@ -28,6 +28,9 @@
 		},
 		"packages/gitignore": {
 			"component": "pi-gitignore"
+		},
+		"packages/jj": {
+			"component": "pi-jj"
 		}
 	},
 	"changelog-sections": [

@@ -6,5 +6,6 @@
 	"packages/skills": "0.1.0",
 	"packages/forgejo-mcp": "0.2.0",
 	"packages/council": "0.2.0",
-	"packages/gitignore": "1.0.0"
+	"packages/gitignore": "1.0.0",
+	"packages/jj": "0.0.0"
 }

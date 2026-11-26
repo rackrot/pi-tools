@@ -7,6 +7,8 @@
 			"!**/dist",
 			"!packages/skills/skills",
 			"!packages/skills/evals",
+			"!packages/jj/skills",
+			"!packages/jj/evals",
 			"!**/CHANGELOG.md"
 		]
 	},
