@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/rackrot/pi-tools/compare/pi-skill-index-v0.2.0...pi-skill-index-v0.2.1) (2026-11-26)
+
+
+### Bug Fixes
+
+* publish with pnpm so workspace: ranges resolve on npm ([f89c869](https://github.com/rackrot/pi-tools/commit/f89c869bf8c721b836bd8276e0ccdad3f9dc2413))
+
 ## [0.2.0](https://github.com/rackrot/pi-tools/compare/pi-skill-index-v0.1.0...pi-skill-index-v0.2.0) (2026-11-25)
 
 
