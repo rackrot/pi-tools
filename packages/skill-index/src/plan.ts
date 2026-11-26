@@ -37,7 +37,7 @@ export function plan<T extends SkillInfo>(skills: T[], cfg: Config): Plan<T> {
 export function indexSection(p: Plan<SkillInfo>): string {
 	if (!p.titles.length && !p.hidden) return "";
 	const lines = [
-		"Skills are not all listed here. Before starting any task that is not trivial, call skill_search with a short description of the task. It returns matching skill names, descriptions and file paths; read the SKILL.md of any that fit and follow it.",
+		"This list is incomplete: most skills are not shown. You MUST call skill_search with a short description of the task before starting any task that is not trivial, and again whenever the task changes direction. Do this first, before reading code or running commands, and do not skip it because you think you already know how. It returns matching skill names, descriptions and file paths. If a skill fits, read its SKILL.md and follow it; skipping a matching skill is a mistake.",
 	];
 	if (p.titles.length) lines.push(`Skills by name: ${p.titles.join(", ")}.`);
 	if (p.hidden) lines.push(`${p.hidden} more are found only through skill_search.`);

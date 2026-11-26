@@ -176,7 +176,7 @@ export default function (pi: ExtensionAPI) {
 			"Search installed skills by task description. Returns names, descriptions and SKILL.md paths.",
 		promptSnippet: "Search installed skills that are not listed in the prompt",
 		promptGuidelines: [
-			"Before starting a task that is not trivial, call skill_search with a short description of it, then read the SKILL.md of any skill that fits and follow it.",
+			"You MUST call skill_search before starting any non-trivial task, and read and follow the SKILL.md of any skill that fits.",
 		],
 		parameters: Type.Object({
 			query: Type.String({ description: "What you need to do, in a few words" }),
