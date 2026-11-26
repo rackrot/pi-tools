@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/rackrot/pi-tools/compare/pi-gitignore-v1.0.0...pi-gitignore-v1.0.1) (2026-11-26)
+
+
+### Bug Fixes
+
+* publish with pnpm so workspace: ranges resolve on npm ([f89c869](https://github.com/rackrot/pi-tools/commit/f89c869bf8c721b836bd8276e0ccdad3f9dc2413))
+
 ## 1.0.0 (2026-11-25)
 
 
