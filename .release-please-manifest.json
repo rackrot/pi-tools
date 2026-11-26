@@ -4,7 +4,7 @@
 	"packages/model-aliases": "0.2.0",
 	"packages/skill-index": "0.2.0",
 	"packages/skills": "0.1.1",
-	"packages/forgejo-mcp": "0.2.0",
+	"packages/forgejo-mcp": "0.2.1",
 	"packages/council": "0.2.0",
 	"packages/gitignore": "1.0.1",
 	"packages/jj": "1.0.0"
