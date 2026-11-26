@@ -82,16 +82,21 @@ and, at the top level, removes tools from the main session. Set `orchestration` 
 config, or use `/rackrot-config orchestration` (Tab switches global/project):
 
 ```json
-{ "orchestration": { "level": "lean", "deniedTools": ["read", "edit", "write", "bash", "grep", "find", "ls"] } }
+{
+	"orchestration": {
+		"level": "lean",
+		"deniedTools": ["read", "edit", "write", "bash", "grep", "find", "ls"]
+	}
+}
 ```
 
-| Level          | Behaviour                                                                  |
-| -------------- | -------------------------------------------------------------------------- |
-| `off` (default) | Nothing.                                                                   |
-| `lean`         | Delegate only bulk work (broad searches, logs, test output) to keep context clean. |
-| `delegate`     | Prefer subagents for self-contained multi-step tasks.                      |
-| `orchestrator` | Plan, delegate, verify; do work yourself only when clearly cheaper.        |
-| `strict`       | Main session only orchestrates: `deniedTools` are hidden and calls are blocked. |
+| Level           | Behaviour                                                                          |
+| --------------- | ---------------------------------------------------------------------------------- |
+| `off` (default) | Nothing.                                                                           |
+| `lean`          | Delegate only bulk work (broad searches, logs, test output) to keep context clean. |
+| `delegate`      | Prefer subagents for self-contained multi-step tasks.                              |
+| `orchestrator`  | Plan, delegate, verify; do work yourself only when clearly cheaper.                |
+| `strict`        | Main session only orchestrates: `deniedTools` are hidden and calls are blocked.    |
 
 `deniedTools` applies to `strict` only; `Agent`, `get_subagent_result`, `steer_subagent` and
 `ask_user` are never denied. Subagent sessions and sessions without the `Agent` tool are left alone.
