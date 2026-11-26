@@ -12,6 +12,8 @@
 	"files": [
 		"src",
 		"agents",
+		"workflows",
+		"skills",
 		"defaults.json",
 		"README.md"
 	],
@@ -25,8 +27,14 @@
 		"subagents": {
 			"agents": [
 				"./agents"
+			],
+			"workflows": [
+				"./workflows"
 			]
-		}
+		},
+		"skills": [
+			"./skills"
+		]
 	},
 	"dependencies": {
 		"@rackrot/pi-core": "workspace:*"

@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { configuredNames, parseOverrides, resolveTuning } from "../src/config.ts";
+import {
+	configuredNames,
+	parseOverrides,
+	resolveTuning,
+	withConfiguredAgents,
+	workflowAgents,
+} from "../src/config.ts";
 
 test("parseOverrides keeps valid fields and lowercases names", () => {
 	const o = parseOverrides({
@@ -36,4 +42,25 @@ test("configuredNames is the sorted union", () => {
 	const a = parseOverrides({ b: { model: "m" } });
 	const b = parseOverrides({ a: { model: "m" }, b: { thinking: "low" } });
 	assert.deepEqual(configuredNames([a, b]), ["a", "b"]);
+});
+
+test("workflow args get configured agents, and explicit args win", () => {
+	const layers = [
+		parseOverrides({
+			Reviewer: { model: "haiku", thinking: "low", maxTurns: 9 },
+			Plan: { thinking: "off" },
+		}),
+	];
+	const configured = workflowAgents(layers);
+	assert.deepEqual(configured, { reviewer: { model: "haiku", effort: "low" } });
+	assert.deepEqual(
+		withConfiguredAgents('{"scope":"x","agents":{"Reviewer":{"effort":"high"}}}', configured),
+		{
+			scope: "x",
+			agents: { Reviewer: { effort: "high" } },
+		},
+	);
+	assert.deepEqual(withConfiguredAgents(undefined, configured), { agents: configured });
+	assert.equal(withConfiguredAgents("not json", configured), "not json");
+	assert.equal(withConfiguredAgents({ a: 1 }, {}).constructor, Object);
 });

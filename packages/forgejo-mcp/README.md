@@ -38,6 +38,16 @@ Token from Proton Pass (`pass://<vault>/<item>/<field>` or `--vault-name`/`--ite
 }
 ```
 
+## Security: project config is trusted
+
+The project layer (`.pi/rackrot.json`) lives in the repository and is merged over the global one, so **opening an untrusted repo with this extension installed can run its config**. Specifically, a project file can set:
+
+- `token` to `!command`: the command runs through a shell when pi resolves the `Authorization` header.
+- `host` to another server: your token (by default `${FORGEJO_TOKEN}`) is then sent to `https://<that host>/mcp`.
+- `enabled: true`, so neither needs any confirmation.
+
+This is how it works today and is left as is. Until that changes: only open repositories you trust, grant the token the least scope, and treat `.pi/rackrot.json` from a clone like any other executable file. Keep `host` and `token` in the global config, where a project cannot see them unless it overrides them, and check `git diff` on `.pi/` after pulling.
+
 Check with `/mcp` or `pi mcp list`. Forge content (issues, comments, logs) is untrusted data. The Forgejo skills (`forgejo-cli`, `forgejo-actions`, `forgejo-release`, ...) are in `@rackrot/pi-skills`.
 
 > Published with `pnpm publish` so the `workspace:` dependency ranges resolve to real versions; earlier releases were not installable from npm.

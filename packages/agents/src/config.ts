@@ -55,6 +55,49 @@ export function configuredNames(layers: Overrides[]): string[] {
 	return [...new Set(layers.flatMap((l) => Object.keys(l)))].sort();
 }
 
+/**
+ * `agentOverrides` as the `args.agents` map the shipped workflows read (`model` and `effort` per
+ * agent type). Workflow `agent()` calls do not pass through the `Agent` tool hook, and a workflow
+ * has no `maxTurns` or `off`, so those are left out.
+ */
+export function workflowAgents(
+	layers: Overrides[],
+): Record<string, { model?: string; effort?: string }> {
+	const out: Record<string, { model?: string; effort?: string }> = {};
+	for (const name of configuredNames(layers)) {
+		const { model, thinking } = resolveTuning(name, layers);
+		const entry = {
+			...(model && { model }),
+			...(thinking && thinking !== "off" && { effort: thinking }),
+		};
+		if (Object.keys(entry).length) out[name] = entry;
+	}
+	return out;
+}
+
+/** Adds configured agents under `args.agents`; anything the caller passed for an agent wins. */
+export function withConfiguredAgents(
+	args: unknown,
+	configured: Record<string, { model?: string; effort?: string }>,
+): unknown {
+	if (!Object.keys(configured).length) return args;
+	let base: unknown = args;
+	if (typeof args === "string") {
+		try {
+			base = JSON.parse(args);
+		} catch {
+			return args;
+		}
+	}
+	if (base === undefined || base === null) base = {};
+	if (typeof base !== "object" || Array.isArray(base)) return args;
+	const given = (base as { agents?: unknown }).agents;
+	const agents = given && typeof given === "object" && !Array.isArray(given) ? given : {};
+	const lower = new Set(Object.keys(agents).map((k) => k.toLowerCase()));
+	const missing = Object.entries(configured).filter(([k]) => !lower.has(k));
+	return { ...base, agents: { ...agents, ...Object.fromEntries(missing) } };
+}
+
 export const SETTINGS_KEY = "agentOverrides";
 
 /** Layers in precedence order, lowest first. */

@@ -24,6 +24,25 @@ name overrides them.
 | `dependency-auditor` | Vets a package against our maintenance criteria             |
 | `research-analyst`   | Multi-source web research with citations                    |
 
+## Workflows
+
+The package declares `pi.subagents.workflows`, so these [SubagentWorkflow](https://github.com/tintinweb/pi-subagents/blob/master/docs/workflows.md) scripts are available by name once installed. They use the agents above.
+
+| Name           | Purpose                                                                                  | `args`                 |
+| -------------- | ---------------------------------------------------------------------------------------- | ---------------------- |
+| `review-panel` | `reviewer`, `security-auditor` and `test-runner` in parallel, then one reconciling agent | `scope`, `spec`        |
+| `gated-fix`    | Fix behind a shell `gate`, one resumed retry, `test-runner` re-check                     | `task`, `check`        |
+| `audit-fanout` | `Explore` lists files, `security-auditor` audits each, a refuter checks every finding    | `root`, `focus`, `max` |
+
+All three also accept `model`, `effort` and `agents` (per agent type or label, e.g.
+`{"reviewer": {"effort": "high"}}`) in `args`; unset means inherit.
+
+Ask the model, e.g. "run the review-panel workflow on `git diff main...HEAD`". A file with the same name in
+`.pi/workflows/` or `~/.pi/agent/workflows/` wins. `agentOverrides` reach them too: a hook on `SubagentWorkflow` calls fills `args.agents` from the
+config (`model`, and `thinking` as `effort`; `maxTurns` and `off` have no workflow equivalent), and
+anything you pass in `args` wins. Scripts you write yourself only see it if they read `args.agents`. The bundled `subagent-workflows` skill documents running, writing and
+adding workflows.
+
 ## Overrides
 
 Add `agentOverrides` to `~/.pi/agent/rackrot/config.json(c)` or `.pi/rackrot.json(c)`:
@@ -67,8 +86,8 @@ pi-subagents treats an agent file's `model`, `thinking` and `max_turns` as autho
 caller. The shipped files therefore leave those fields out. A `tool_call` hook rewrites the `Agent`
 call's `model`, `thinking` and `max_turns` from settings, and settings win over what the orchestrator passed.
 
-The hook only sees calls made through the `Agent` tool. Not covered: workflow `agent()` options,
-scheduled spawns, cross-extension RPC, and possibly `@mention` starts in `direct` mode. Those run
+The hook only sees calls made through the `Agent` tool. Workflow `agent()` calls are covered separately, by
+filling `args.agents` (see Workflows). Not covered: scheduled spawns, cross-extension RPC, and possibly `@mention` starts in `direct` mode. Those run
 with the agent file's own settings, which for these agents means the parent's model.
 
 If `scopeModels` is on in pi-subagents, a model outside `enabledModels` is rejected.

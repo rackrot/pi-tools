@@ -9,6 +9,7 @@
 			"!packages/skills/evals",
 			"!packages/jj/skills",
 			"!packages/jj/evals",
+			"!packages/agents/workflows",
 			"!**/CHANGELOG.md"
 		]
 	},

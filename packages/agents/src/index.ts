@@ -2,7 +2,14 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type ExtensionAPI, getAgentDir } from "@earendil-works/pi-coding-agent";
 import { registerConfigSection } from "@rackrot/pi-core/config-ui";
-import { configuredNames, loadLayers, resolveTuning, SETTINGS_KEY } from "./config.ts";
+import {
+	configuredNames,
+	loadLayers,
+	resolveTuning,
+	SETTINGS_KEY,
+	withConfiguredAgents,
+	workflowAgents,
+} from "./config.ts";
 import orchestration from "./orchestration/index.ts";
 import { openSettings } from "./settings-ui.ts";
 
@@ -16,10 +23,20 @@ const PACKAGE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
  * Settings win over whatever the orchestrator passed, matching that authority.
  *
  * Covers calls made through the `Agent` tool. Workflow `agent()` calls, scheduled spawns and
- * cross-extension RPC do not go through it.
+ * cross-extension RPC do not go through it; `SubagentWorkflow` calls get the settings as `args.agents`.
  */
 export default function (pi: ExtensionAPI) {
 	orchestration(pi);
+
+	// Workflow `agent()` calls skip the hook below, so hand the shipped workflows the same settings
+	// through `args.agents`, which they read. Scripts that ignore `args.agents` are unaffected.
+	pi.on("tool_call", (event, ctx) => {
+		if (event.toolName !== "SubagentWorkflow") return;
+		const input = event.input as Record<string, unknown>;
+		const configured = workflowAgents(loadLayers(PACKAGE_DIR, getAgentDir(), ctx.cwd));
+		const args = withConfiguredAgents(input.args, configured);
+		if (args !== input.args) input.args = args;
+	});
 
 	pi.on("tool_call", (event, ctx) => {
 		if (event.toolName !== "Agent") return;
