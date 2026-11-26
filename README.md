@@ -20,6 +20,9 @@ Restart pi (or run `/reload`) after installing. Pin a version with `npm:@rackrot
 | [`@rackrot/pi-skill-index`](packages/skill-index)     | Per-skill system-prompt exposure levels and a BM25 `skill_search` tool                                                      | `pi install npm:@rackrot/pi-skill-index`   |
 | [`@rackrot/pi-skills`](packages/skills)               | 170 skills imported from claude-plugins and adapted for pi                                                                  | `pi install npm:@rackrot/pi-skills`        |
 | [`@rackrot/pi-agents`](packages/agents)               | Curated [pi-subagents](https://github.com/tintinweb/pi-subagents) agents with settings-driven model/thinking overrides      | `pi install npm:@rackrot/pi-agents`        |
+| [`@rackrot/pi-council`](packages/council)             | Second-opinion and multi-model council tools                                                                                | `pi install npm:@rackrot/pi-council`       |
+| [`@rackrot/pi-forgejo-mcp`](packages/forgejo-mcp)     | Connects pi to a forgejo-mcp server with a curated, repo-focused tool set                                                   | `pi install npm:@rackrot/pi-forgejo-mcp`   |
+| [`@rackrot/pi-gitignore`](packages/gitignore)         | Create and update `.gitignore` from gitignore.io templates plus custom entries (tool and `/gitignore` command)              | `pi install npm:@rackrot/pi-gitignore`     |
 
 Each package README documents its configuration (usually in `~/.pi/agent/settings.json` or `.pi/settings.json`).
 
@@ -56,4 +59,4 @@ pi install ./packages/<name>             # install a local checkout
 
 To add a package, copy an existing package (e.g. `packages/skill-index`), rename it, and edit the `pi` manifest in its `package.json`.
 Host-provided pi libs go in `peerDependencies` (`"*"`), never `dependencies`.
-Commits follow Conventional Commits; `pnpm changelog` runs git-cliff. See also [docs/subagents.md](docs/subagents.md).
+Commits follow Conventional Commits; releases and changelogs are automated by release-please (`.release-please-manifest.json`). See also [docs/subagents.md](docs/subagents.md).
