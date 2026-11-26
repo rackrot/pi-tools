@@ -122,95 +122,184 @@ function textEditor(initial: string, done: (v?: string) => void): Component {
 	return input;
 }
 
-/** Opens the field screen for one section. Resolves true when anything was saved. */
-async function openFields(ctx: ExtensionCommandContext, s: ConfigSection): Promise<boolean> {
-	const fields = s.fields ?? [];
+/** One row of a config screen. `group` partitions rows; `source` is the layer the effective value comes from. */
+export interface ConfigRow extends SettingItem {
+	group?: string;
+	source?: Scope;
+}
+
+/** What a package supplies to get the shared config screen. */
+export interface ConfigScreen {
+	title: string;
+	pathOf(scope: Scope): string;
+	/** Extra line under the file path. */
+	hint?: string;
+	/** Say that pi reloads when the screen closes after a save. */
+	reload?: boolean;
+	/** Rows for the layer being edited; called again after every change. Rows with different `group`s get a picker first. */
+	rows(scope: Scope): ConfigRow[];
+	/** Persist one change to `scope`'s layer. Throw to show the message in the status line. */
+	apply(scope: Scope, id: string, value: string): void;
+}
+
+/**
+ * The shared config screen: a scope strip (global/project), an optional group picker, and the rows of
+ * one group, so only what is being edited is on screen. Resolves true when anything was saved.
+ */
+export async function openConfigScreen(
+	ctx: ExtensionCommandContext,
+	s: ConfigScreen,
+): Promise<boolean> {
 	let scope: Scope = "global";
 	let dirty = false;
-	const cwd = ctx.cwd;
-	const layer = (sc: Scope) => readConfig(configPath(sc, cwd));
-
-	const build = (): SettingItem[] => {
-		const here = layer(scope);
-		const global = layer("global");
-		const project = layer("project");
-		return fields.map((f) => {
-			const eff = getPath(project, f.path) ?? getPath(global, f.path);
-			const values = f.kind === "boolean" ? ["true", "false"] : f.values;
-			return {
-				id: f.path.join("."),
-				label: f.label,
-				description:
-					`${f.description ?? ""} Effective: ${show(eff)}. "${UNSET}" clears the ${scope} value (project wins over global).`.trim(),
-				currentValue: show(getPath(here, f.path)),
-				values: values ? [UNSET, ...values] : undefined,
-				submenu: values ? undefined : (cur, done) => textEditor(cur === UNSET ? "" : cur, done),
-			};
-		});
-	};
-
+	let group: string | undefined;
+	/** `scope:id` of rows saved while this screen has been open. */
+	const changed = new Set<string>();
 	await ctx.ui.custom<void>((tui, theme, kb, done) => {
-		const items = build();
-		const title = new Text("", 0, 0);
-		const file = new Text("", 0, 0);
-		const status = new Text("", 0, 0);
-		const header = new Container();
-		header.addChild(title);
-		header.addChild(file);
+		let rows: ConfigRow[] = [];
+		let body: Component;
+		let list: CycleSettingsList | undefined;
+		let error = "";
 		const tabKey = kb.getKeys("tui.input.tab")[0];
-		const renderHeader = () => {
-			title.setText(
-				`⚙  ${s.label} · Saving to: ${scope === "global" ? "Global" : "Project"}${tabKey ? theme.fg("muted", ` · ${tabKey} to switch`) : ""}`,
-			);
-			file.setText(theme.fg("muted", `   ${configPath(scope, cwd)}`));
-		};
-		const refresh = () => {
-			const fresh = new Map(build().map((i) => [i.id, i]));
-			for (const item of items) {
-				const n = fresh.get(item.id);
-				if (n) Object.assign(item, { currentValue: n.currentValue, description: n.description });
+		const inGroup = (g: string | undefined) => rows.filter((r) => (r.group ?? "") === g);
+		const isChanged = (r: ConfigRow) => changed.has(`${scope}:${r.id}`);
+		const dot = (on: boolean) => (on ? theme.fg("accent", " ●") : "");
+		const marker = (r: ConfigRow) =>
+			r.source && r.source !== scope ? theme.fg("muted", ` ·${r.source}`) : "";
+
+		const show = () => {
+			rows = s.rows(scope);
+			const groups = [...new Set(rows.map((r) => r.group ?? ""))];
+			if (groups.length <= 1) group = groups[0] ?? "";
+			else if (group !== undefined && !groups.includes(group)) group = undefined;
+			if (group === undefined) {
+				list = undefined;
+				body = filterPicker(
+					groups.map((g) => ({
+						value: g,
+						label: g + dot(inGroup(g).some(isChanged)),
+						description: inGroup(g)
+							.slice(0, 4)
+							.map((r) => `${r.label.trim()} ${r.currentValue}`)
+							.join(" · "),
+					})),
+					(g) => {
+						if (g === undefined) return done();
+						group = g;
+						show();
+					},
+				);
+				return;
 			}
-			renderHeader();
-			list.invalidate();
+			const view = inGroup(group);
+			list = new CycleSettingsList(
+				view.map((r) => ({ ...r, label: r.label + dot(isChanged(r)) + marker(r) })),
+				Math.max(5, Math.min(tui.terminal.rows - 12, view.length)),
+				getSettingsListTheme(),
+				(id, next) => {
+					try {
+						s.apply(scope, id, next);
+						dirty = true;
+						changed.add(`${scope}:${id}`);
+						error = "";
+					} catch (e) {
+						error = e instanceof Error ? e.message : String(e);
+					}
+					show();
+					list?.selectItem(id);
+				},
+				() => {
+					if (groups.length <= 1) return done();
+					group = undefined;
+					show();
+				},
+				{ enableSearch: true },
+			);
+			body = list;
 		};
-		const list = new CycleSettingsList(
-			items,
-			Math.min(Math.max(5, tui.terminal.rows - 10), Math.max(items.length, 1)),
-			getSettingsListTheme(),
-			(id, next) => {
-				const f = fields.find((x) => x.path.join(".") === id);
-				try {
-					if (!f) return;
-					const v = parseValue(f, next);
-					editConfig(configPath(scope, cwd), (d) => setPath(d, f.path, v));
-					dirty = true;
-					status.setText("");
-				} catch (e) {
-					status.setText(theme.fg("error", `   ${e instanceof Error ? e.message : String(e)}`));
-				}
-				refresh();
-			},
-			() => done(),
-			{ enableSearch: true },
-		);
-		renderHeader();
+		show();
+
+		const strip = () => {
+			const tab = (sc: Scope, name: string) =>
+				sc === scope
+					? theme.bold(theme.fg("accent", `[ ${name} ]`))
+					: theme.fg("muted", `  ${name}  `);
+			return `   Saving to ${tab("global", "Global")}${tab("project", "Project")}${tabKey ? theme.fg("muted", ` ${tabKey} switches`) : ""}`;
+		};
 		return {
-			render: (w) => [...header.render(w), "", ...list.render(w), ...status.render(w)],
-			invalidate: () => {
-				header.invalidate();
-				list.invalidate();
+			render: (w) => {
+				const t = (text: string) => new Text(text, 0, 0).render(w);
+				const crumb = group ? ` › ${group}` : "";
+				return [
+					...t(`⚙  ${s.title}${crumb}`),
+					...t(strip()),
+					...t(theme.fg("muted", `   ${s.pathOf(scope)}${s.hint ? ` · ${s.hint}` : ""}`)),
+					"",
+					...body.render(w),
+					...(error ? t(theme.fg("error", `   ${error}`)) : []),
+					...(changed.size
+						? t(
+								theme.fg(
+									"muted",
+									`   ● changed this session${s.reload ? " · pi reloads when you close" : ""}`,
+								),
+							)
+						: []),
+					...(list
+						? t(theme.fg("muted", "   ←/→ cycle values · esc back"))
+						: t(theme.fg("muted", "   enter open · type to filter · esc close"))),
+				];
 			},
+			invalidate: () => body.invalidate(),
 			handleInput: (data) => {
 				if (kb.matches(data, "tui.input.tab")) {
 					scope = scope === "global" ? "project" : "global";
-					refresh();
+					show();
 					return;
 				}
-				list.handleInput(data);
+				body.handleInput?.(data);
 			},
 		} as Component;
 	});
 	return dirty;
+}
+
+/** Opens the field screen for one section. Resolves true when anything was saved. */
+function openFields(ctx: ExtensionCommandContext, s: ConfigSection): Promise<boolean> {
+	const fields = s.fields ?? [];
+	const cwd = ctx.cwd;
+	const layer = (sc: Scope) => readConfig(configPath(sc, cwd));
+	return openConfigScreen(ctx, {
+		title: s.label,
+		pathOf: (sc) => configPath(sc, cwd),
+		rows: (scope) => {
+			const here = layer(scope);
+			const global = layer("global");
+			const project = layer("project");
+			return fields.map((f) => {
+				const inProject = getPath(project, f.path) !== undefined;
+				const eff = inProject ? getPath(project, f.path) : getPath(global, f.path);
+				const values = f.kind === "boolean" ? ["true", "false"] : f.values;
+				return {
+					id: f.path.join("."),
+					label: f.label,
+					description:
+						`${f.description ?? ""} Effective: ${show(eff)}. "${UNSET}" clears the ${scope} value (project wins over global).`.trim(),
+					currentValue: show(getPath(here, f.path)),
+					values: values ? [UNSET, ...values] : undefined,
+					submenu: values ? undefined : (cur, done) => textEditor(cur === UNSET ? "" : cur, done),
+					source: inProject ? "project" : eff !== undefined ? "global" : undefined,
+				};
+			});
+		},
+		apply: (scope, id, next) => {
+			const f = fields.find((x) => x.path.join(".") === id);
+			if (f) {
+				const v = parseValue(f, next);
+				editConfig(configPath(scope, cwd), (d) => setPath(d, f.path, v));
+			}
+		},
+	});
 }
 
 /** Opens one section. Resolves true when it saved something that needs a reload. */
@@ -221,7 +310,7 @@ async function openSection(ctx: ExtensionCommandContext, s: ConfigSection): Prom
 
 /** Fuzzy-filterable list: type to narrow (any order, substring or scattered), arrows to move, enter to pick, escape to cancel. */
 export function filterPicker(
-	items: { value: string; label: string }[],
+	items: { value: string; label: string; description?: string }[],
 	done: (v?: string) => void,
 	current?: string,
 ): Component {
@@ -289,7 +378,11 @@ export function registerConfigCommand(pi: ExtensionAPI): void {
 				if (!named) {
 					const id = await ctx.ui.custom<string | undefined>((_tui, _theme, _kb, done) =>
 						filterPicker(
-							all.map((x) => ({ value: x.id, label: x.label })),
+							all.map((x) => ({
+								value: x.id,
+								label: x.label,
+								description: x.summary?.(ctx),
+							})),
 							done,
 						),
 					);

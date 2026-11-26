@@ -1,11 +1,6 @@
-import {
-	type ExtensionCommandContext,
-	getAgentDir,
-	getSettingsListTheme,
-} from "@earendil-works/pi-coding-agent";
-import { type Component, Container, type SettingItem, Text } from "@earendil-works/pi-tui";
+import { type ExtensionCommandContext, getAgentDir } from "@earendil-works/pi-coding-agent";
 import { configPath } from "@rackrot/pi-core/config";
-import { CycleSettingsList, filterPicker } from "@rackrot/pi-core/config-ui";
+import { type ConfigRow, filterPicker, openConfigScreen } from "@rackrot/pi-core/config-ui";
 import {
 	configuredNames,
 	loadLayers,
@@ -28,6 +23,7 @@ import {
 const INHERIT = "inherit";
 const TURN_PRESETS = ["5", "10", "15", "25", "40", "60", "100"];
 const SOURCES = ["package default", "global settings", "project settings"];
+const SOURCE_SCOPE: Record<number, Scope | undefined> = { 1: "global", 2: "project" };
 
 type Row = "enabled" | "model" | "thinking" | "maxTurns";
 const ROW_LABEL: Record<Row, string> = {
@@ -100,9 +96,11 @@ export async function openSettings(
 		return undefined;
 	}
 
-	const buildItem = (name: string, row: Row): SettingItem => ({
+	const buildItem = (name: string, row: Row): ConfigRow => ({
 		id: rowId(row, name),
-		label: `${name} · ${ROW_LABEL[row]}`,
+		group: name,
+		label: ROW_LABEL[row],
+		source: row === "enabled" ? undefined : SOURCE_SCOPE[sourceLayer(name, row, layers)],
 		description: describe(name, row),
 		currentValue: value(name, row),
 		values: cycleValues(name, row),
@@ -130,79 +128,18 @@ export async function openSettings(
 		saveOverride(path, name, row, next);
 	}
 
-	await ctx.ui.custom<void>((tui, theme, kb, done) => {
-		const items = buildItems();
-		const title = new Text("", 0, 0);
-		const file = new Text("", 0, 0);
-		const header = new Container();
-		header.addChild(title);
-		header.addChild(file);
-
-		const tabKey = kb.getKeys("tui.input.tab")[0];
-		const renderHeader = () => {
-			const hint = tabKey ? theme.fg("muted", ` · ${tabKey} to switch`) : "";
-			title.setText(
-				`⚙  Subagent Settings · Saving to: ${scope === "global" ? "Global" : "Project"}${hint}`,
-			);
-			file.setText(
-				theme.fg(
-					"muted",
-					`   ${configPath(scope, cwd, agentDir)} · agent files in ${agentsDir(scope, agentDir, cwd)}`,
-				),
-			);
-		};
-
-		const refresh = () => {
+	await openConfigScreen(ctx, {
+		title: "Subagents",
+		pathOf: (sc) => configPath(sc, cwd, agentDir),
+		hint: "agent on/off writes agents/<name>.md",
+		rows: (sc) => {
+			scope = sc;
 			layers = loadLayers(packageDir, agentDir, cwd);
-			const fresh = new Map(buildItems().map((i) => [i.id, i]));
-			for (const item of items) {
-				const next = fresh.get(item.id);
-				if (next)
-					Object.assign(item, {
-						currentValue: next.currentValue,
-						description: next.description,
-						values: next.values,
-					});
-			}
-			renderHeader();
-			list.invalidate();
-		};
-
-		const status = new Text("", 0, 0);
-		const rows = Math.max(5, tui.terminal.rows - 10);
-		const list = new CycleSettingsList(
-			items,
-			Math.min(rows, items.length),
-			getSettingsListTheme(),
-			(id, next) => {
-				try {
-					apply(id, next);
-					status.setText("");
-				} catch (e) {
-					status.setText(theme.fg("error", `   ${e instanceof Error ? e.message : String(e)}`));
-				}
-				refresh();
-			},
-			() => done(),
-			{ enableSearch: true },
-		);
-		renderHeader();
-
-		const component: Component = {
-			render: (w) => [...header.render(w), "", ...list.render(w), ...status.render(w)],
-			invalidate: () => {
-				header.invalidate();
-				list.invalidate();
-			},
-			handleInput: (data) => {
-				if (kb.matches(data, "tui.input.tab")) {
-					scope = scope === "global" ? "project" : "global";
-					refresh();
-					return;
-				}
-				list.handleInput(data);
-			},
-		};
-		return component;
+			return buildItems();
+		},
+		apply: (sc, id, next) => {
+			scope = sc;
+			apply(id, next);
+		},
 	});
 }

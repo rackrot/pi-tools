@@ -9,6 +9,8 @@ const NONE = "(none)";
 /** One editable line in the settings screen. `apply` mutates the raw `council` object of one settings file. */
 export interface Row {
 	id: string;
+	/** Screen partition the row is shown under. */
+	group: string;
 	label: string;
 	description: string;
 	current: string;
@@ -55,6 +57,7 @@ const TOKENS = ["2000", "4000", "8000", "16000", "32000"];
 /** Builds every row for one settings layer (`layer` is its raw `council` object); `eff` is the merged result. */
 export function buildRows(layer: Obj, eff: Config): Row[] {
 	const rows: Row[] = [];
+	let group = "";
 	const so = isObj(layer.secondOpinion) ? layer.secondOpinion : {};
 	const co = isObj(layer.council) ? layer.council : {};
 	const syn = isObj(co.synthesizer) ? co.synthesizer : {};
@@ -68,6 +71,7 @@ export function buildRows(layer: Obj, eff: Config): Row[] {
 	) =>
 		rows.push({
 			id,
+			group,
 			label,
 			description: `Effective: ${effective ? "on" : "off"}. Saving writes an explicit value to this scope.`,
 			current: typeof raw === "boolean" ? (raw ? "on" : "off") : effective ? "on" : "off",
@@ -86,6 +90,7 @@ export function buildRows(layer: Obj, eff: Config): Row[] {
 		const current = raw === undefined ? UNSET : String(raw);
 		rows.push({
 			id,
+			group,
 			label,
 			description: `${desc} "${UNSET}" clears the value in this scope.`,
 			current,
@@ -103,6 +108,7 @@ export function buildRows(layer: Obj, eff: Config): Row[] {
 	) =>
 		rows.push({
 			id,
+			group,
 			label,
 			description: `${desc} Empty clears the value.`,
 			current:
@@ -120,6 +126,7 @@ export function buildRows(layer: Obj, eff: Config): Row[] {
 	) =>
 		rows.push({
 			id,
+			group,
 			label,
 			description: desc,
 			current: firstModel(raw) ?? UNSET,
@@ -130,6 +137,7 @@ export function buildRows(layer: Obj, eff: Config): Row[] {
 	const action = (id: string, label: string, desc: string, run: (c: Obj) => void) =>
 		rows.push({
 			id,
+			group,
 			label,
 			description: desc,
 			current: "…",
@@ -145,31 +153,25 @@ export function buildRows(layer: Obj, eff: Config): Row[] {
 	) => cycle(id, label, raw, [...THINKING], "Reasoning effort; unset uses the model default.", set);
 
 	// second_opinion
+	group = "second_opinion";
 	const sc = (c: Obj) => child(c, "secondOpinion");
-	toggle("so.enabled", "second_opinion · enabled", so.enabled, eff.secondOpinion.enabled, (c, v) =>
+	toggle("so.enabled", "enabled", so.enabled, eff.secondOpinion.enabled, (c, v) =>
 		put(sc(c), "enabled", v),
 	);
 	model(
 		"so.model",
-		"second_opinion · default model",
+		"default model",
 		so.model,
 		"Model used when the agent passes none. Unset uses the session's model.",
 		(c, v) => setFirstModel(sc(c), "model", v),
 	);
-	thinking("so.thinking", "second_opinion · thinking", so.thinking, (c, v) =>
-		put(sc(c), "thinking", v),
-	);
-	cycle(
-		"so.maxTokens",
-		"second_opinion · max tokens",
-		so.maxTokens,
-		TOKENS,
-		"Output cap per call.",
-		(c, v) => put(sc(c), "maxTokens", v && Number(v)),
+	thinking("so.thinking", "thinking", so.thinking, (c, v) => put(sc(c), "thinking", v));
+	cycle("so.maxTokens", "max tokens", so.maxTokens, TOKENS, "Output cap per call.", (c, v) =>
+		put(sc(c), "maxTokens", v && Number(v)),
 	);
 	cycle(
 		"so.timeout",
-		"second_opinion · timeout (s)",
+		"timeout (s)",
 		so.timeoutSeconds,
 		TIMEOUTS,
 		`Per call. Effective: ${eff.secondOpinion.timeoutSeconds}.`,
@@ -177,7 +179,7 @@ export function buildRows(layer: Obj, eff: Config): Row[] {
 	);
 	text(
 		"so.prompt",
-		"second_opinion · extra prompt",
+		"extra prompt",
 		so.systemPrompt,
 		"Appended to the reviewer's system prompt.",
 		(c, v) => put(sc(c), "systemPrompt", v),
@@ -185,40 +187,40 @@ export function buildRows(layer: Obj, eff: Config): Row[] {
 	const opts = Array.isArray(so.models) ? so.models : [];
 	opts.forEach((entry, i) => {
 		const e = isObj(entry) ? entry : {};
-		const name = `option ${typeof e.id === "string" ? e.id : (firstModel(e) ?? i + 1)}`;
+		group = `second_opinion option ${typeof e.id === "string" ? e.id : (firstModel(e) ?? i + 1)}`;
 		const at = (c: Obj) => {
 			const list = sc(c).models as unknown[];
 			if (!isObj(list[i])) list[i] = {};
 			return list[i] as Obj;
 		};
 		const p = `so.opt.${i}`;
-		model(`${p}.model`, `  ${name} · model`, e.model, "Model the agent can switch to.", (c, v) =>
+		model(`${p}.model`, "model", e.model, "Model the agent can switch to.", (c, v) =>
 			setFirstModel(at(c), "model", v),
 		);
 		text(
 			`${p}.id`,
-			`  ${name} · id`,
+			"id",
 			e.id,
 			"Name the agent passes as 'model'. Defaults to the model string.",
 			(c, v) => put(at(c), "id", v),
 		);
 		text(
 			`${p}.useWhen`,
-			`  ${name} · use when`,
+			"use when",
 			e.useWhen,
 			"Tells the agent when to pick this model over the default.",
 			(c, v) => put(at(c), "useWhen", v),
 		);
-		thinking(`${p}.thinking`, `  ${name} · thinking`, e.thinking, (c, v) =>
-			put(at(c), "thinking", v),
-		);
-		action(`${p}.remove`, `  ${name} · remove`, "Delete this option.", (c) =>
+		thinking(`${p}.thinking`, "thinking", e.thinking, (c, v) => put(at(c), "thinking", v));
+		action(`${p}.remove`, "remove", "Delete this option.", (c) =>
 			(sc(c).models as unknown[]).splice(i, 1),
 		);
 	});
+	group = "second_opinion";
 	rows.push({
 		id: "so.add",
-		label: "second_opinion · add option",
+		group,
+		label: "add option",
 		description: "Pick a model to add as an override option, then set its 'use when'.",
 		current: "pick…",
 		submenu: "model",
@@ -230,13 +232,14 @@ export function buildRows(layer: Obj, eff: Config): Row[] {
 	});
 
 	// council
+	group = "council";
 	const cc = (c: Obj) => child(c, "council");
-	toggle("co.enabled", "council · enabled", co.enabled, eff.council.enabled, (c, v) =>
+	toggle("co.enabled", "enabled", co.enabled, eff.council.enabled, (c, v) =>
 		put(cc(c), "enabled", v),
 	);
 	cycle(
 		"co.default",
-		"council · default preset",
+		"default preset",
 		co.defaultPreset,
 		Object.keys(eff.council.presets),
 		`Effective: ${eff.council.defaultPreset}.`,
@@ -244,7 +247,7 @@ export function buildRows(layer: Obj, eff: Config): Row[] {
 	);
 	cycle(
 		"co.maxTokens",
-		"council · max tokens",
+		"max tokens",
 		co.maxTokens,
 		TOKENS,
 		"Output cap per councillor and synthesizer call.",
@@ -252,7 +255,7 @@ export function buildRows(layer: Obj, eff: Config): Row[] {
 	);
 	cycle(
 		"co.timeout",
-		"council · timeout (s)",
+		"timeout (s)",
 		co.timeoutSeconds,
 		TIMEOUTS,
 		`Per call. Effective: ${eff.council.timeoutSeconds}.`,
@@ -260,52 +263,40 @@ export function buildRows(layer: Obj, eff: Config): Row[] {
 	);
 	text(
 		"co.prompt",
-		"council · councillor prompt",
+		"councillor prompt",
 		co.councillorPrompt,
 		"Appended to every councillor's system prompt.",
 		(c, v) => put(cc(c), "councillorPrompt", v),
 	);
+	group = "council synthesizer";
 	const sy = (c: Obj) => child(cc(c), "synthesizer");
-	toggle(
-		"syn.enabled",
-		"council · synthesizer enabled",
-		syn.enabled,
-		eff.council.synthesizer.enabled,
-		(c, v) => put(sy(c), "enabled", v),
+	toggle("syn.enabled", "enabled", syn.enabled, eff.council.synthesizer.enabled, (c, v) =>
+		put(sy(c), "enabled", v),
 	);
-	model(
-		"syn.model",
-		"council · synthesizer model",
-		syn.model,
-		"Unset uses the session's model.",
-		(c, v) => setFirstModel(sy(c), "model", v),
+	model("syn.model", "model", syn.model, "Unset uses the session's model.", (c, v) =>
+		setFirstModel(sy(c), "model", v),
 	);
-	thinking("syn.thinking", "council · synthesizer thinking", syn.thinking, (c, v) =>
-		put(sy(c), "thinking", v),
-	);
-	text(
-		"syn.prompt",
-		"council · synthesizer prompt",
-		syn.prompt,
-		"Appended to the synthesizer's system prompt.",
-		(c, v) => put(sy(c), "prompt", v),
+	thinking("syn.thinking", "thinking", syn.thinking, (c, v) => put(sy(c), "thinking", v));
+	text("syn.prompt", "prompt", syn.prompt, "Appended to the synthesizer's system prompt.", (c, v) =>
+		put(sy(c), "prompt", v),
 	);
 
 	const presets = isObj(co.presets) ? co.presets : {};
 	for (const [pn, praw] of Object.entries(presets)) {
 		const pr = isObj(praw) ? praw : {};
 		const pat = (c: Obj) => child(child(cc(c), "presets"), pn);
-		const pl = `preset ${pn}`;
+		group = `preset ${pn}`;
 		text(
 			`pr.${pn}.useWhen`,
-			`${pl} · use when`,
+			"use when",
 			pr.useWhen,
 			"Tells the agent when to pick this preset.",
 			(c, v) => put(pat(c), "useWhen", v),
 		);
 		rows.push({
 			id: `pr.${pn}.add`,
-			label: `${pl} · add councillor`,
+			group,
+			label: "add councillor",
 			description:
 				"Pick a model; the councillor is named after it. Rename by editing settings.json.",
 			current: "pick…",
@@ -320,42 +311,44 @@ export function buildRows(layer: Obj, eff: Config): Row[] {
 		});
 		action(
 			`pr.${pn}.remove`,
-			`${pl} · remove`,
+			"remove",
 			"Delete this preset.",
 			(c) => delete child(cc(c), "presets")[pn],
 		);
 		for (const [cn, craw] of Object.entries(isObj(pr.councillors) ? pr.councillors : {})) {
 			const cr = isObj(craw) ? craw : {};
 			const cat = (c: Obj) => child(child(pat(c), "councillors"), cn);
-			const cl = `  ${pn}/${cn}`;
+			group = `preset ${pn} / ${cn}`;
 			model(
 				`pr.${pn}.${cn}.model`,
-				`${cl} · model`,
+				"model",
 				cr.model,
 				"First model of the chain; add fallbacks in settings.json.",
 				(c, v) => setFirstModel(cat(c), "model", v),
 			);
-			thinking(`pr.${pn}.${cn}.thinking`, `${cl} · thinking`, cr.thinking, (c, v) =>
+			thinking(`pr.${pn}.${cn}.thinking`, "thinking", cr.thinking, (c, v) =>
 				put(cat(c), "thinking", v),
 			);
 			text(
 				`pr.${pn}.${cn}.prompt`,
-				`${cl} · role prompt`,
+				"role prompt",
 				cr.prompt,
 				"Role guidance appended to this councillor's system prompt.",
 				(c, v) => put(cat(c), "prompt", v),
 			);
 			action(
 				`pr.${pn}.${cn}.remove`,
-				`${cl} · remove`,
+				"remove",
 				"Delete this councillor.",
 				(c) => delete child(pat(c), "councillors")[cn],
 			);
 		}
 	}
+	group = "council";
 	rows.push({
 		id: "co.addPreset",
-		label: "council · add preset",
+		group,
+		label: "add preset",
 		description: "Type a name, then add councillors to it.",
 		current: "name…",
 		submenu: "text",

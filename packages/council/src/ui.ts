@@ -1,10 +1,7 @@
-import {
-	type ExtensionCommandContext,
-	getSettingsListTheme,
-} from "@earendil-works/pi-coding-agent";
-import { type Component, Container, Input, type SettingItem, Text } from "@earendil-works/pi-tui";
+import type { ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
+import { type Component, Input } from "@earendil-works/pi-tui";
 import { configPath } from "@rackrot/pi-core/config";
-import { CycleSettingsList, filterPicker } from "@rackrot/pi-core/config-ui";
+import { type ConfigRow, filterPicker, openConfigScreen } from "@rackrot/pi-core/config-ui";
 import { loadConfig } from "./config.ts";
 import { buildRows, type Row, readLayer, saveLayer, UNSET } from "./edit.ts";
 
@@ -26,7 +23,7 @@ function textEditor(initial: string, done: (v?: string) => void): Component {
 	return input;
 }
 
-/** Opens the council settings screen. Resolves when the user closes it; true when anything was saved. */
+/** Opens the council settings screen. Resolves true when anything was saved. */
 export async function openSettings(ctx: ExtensionCommandContext): Promise<boolean> {
 	let dirty = false;
 	const cwd = ctx.cwd;
@@ -41,12 +38,9 @@ export async function openSettings(ctx: ExtensionCommandContext): Promise<boolea
 		),
 	].sort();
 
-	let rows: Row[] = [];
-	const rebuild = () => {
-		rows = buildRows(readLayer(pathOf(scope)), loadConfig(cwd));
-	};
-	const toItem = (r: Row): SettingItem => ({
+	const toItem = (r: Row): ConfigRow => ({
 		id: r.id,
+		group: r.group,
 		label: r.label,
 		description: r.description,
 		currentValue: r.current,
@@ -58,68 +52,20 @@ export async function openSettings(ctx: ExtensionCommandContext): Promise<boolea
 					? (cur, done) => textEditor(cur === UNSET || cur === "name…" ? "" : cur, done)
 					: undefined,
 	});
+	const build = (scope: Scope) => buildRows(readLayer(pathOf(scope)), loadConfig(cwd));
 
-	await ctx.ui.custom<void>((tui, theme, kb, done) => {
-		const title = new Text("", 0, 0);
-		const file = new Text("", 0, 0);
-		const status = new Text("", 0, 0);
-		const header = new Container();
-		header.addChild(title);
-		header.addChild(file);
-		const tabKey = kb.getKeys("tui.input.tab")[0];
-		const renderHeader = () => {
-			title.setText(
-				`⚙  Council · Saving to: ${scope === "global" ? "Global" : "Project"}${tabKey ? theme.fg("muted", ` · ${tabKey} to switch`) : ""}`,
-			);
-			file.setText(theme.fg("muted", `   ${pathOf(scope)} · pi reloads on close to apply changes`));
-		};
-
-		let list: CycleSettingsList;
-		const makeList = () => {
-			rebuild();
-			list = new CycleSettingsList(
-				rows.map(toItem),
-				Math.max(5, Math.min(tui.terminal.rows - 10, rows.length)),
-				getSettingsListTheme(),
-				(id, next) => {
-					const row = rows.find((r) => r.id === id);
-					try {
-						if (row) {
-							saveLayer(pathOf(scope), (c) => row.apply(c, next));
-							dirty = true;
-						}
-						status.setText("");
-					} catch (e) {
-						status.setText(theme.fg("error", `   ${e instanceof Error ? e.message : String(e)}`));
-					}
-					makeList();
-					list.selectItem(id);
-					renderHeader();
-				},
-				() => done(),
-				{ enableSearch: true },
-			);
-		};
-		makeList();
-		renderHeader();
-
-		const component: Component = {
-			render: (w) => [...header.render(w), "", ...list.render(w), ...status.render(w)],
-			invalidate: () => {
-				header.invalidate();
-				list.invalidate();
-			},
-			handleInput: (data) => {
-				if (kb.matches(data, "tui.input.tab")) {
-					scope = scope === "global" ? "project" : "global";
-					makeList();
-					renderHeader();
-					return;
-				}
-				list.handleInput(data);
-			},
-		};
-		return component;
+	await openConfigScreen(ctx, {
+		title: "Council",
+		pathOf,
+		reload: true,
+		rows: (scope) => build(scope).map(toItem),
+		apply: (scope, id, next) => {
+			const row = build(scope).find((r) => r.id === id);
+			if (row) {
+				saveLayer(pathOf(scope), (c) => row.apply(c, next));
+				dirty = true;
+			}
+		},
 	});
 	return dirty;
 }
