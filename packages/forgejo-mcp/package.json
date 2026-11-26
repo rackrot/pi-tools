@@ -1,6 +1,6 @@
 {
 	"name": "@rackrot/pi-forgejo-mcp",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Connects pi to a forgejo-mcp server (https://<host>/mcp) with a curated, repo-focused tool set",
 	"type": "module",
 	"keywords": [
