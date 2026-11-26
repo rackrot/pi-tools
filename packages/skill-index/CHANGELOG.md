@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/rackrot/pi-tools/compare/pi-skill-index-v0.2.1...pi-skill-index-v0.2.2) (2026-11-26)
+
+
+### Bug Fixes
+
+* **skill-index:** make the skill_search instruction mandatory ([d30ce54](https://github.com/rackrot/pi-tools/commit/d30ce54189f327b0bc64f0112cd47cea405592db))
+
 ## [0.2.1](https://github.com/rackrot/pi-tools/compare/pi-skill-index-v0.2.0...pi-skill-index-v0.2.1) (2026-11-26)
 
 
