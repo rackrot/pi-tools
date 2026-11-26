@@ -99,3 +99,5 @@ Settings are re-read on every call; descriptions refresh on `/reload`.
 
 If some councillors fail, the synthesizer works from the rest and the failures are listed. If every councillor fails the
 tool errors. If the synthesizer fails, the raw councillor answers are returned.
+
+> Published with `pnpm publish` so the `workspace:` dependency ranges resolve to real versions; earlier releases were not installable from npm.

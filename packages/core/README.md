@@ -60,3 +60,5 @@ import { readJson, writeJsonAtomic, readConfigLayers } from "@rackrot/pi-core";
 | `editConfig(path, fn)`        | Rewrite changed top-level keys only, keeping comments         |
 
 Put code here only when two or more packages need it.
+
+> Published with `pnpm publish` so the `workspace:` dependency ranges resolve to real versions; earlier releases were not installable from npm.

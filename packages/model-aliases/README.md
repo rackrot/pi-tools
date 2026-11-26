@@ -47,3 +47,5 @@ pi install npm:@rackrot/pi-model-aliases
 
 - `/model-alias` shows each alias, its active entry (▶), and exhaustion deadlines.
 - `/model-alias reset [entry...]` clears exhaustion.
+
+> Published with `pnpm publish` so the `workspace:` dependency ranges resolve to real versions; earlier releases were not installable from npm.

@@ -27,3 +27,5 @@ PATH=$(dirname $(mise which jj)):$PATH node src/cli.ts ../jj/evals --skills-dir 
 Real model calls. The `PATH` prefix is needed because the runner gives the scaffold a throwaway `HOME`, which hides mise shims.
 
 Last results (one model, 3 runs): the skill lifts `set-aside-work` from 0.50 to 1.00 and `commit-without-git` from 0.83 to 1.00; the other three score 1.00 either way, so they guard against regressions rather than prove the skill. With the extension all five score 1.00. The no-skill arm cannot load the extension, because it would contribute the skill itself.
+
+> Published with `pnpm publish` so the `workspace:` dependency ranges resolve to real versions; earlier releases were not installable from npm.

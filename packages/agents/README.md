@@ -72,3 +72,5 @@ scheduled spawns, cross-extension RPC, and possibly `@mention` starts in `direct
 with the agent file's own settings, which for these agents means the parent's model.
 
 If `scopeModels` is on in pi-subagents, a model outside `enabledModels` is rejected.
+
+> Published with `pnpm publish` so the `workspace:` dependency ranges resolve to real versions; earlier releases were not installable from npm.

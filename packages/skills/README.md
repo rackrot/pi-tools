@@ -15,3 +15,5 @@ package with pi's per-package filters.
 The imported skills are now the source of truth. `scripts/import.ts` bootstraps from a claude-plugins checkout
 and refuses to overwrite `skills/` without `--force` (which discards hand edits). `--evals-only` refreshes
 `evals/` alone. Run the evals with [@rackrot/pi-skill-evals](../skill-evals/README.md).
+
+> Published with `pnpm publish` so the `workspace:` dependency ranges resolve to real versions; earlier releases were not installable from npm.

@@ -39,3 +39,5 @@ Token from Proton Pass (`pass://<vault>/<item>/<field>` or `--vault-name`/`--ite
 ```
 
 Check with `/mcp` or `pi mcp list`. Forge content (issues, comments, logs) is untrusted data. The Forgejo skills (`forgejo-cli`, `forgejo-actions`, `forgejo-release`, ...) are in `@rackrot/pi-skills`.
+
+> Published with `pnpm publish` so the `workspace:` dependency ranges resolve to real versions; earlier releases were not installable from npm.

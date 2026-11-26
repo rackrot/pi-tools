@@ -102,3 +102,5 @@ until embedding finishes (in the background) search uses BM25 alone.
   that sets `skills: false` or a named list in its own file is not affected by it.
 - `full` puts the body in the system prompt of every run; use it sparingly.
 - Changing modes mid-session changes the prompt on the next run, which can cost a cache miss.
+
+> Published with `pnpm publish` so the `workspace:` dependency ranges resolve to real versions; earlier releases were not installable from npm.

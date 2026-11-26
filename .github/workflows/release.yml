@@ -60,5 +60,5 @@ jobs:
       - run: pnpm check
       - run: pnpm --dir ${{ matrix.path }} --if-present test
       # Trusted publishing (OIDC): no token needed, provenance is automatic.
-      - run: npm publish --access public
+      - run: pnpm publish --access public --no-git-checks
         working-directory: ${{ matrix.path }}
