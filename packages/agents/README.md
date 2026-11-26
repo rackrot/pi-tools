@@ -28,13 +28,18 @@ name overrides them.
 
 The package declares `pi.subagents.workflows`, so these [SubagentWorkflow](https://github.com/tintinweb/pi-subagents/blob/master/docs/workflows.md) scripts are available by name once installed. They use the agents above.
 
-| Name           | Purpose                                                                                  | `args`                 |
-| -------------- | ---------------------------------------------------------------------------------------- | ---------------------- |
-| `review-panel` | `reviewer`, `security-auditor` and `test-runner` in parallel, then one reconciling agent | `scope`, `spec`        |
-| `gated-fix`    | Fix behind a shell `gate`, one resumed retry, `test-runner` re-check                     | `task`, `check`        |
-| `audit-fanout` | `Explore` lists files, `security-auditor` audits each, a refuter checks every finding    | `root`, `focus`, `max` |
+| Name                   | Purpose                                                                                                                      | `args`                                                    |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `review-panel`         | `reviewer`, `security-auditor` and `test-runner` in parallel, then one reconciling agent                                     | `scope`, `spec`                                           |
+| `gated-fix`            | Fix behind a shell `gate`, one resumed retry, `test-runner` re-check                                                         | `task`, `check`                                           |
+| `audit-fanout`         | `Explore` lists files, `security-auditor` audits each, a refuter checks every finding                                        | `root`, `focus`, `max`                                    |
+| `plan-slice-implement` | Plan file to slices; parallel gated worktree writers, read-only review, serial merge, Status update                          | `planPath`, `gateCmd`, `max`                              |
+| `config-rollout`       | One change across many repos: branch, edit, validate in each repo, review the diff, optional PR                              | `instruction`, `validateCmd`, `repos` or `root`, `openPr` |
+| `pr-merge-queue`       | Check open PRs for CI, conflicts and risk in parallel; merge green ones lowest risk first (report only unless `merge: true`) | `merge`, `filter`, `method`                               |
 
-All three also accept `model`, `effort` and `agents` (per agent type or label, e.g.
+`plan-slice-implement` works in the repo of the current session (worktrees are of that repo) and needs the plan and its dependencies committed first. `config-rollout` works in separate checkouts you name. `pr-merge-queue` does not merge unless you pass `merge: true`.
+
+All of them also accept `model`, `effort` and `agents` (per agent type or label, e.g.
 `{"reviewer": {"effort": "high"}}`) in `args`; unset means inherit.
 
 Ask the model, e.g. "run the review-panel workflow on `git diff main...HEAD`". A file with the same name in

@@ -1,7 +1,7 @@
 ---
 
 name: subagent-workflows
-description: 'Runs, writes, saves and packages pi-subagents SubagentWorkflow scripts, and covers the workflows shipped with @rackrot/pi-agents (review-panel, gated-fix, audit-fanout). Use when work needs many subagents whose number is found at runtime, staged pipelines, or findings verified before reporting; when authoring or editing a workflow .js file; or when adding a workflow to this package. Not for one delegated task or a few named agents (use the Agent tool). Applies only when the SubagentWorkflow tool is available.'
+description: 'Runs, writes, saves and packages pi-subagents SubagentWorkflow scripts, and covers the workflows shipped with @rackrot/pi-agents (review-panel, gated-fix, audit-fanout, plan-slice-implement, config-rollout, pr-merge-queue). Use when work needs many subagents whose number is found at runtime, staged pipelines, or findings verified before reporting; when authoring or editing a workflow .js file; or when adding a workflow to this package. Not for one delegated task or a few named agents (use the Agent tool). Applies only when the SubagentWorkflow tool is available.'
 ---
 
 # Subagent workflows
@@ -14,13 +14,18 @@ Use the `Agent` tool for one task, or a few you can name up front. Use a workflo
 
 Installed with `@rackrot/pi-agents` (`packages/agents/workflows/`). Run one by name with `args`.
 
-| Name           | Does                                                                                      | `args`                 |
-| -------------- | ----------------------------------------------------------------------------------------- | ---------------------- |
-| `review-panel` | `reviewer`, `security-auditor` and `test-runner` review in parallel; one agent reconciles | `scope`, `spec`        |
-| `gated-fix`    | Fix agent behind a shell `gate`; one resumed retry; `test-runner` re-checks               | `task`, `check`        |
-| `audit-fanout` | `Explore` lists files, `security-auditor` audits each, a refuter checks each finding      | `root`, `focus`, `max` |
+| Name                   | Does                                                                                                                                                                                           | `args`                                                                              |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `review-panel`         | `reviewer`, `security-auditor` and `test-runner` review in parallel; one agent reconciles                                                                                                      | `scope`, `spec`                                                                     |
+| `gated-fix`            | Fix agent behind a shell `gate`; one resumed retry; `test-runner` re-checks                                                                                                                    | `task`, `check`                                                                     |
+| `audit-fanout`         | `Explore` lists files, `security-auditor` audits each, a refuter checks each finding                                                                                                           | `root`, `focus`, `max`                                                              |
+| `plan-slice-implement` | Plan file to slices in dependency waves; each slice in a worktree behind `gateCmd`, reviewed, merged serially with the gate rerun and a revert on failure; plan Status updated, nothing pushed | `planPath`, `gateCmd`, `max`                                                        |
+| `config-rollout`       | Per repo: branch, edit, validate with `validateCmd` inside the repo (one resumed retry), review the diff; optional push and PR                                                                 | `instruction`, `validateCmd`, `repos` or `root`+`filter`, `branch`, `openPr`, `max` |
+| `pr-merge-queue`       | Parallel read-only check of each open PR (CI, conflicts, risk), then serial merge lowest risk first with a re-check before each; report only unless `merge: true`                              | `merge`, `repo`, `filter`, `method`, `maxRounds`                                    |
 
 Every shipped workflow also takes `model` and `effort` (apply to every agent) and `agents` (per agent type or label, e.g. `{"reviewer": {"model": "provider/id", "effort": "high"}}`). Unset means inherit. The agents extension also fills `agents` from the user's `agentOverrides` when it loads, so a configured `reviewer` model applies without being passed; anything in `args` wins.
+
+`plan-slice-implement` isolates the session's own repo, so run it from the repo the plan is for, with the plan and its dependencies committed (worktree agents see only committed files) and a clean tree. `config-rollout` cannot use worktrees because its repos are other checkouts; it refuses dirty repos. Both ask for the gate command instead of guessing one.
 
 Call `SubagentWorkflow` with `{name: "review-panel", args: {scope: "git diff main...HEAD"}}`. Pass `args` as a real JSON value, never a JSON string. Read each script's header comment for defaults.
 
