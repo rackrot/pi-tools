@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/rackrot/pi-tools/compare/pi-forgejo-mcp-v0.2.1...pi-forgejo-mcp-v0.3.0) (2026-11-27)
+
+
+### Features
+
+* **agents:** ship SubagentWorkflow workflows and a subagent-workflows skill ([e9fe309](https://github.com/rackrot/pi-tools/commit/e9fe309c680063e00e410a3d2261f2d07dbab5da))
+
 ## [0.2.1](https://github.com/rackrot/pi-tools/compare/pi-forgejo-mcp-v0.2.0...pi-forgejo-mcp-v0.2.1) (2026-11-26)
 
 
