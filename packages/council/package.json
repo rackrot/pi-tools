@@ -1,6 +1,6 @@
 {
 	"name": "@rackrot/pi-council",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "Second-opinion and multi-model council tools for pi",
 	"type": "module",
 	"keywords": [
