@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/rackrot/pi-tools/compare/pi-core-v0.3.1...pi-core-v0.4.0) (2026-11-27)
+
+
+### Features
+
+* **core:** shared grouped config screen with scope strip and change markers ([49eef3a](https://github.com/rackrot/pi-tools/commit/49eef3a2727f84714c5d9168583517eac43f4ec6))
+
 ## [0.3.1](https://github.com/rackrot/pi-tools/compare/pi-core-v0.3.0...pi-core-v0.3.1) (2026-11-26)
 
 
