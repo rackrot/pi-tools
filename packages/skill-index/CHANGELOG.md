@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/rackrot/pi-tools/compare/pi-skill-index-v0.2.2...pi-skill-index-v0.3.0) (2026-11-27)
+
+
+### Features
+
+* **core:** shared grouped config screen with scope strip and change markers ([49eef3a](https://github.com/rackrot/pi-tools/commit/49eef3a2727f84714c5d9168583517eac43f4ec6))
+
 ## [0.2.2](https://github.com/rackrot/pi-tools/compare/pi-skill-index-v0.2.1...pi-skill-index-v0.2.2) (2026-11-26)
 
 
