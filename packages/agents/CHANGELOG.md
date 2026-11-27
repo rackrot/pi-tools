@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.0](https://github.com/rackrot/pi-tools/compare/pi-agents-v0.3.0...pi-agents-v0.4.0) (2026-11-27)
+
+
+### Features
+
+* **agents:** add nine workflows, a test-writer agent, and scope agent tools ([fe337f4](https://github.com/rackrot/pi-tools/commit/fe337f4e7a859bcab3fe265a1071abd97ddf53bb))
+* **agents:** add plan-slice-implement, config-rollout and pr-merge-queue workflows ([0e3d4c9](https://github.com/rackrot/pi-tools/commit/0e3d4c912b5ce9d3c670ba3d3a4174fb5cb22b03))
+* **agents:** ship SubagentWorkflow workflows and a subagent-workflows skill ([e9fe309](https://github.com/rackrot/pi-tools/commit/e9fe309c680063e00e410a3d2261f2d07dbab5da))
+* **core:** shared grouped config screen with scope strip and change markers ([49eef3a](https://github.com/rackrot/pi-tools/commit/49eef3a2727f84714c5d9168583517eac43f4ec6))
+
 ## [0.3.0](https://github.com/rackrot/pi-tools/compare/pi-agents-v0.2.1...pi-agents-v0.3.0) (2026-11-26)
 
 
