@@ -4,5 +4,6 @@
 	"docs-lookup": { "thinking": "low", "maxTurns": 20 },
 	"security-auditor": { "thinking": "medium", "maxTurns": 25 },
 	"dependency-auditor": { "thinking": "low", "maxTurns": 20 },
-	"research-analyst": { "thinking": "low", "maxTurns": 25 }
+	"research-analyst": { "thinking": "low", "maxTurns": 25 },
+	"test-writer": { "thinking": "medium", "maxTurns": 25 }
 }

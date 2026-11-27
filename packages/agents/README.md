@@ -15,14 +15,15 @@ name overrides them.
 
 ## Agents
 
-| Name                 | Purpose                                                     |
-| -------------------- | ----------------------------------------------------------- |
-| `reviewer`           | Diff review against a spec; read-only                       |
-| `test-runner`        | Runs tests/typecheck/lint, returns only failures; read-only |
-| `docs-lookup`        | Current library docs with sources                           |
-| `security-auditor`   | Read-only security sweep; returns findings only             |
-| `dependency-auditor` | Vets a package against our maintenance criteria             |
-| `research-analyst`   | Multi-source web research with citations                    |
+| Name                 | Purpose                                                                 |
+| -------------------- | ----------------------------------------------------------------------- |
+| `reviewer`           | Diff review against a spec; read-only                                   |
+| `test-runner`        | Runs tests/typecheck/lint, returns only failures; read-only             |
+| `test-writer`        | Smallest set of tests that catch a named bug; edits tests only          |
+| `docs-lookup`        | Current library docs with sources (uses `context7-pi`, `pi-web-access`) |
+| `security-auditor`   | Read-only security sweep; returns findings only                         |
+| `dependency-auditor` | Vets a package against our maintenance criteria                         |
+| `research-analyst`   | Multi-source web research with citations (needs `pi-web-access`)        |
 
 ## Workflows
 
@@ -36,8 +37,26 @@ The package declares `pi.subagents.workflows`, so these [SubagentWorkflow](https
 | `plan-slice-implement` | Plan file to slices; parallel gated worktree writers, read-only review, serial merge, Status update                          | `planPath`, `gateCmd`, `max`                              |
 | `config-rollout`       | One change across many repos: branch, edit, validate in each repo, review the diff, optional PR                              | `instruction`, `validateCmd`, `repos` or `root`, `openPr` |
 | `pr-merge-queue`       | Check open PRs for CI, conflicts and risk in parallel; merge green ones lowest risk first (report only unless `merge: true`) | `merge`, `filter`, `method`                               |
+| `bug-remediation`      | Test-first fix: triage, failing repro test, parallel root-cause investigators, minimal gated fix, root-cause review          | `report`, `checkCmd`, `reproCmd`                          |
+| `test-generate`        | Fewest tests that catch a named bug: `test-writer`, critic, then a mutation check that drops any test that does not fail     | `scope`, `testCmd`, `max`                                 |
+| `refactor-simplify`    | Atomic removal-only steps, behaviour pinned by tests, gate forbids test edits, new files and net growth, final review        | `target`, `checkCmd`, `maxSteps`                          |
+| `docs-sync`            | Check every doc claim against code, refute each finding, find undocumented surface; optional apply on a branch               | `root`, `apply`, `prune`, `out`                           |
+| `issue-triage`         | Verify each issue against the code, find duplicates, decide; report only unless `apply` (closing needs `allowClose`)         | `repo`, `issues`, `apply`, `allowClose`, `out`            |
+| `deep-research`        | Parallel web workers with quoted sources, an independent citation check, one gap round, a report of verified claims only     | `question`, `depth`, `out`                                |
+| `spec-develop`         | Draft a spec, attack it with ambiguity/testability/scope/feasibility critics, revise; open questions instead of guesses      | `topic`, `out`, `answers`, `security`                     |
+| `feature-plan`         | Map reuse, plan gated slices in the `plan-slice-implement` format, skeptic panel, decisions section; stops at the plan file  | `feature`, `out`, `spec`, `gateCmd`                       |
+| `prototype-variants`   | One question, one shared measurement protocol, N structurally different throwaway variants in worktrees, scored and compared | `question`, `criteria`, `variants`, `cleanup`, `out`      |
 
 `plan-slice-implement` works in the repo of the current session (worktrees are of that repo) and needs the plan and its dependencies committed first. `config-rollout` works in separate checkouts you name. `pr-merge-queue` does not merge unless you pass `merge: true`.
+
+Notes on the second group:
+
+- `bug-remediation`, `test-generate` and `refactor-simplify` work on a new branch of the current checkout, serially, and need a clean tree. They never push or merge.
+- `docs-sync` and `issue-triage` only report unless you opt in (`apply`, plus `prune` or `allowClose`). Issue and doc text is treated as data.
+- `docs-sync`, `issue-triage`, `deep-research`, `spec-develop` and `feature-plan` write their full output to the `out` file and return a compact summary, because a workflow's result reaches the model through a size-limited notification.
+- `spec-develop` and `feature-plan` cannot ask you questions mid-run. They return open questions or decisions; answer and run again (`answers`), or edit the file. `feature-plan` ends at the plan; build it with `plan-slice-implement`.
+- `prototype-variants` never merges. Its worktree branches stay (`cleanup: true` deletes them); a build attempt that failed its run check can leave a `pi-agent-*` branch behind that you delete with `git branch -D`.
+- `deep-research` workers and citation checkers are `research-analyst` agents: read-only, with only the web tools.
 
 All of them also accept `model`, `effort` and `agents` (per agent type or label, e.g.
 `{"reviewer": {"effort": "high"}}`) in `args`; unset means inherit.
