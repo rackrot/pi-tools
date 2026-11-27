@@ -1,6 +1,6 @@
 {
 	"name": "@rackrot/pi-agents",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"description": "Curated pi-subagents agent definitions with settings-driven model/thinking overrides",
 	"type": "module",
 	"keywords": [
