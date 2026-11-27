@@ -25,7 +25,8 @@
 	},
 	"peerDependencies": {
 		"@earendil-works/pi-coding-agent": "*",
-		"typebox": "*"
+		"typebox": "*",
+		"@earendil-works/pi-tui": "*"
 	},
 	"publishConfig": {
 		"access": "public"
