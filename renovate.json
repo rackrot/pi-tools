@@ -1,0 +1,19 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": ["config:recommended", ":semanticCommits"],
+	"schedule": ["before 6am on monday"],
+	"minimumReleaseAge": "3 days",
+	"lockFileMaintenance": { "enabled": true },
+	"packageRules": [
+		{
+			"description": "Peer ranges stay open ('*'); only bump real deps",
+			"matchDepTypes": ["peerDependencies"],
+			"enabled": false
+		},
+		{
+			"description": "pi framework packages move together",
+			"matchPackageNames": ["@earendil-works/*"],
+			"groupName": "pi framework"
+		}
+	]
+}
