@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/rackrot/pi-tools/compare/pi-model-aliases-v0.2.1...pi-model-aliases-v0.2.2) (2026-11-28)
+
+
+### Bug Fixes
+
+* **model-aliases:** do not treat rate limits or context overflow as out of usage ([c15d180](https://github.com/rackrot/pi-tools/commit/c15d1800edecf2135b045000f2f1727bd746716a))
+
 ## [0.2.1](https://github.com/rackrot/pi-tools/compare/pi-model-aliases-v0.2.0...pi-model-aliases-v0.2.1) (2026-11-26)
 
 
