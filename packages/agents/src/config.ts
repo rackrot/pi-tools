@@ -42,6 +42,14 @@ export function resolveTuning(name: string, layers: Overrides[]): Tuning {
 	return merged;
 }
 
+/** Fills `model`, `thinking` and `max_turns` of an `Agent` call from `tuning`; fields the caller set are kept. */
+export function applyTuning(input: Record<string, unknown>, tuning: Tuning): void {
+	const unset = (v: unknown) => v === undefined || v === null || v === "";
+	if (tuning.model && unset(input.model)) input.model = tuning.model;
+	if (tuning.thinking && unset(input.thinking)) input.thinking = tuning.thinking;
+	if (tuning.maxTurns && unset(input.max_turns)) input.max_turns = tuning.maxTurns;
+}
+
 /** Index of the highest layer that sets `field` for `name`, or -1. */
 export function sourceLayer(name: string, field: keyof Tuning, layers: Overrides[]): number {
 	for (let i = layers.length - 1; i >= 0; i--) {

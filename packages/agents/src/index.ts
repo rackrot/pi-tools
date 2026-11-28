@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { type ExtensionAPI, getAgentDir } from "@earendil-works/pi-coding-agent";
 import { registerConfigSection } from "@rackrot/pi-core/config-ui";
 import {
+	applyTuning,
 	configuredNames,
 	loadLayers,
 	resolveTuning,
@@ -20,7 +21,8 @@ const PACKAGE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
  *
  * pi-subagents treats an agent file's `model`, `thinking` and `max_turns` as authoritative over
  * the caller's, so the shipped agent files leave those fields out and this hook supplies them.
- * Settings win over whatever the orchestrator passed, matching that authority.
+ * Settings only fill fields the orchestrator left unset, so a caller can still pick a model for one
+ * call; workflows behave the same way (`args.agents` wins over the configured values).
  *
  * Covers calls made through the `Agent` tool. Workflow `agent()` calls, scheduled spawns and
  * cross-extension RPC do not go through it; `SubagentWorkflow` calls get the settings as `args.agents`.
@@ -46,9 +48,7 @@ export default function (pi: ExtensionAPI) {
 			input.subagent_type,
 			loadLayers(PACKAGE_DIR, getAgentDir(), ctx.cwd),
 		);
-		if (tuning.model) input.model = tuning.model;
-		if (tuning.thinking) input.thinking = tuning.thinking;
-		if (tuning.maxTurns) input.max_turns = tuning.maxTurns;
+		applyTuning(input, tuning);
 	});
 
 	registerConfigSection({
