@@ -1,6 +1,6 @@
 ---
 name: not-branching-open-pr
-description: Hard negative. Opening a pull request is a ship task and must not load the branching-model skill.
+description: Hard negative. Opening a pull request is a gh-pr or forgejo-pr task and must not load the branching-model skill.
 tags: [routing]
 runs: 3
 max_turns: 6

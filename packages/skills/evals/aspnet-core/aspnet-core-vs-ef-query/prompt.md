@@ -1,10 +1,10 @@
 ---
 name: aspnet-core-vs-ef-query
-description: An EF Core N+1 inside a service should not load aspnet-core.
+description: Adding an EF Core migration for a new column is owned by ef-core and should not load aspnet-core.
 tags: [routing]
 runs: 1
 max_turns: 6
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 
-OrderReportService loops over 2,000 orders and reads order.Customer.Name and order.Lines.Count for each one; the SQL log shows thousands of SELECTs. Rewrite the EF Core query so it runs in one or two round-trips.
+Add a nullable LoyaltyTier string property (max 32 characters, indexed) to the Customer entity in our EF Core model, generate the migration with dotnet ef, and show me what its Up and Down methods should contain.

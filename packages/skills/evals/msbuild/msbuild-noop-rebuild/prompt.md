@@ -2,9 +2,7 @@
 name: msbuild-noop-rebuild
 description: An incremental-build problem in a custom target routes to msbuild, not csharp.
 tags: [routing]
-runs: 1
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

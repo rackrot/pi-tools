@@ -2,9 +2,8 @@
 name: trigger-review-1
 description: A pre-release review of our own MCP server should load mcp-server-review:mcp-server-review.
 tags: [trigger]
-runs: 1
+runs: 3
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

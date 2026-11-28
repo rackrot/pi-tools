@@ -4,7 +4,6 @@ description: A throwaway state-model prototype routes to prototype, not planning
 tags: [routing]
 runs: 1
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

@@ -2,9 +2,8 @@
 name: redis-vs-postgres
 description: A per-user sliding-window rate limiter on Redis routes to redis.
 tags: [routing]
-runs: 1
+runs: 3
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

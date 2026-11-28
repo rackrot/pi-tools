@@ -2,9 +2,8 @@
 name: roslyn-analyzers-vs-csharp
 description: "Tuning CA warnings in application code does not load roslyn-analyzers (csharp owns it)."
 tags: [routing]
-runs: 1
+runs: 3
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

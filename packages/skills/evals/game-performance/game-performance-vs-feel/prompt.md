@@ -4,7 +4,6 @@ description: Camera jitter at a steady frame rate does not route to game-perform
 tags: [routing, negative]
 runs: 1
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

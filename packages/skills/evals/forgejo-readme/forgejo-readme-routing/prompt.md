@@ -2,9 +2,8 @@
 name: forgejo-readme-routing
 description: "Rewriting a README for a Codeberg-hosted repo routes to forgejo-readme:forgejo-readme."
 tags: [routing]
-runs: 1
+runs: 3
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

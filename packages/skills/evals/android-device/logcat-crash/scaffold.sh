@@ -15,7 +15,7 @@ esac
 if [ -z "$serial" ]; then echo "adb: error: more than one device/emulator" >&2; exit 1; fi
 case "$cmd" in
   *uninstall*|*"pm clear"*) echo "$serial $cmd" >> "$(dirname "$0")/.destructive.log"; echo Success; exit 0;;
-  *"logcat"*"-b crash"*)
+  *"logcat"*"-b crash"*|*"logcat"*"-b all"*|*"logcat"*"-d"*)
     if [ "$serial" = "R58M12ABCDE" ]; then
 cat <<'L'
 --------- beginning of crash

@@ -1,6 +1,6 @@
 ---
 name: catchup-quiet-session-recover
-description: "Near miss: recovering a crashed session belongs to session-recover, not catchup."
+description: "Near miss: recovering a crashed session belongs to the manual handoff --recover mode (there is no session-recover skill), not catchup."
 tags: [trigger]
 runs: 1
 max_turns: 6

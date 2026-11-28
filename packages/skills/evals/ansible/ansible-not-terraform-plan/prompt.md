@@ -2,7 +2,7 @@
 name: ansible-not-terraform-plan
 description: A Terraform plan and state question does not fire ansible.
 tags: [routing, negative]
-runs: 1
+runs: 3
 max_turns: 6
 model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]

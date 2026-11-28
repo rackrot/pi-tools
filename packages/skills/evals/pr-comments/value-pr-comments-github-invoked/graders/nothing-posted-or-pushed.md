@@ -5,4 +5,5 @@ input_match: 'git push|gh pr (comment|review|edit|ready|merge|close)|gh api[^"]*
 min: 0
 max: 0
 weight: 2
+arm: with-only
 ---

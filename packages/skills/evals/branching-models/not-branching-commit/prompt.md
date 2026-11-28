@@ -1,6 +1,6 @@
 ---
 name: not-branching-commit
-description: Hard negative. A plain commit request belongs to git-commit and must not load the branching-model skill.
+description: Hard negative. A plain commit request is not a branching-model task and must not load the branching-model skill.
 tags: [routing]
 runs: 3
 max_turns: 6

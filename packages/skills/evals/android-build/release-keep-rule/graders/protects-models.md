@@ -8,7 +8,7 @@ The task: a Gson model (Order, OrderLine in com.acme.shop.model) parses as all n
 Judge the files the assistant actually changed (app/proguard-rules.pro, Order.kt) as shown in the transcript.
 
 PASS only if both hold:
-1. The models are protected from R8 in a targeted way: a keep rule naming Order and OrderLine (or their package com.acme.shop.model), or `@SerializedName` or `@Keep` annotations on them in the Kotlin source.
-2. The fix does not rely on a blanket rule (`-keep class ** { *; }`, a keep of all of com.acme, `-dontobfuscate`, `-dontshrink`, `-dontoptimize`) and does not turn minification off.
+1. The models are protected from R8 in a targeted way: a keep rule naming Order and OrderLine, or `@SerializedName` or `@Keep` annotations on them in the Kotlin source.
+2. The fix does not rely on a blanket rule (`-keep class ** { *; }`, a keep of all of com.acme or of the whole com.acme.shop.model package, `-dontobfuscate`, `-dontshrink`, `-dontoptimize`) and does not turn minification off.
 
 FAIL otherwise, including when the assistant only described a fix without writing it to the files. Do not reward length.

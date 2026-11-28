@@ -7,4 +7,4 @@ max_turns: 6
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 
-Our CI job fails when it uploads the release bundle to Google Play with "Version code 42 has already been used. Try a higher version code." The versionCode is set in app/build.gradle.kts. What do I change so the upload goes through?
+Our CI job fails when it uploads the release bundle to Google Play with "Version code 318 has already been used. Try a higher version code." The versionCode is set in app/build.gradle.kts. What do I change so the upload goes through?

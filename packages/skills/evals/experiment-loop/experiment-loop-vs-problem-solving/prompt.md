@@ -1,11 +1,10 @@
 ---
 name: experiment-loop-vs-problem-solving
-description: An unattended measured optimization loop routes to experiment-loop.
+description: "Routing, positive. A list of speed-up ideas to be tried one after another against a benchmark target without supervision routes to experiment-loop, not to a one-off optimization. Rewritten: the earlier prompt repeated the skill description (dedicated branch, commit or revert, results log)."
 tags: [routing]
-runs: 1
+runs: 3
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 
-Our `make bench` reports the p50 time of the parser in ns/op. I want to get it under 400 ns/op. Set up a loop that tries one optimization idea at a time on a dedicated branch, runs `make bench` after each, commits the ones that improve the number and reverts the ones that do not, and keeps a results log. Run up to 15 experiments without asking me between them.
+Our `make bench` reports the p50 time of the parser in ns/op, currently around 520, and I want it under 400. I have a list of maybe 30 things that might help (a lookup table for whitespace, no regex in the number path, interning keys, and so on) and I don't want to babysit this: go through ideas on your own, one at a time, timing each, and I only want the ones that really help to survive. Cap it at 30 attempts. Before you start, tell me what you need from me.

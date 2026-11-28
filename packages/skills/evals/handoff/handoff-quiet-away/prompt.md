@@ -1,6 +1,6 @@
 ---
 name: handoff-quiet-away
-description: "Manual-only guard: a returning-human question must not auto-invoke handoff --catchup (catchup was model-invocable before the merge)."
+description: "Manual-only guard: a returning-human question must not invoke handoff; it belongs to catchup."
 tags: [trigger]
 runs: 1
 max_turns: 6

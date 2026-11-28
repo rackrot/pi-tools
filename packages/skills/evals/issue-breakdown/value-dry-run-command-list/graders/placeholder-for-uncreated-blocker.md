@@ -1,0 +1,7 @@
+---
+type: regex
+pattern: '--blocked-by[ =]["'']?#?[<$\[{]'
+flags: i
+weight: 1
+target: last_message
+---

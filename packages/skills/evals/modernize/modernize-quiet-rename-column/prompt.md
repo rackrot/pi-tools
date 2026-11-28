@@ -1,6 +1,6 @@
 ---
 name: modernize-quiet-rename-column
-description: "Near miss: a zero-downtime column rename is a schema migration for db-schema-design, not a sunset plan."
+description: "Near miss: a zero-downtime column rename is an expand/contract schema migration (deprecation-migration in this repo), not a stack modernization or sunset plan."
 tags: [trigger]
 runs: 1
 max_turns: 6

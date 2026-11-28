@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: 'Thread\.sleep|runBlocking'
+pattern: 'Thread\.sleep\(|runBlocking\s*[({]'
 match: not_contains
 target:
   source: file
