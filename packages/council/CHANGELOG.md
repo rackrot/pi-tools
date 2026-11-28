@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3](https://github.com/rackrot/pi-tools/compare/pi-council-v0.3.2...pi-council-v0.3.3) (2026-11-28)
+
+
+### Bug Fixes
+
+* **council:** fall back to the concrete model when the session uses an alias ([d3cbb81](https://github.com/rackrot/pi-tools/commit/d3cbb81b64b4df50d742e4c6635948ab1642e644))
+
 ## [0.3.2](https://github.com/rackrot/pi-tools/compare/pi-council-v0.3.1...pi-council-v0.3.2) (2026-11-28)
 
 
