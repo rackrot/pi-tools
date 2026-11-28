@@ -82,9 +82,34 @@ Add `agentOverrides` to `~/.pi/agent/rackrot/config.json(c)` or `.pi/rackrot.jso
 ```
 
 - Fields: `model` (`provider/id` or fuzzy name), `thinking` (`off` to `max`), `maxTurns` (integer >= 1).
+- `lock` (boolean, default `false`): see below.
 - Precedence per field, lowest first: package `defaults.json`, global settings, project settings.
 - Names are case-insensitive and work for any agent type, including built-ins (`Explore`, `Plan`) and agents from other packages.
 - `/rackrot-config agents` opens a settings screen (below). `/rackrot-config show` prints the effective values.
+
+#### Locking an agent
+
+By default settings only fill what the caller left unset. To make settings win for an agent, set `lock`:
+
+```json
+{ "agentOverrides": { "reviewer": { "model": "claude-opus", "lock": true } } }
+```
+
+or, in a custom agent file's frontmatter (`.pi/agents/`, `.agents/agents/` or `~/.pi/agent/agents/`):
+
+```yaml
+---
+name: reviewer
+lock: true
+---
+```
+
+- A locked agent's configured `model`, `thinking` and `maxTurns` overwrite what an `Agent` call passes, and
+  its `model`/`effort` overwrite the caller's `args.agents` entry in `SubagentWorkflow` calls. Fields with no configured value stay with the caller.
+- Precedence: config `lock` (later layers win, so a project can set `"lock": false`) beats frontmatter `lock`; the frontmatter applies only when no config layer sets it. Project agent files beat global ones.
+- Frontmatter is read only from the three local dirs above. For agents shipped by other packages, set `lock` in the config.
+- pi-subagents ignores the unknown `lock` key in agent files.
+- The settings screen has no `lock` row; edit the config. It preserves an existing `lock` when you change other fields.
 
 ### `/subagent-config` screen
 
@@ -108,7 +133,7 @@ change a value, Esc to close.
 
 pi-subagents treats an agent file's `model`, `thinking` and `max_turns` as authoritative over the
 caller. The shipped files therefore leave those fields out. A `tool_call` hook fills the `Agent`
-call's `model`, `thinking` and `max_turns` from settings when the orchestrator left them unset; a value the orchestrator passes wins.
+call's `model`, `thinking` and `max_turns` from settings when the orchestrator left them unset; a value the orchestrator passes wins unless the agent is locked (see Locking an agent).
 
 The hook only sees calls made through the `Agent` tool. Workflow `agent()` calls are covered separately, by
 filling `args.agents` (see Workflows). Not covered: scheduled spawns, cross-extension RPC, and possibly `@mention` starts in `direct` mode. Those run

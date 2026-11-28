@@ -134,6 +134,8 @@ export function setAgentEnabled(dir: string, name: string, enabled: boolean) {
 
 // ---- discovery ----
 
+const NAME_LINE = /^name:[ \t]*["']?([^"'\r\n]+?)["']?[ \t]*$/m;
+
 function agentNamesIn(dir: string): string[] {
 	if (!existsSync(dir)) return [];
 	const names: string[] = [];
@@ -142,9 +144,7 @@ function agentNamesIn(dir: string): string[] {
 		const stem = basename(f, ".md");
 		let name = stem;
 		try {
-			const m = /^name:[ \t]*["']?([^"'\r\n]+?)["']?[ \t]*$/m.exec(
-				readFileSync(join(dir, f), "utf8").slice(0, 2000),
-			);
+			const m = NAME_LINE.exec(readFileSync(join(dir, f), "utf8").slice(0, 2000));
 			if (m) name = m[1];
 		} catch {
 			// fall back to the file stem
@@ -152,6 +152,35 @@ function agentNamesIn(dir: string): string[] {
 		names.push(name);
 	}
 	return names;
+}
+
+const LOCK_LINE = /^lock:[ \t]*(true|false)[ \t]*$/;
+
+/**
+ * `lock: true|false` from the frontmatter of the agent file for `name` (file stem or `name:`,
+ * case-insensitive), searching `dirs` in order, first match wins. Unreadable files are skipped.
+ */
+export function agentFrontmatterLock(name: string, dirs: string[]): boolean | undefined {
+	const want = name.toLowerCase();
+	for (const dir of dirs) {
+		if (!existsSync(dir)) continue;
+		for (const f of readdirSync(dir)) {
+			if (!f.endsWith(".md")) continue;
+			try {
+				const lines = splitLines(readFileSync(join(dir, f), "utf8"));
+				const b = frontmatterBounds(lines);
+				if (!b) continue;
+				const fm = lines.slice(1, b.close).map((l) => l.replace(/\r?\n$/, ""));
+				const declared = NAME_LINE.exec(fm.join("\n"))?.[1];
+				if ((declared ?? basename(f, ".md")).toLowerCase() !== want) continue;
+				const m = fm.map((l) => LOCK_LINE.exec(l)).find(Boolean);
+				return m ? m[1] === "true" : undefined;
+			} catch {
+				// unreadable: skip
+			}
+		}
+	}
+	return undefined;
 }
 
 /**
