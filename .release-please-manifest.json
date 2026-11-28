@@ -7,5 +7,6 @@
 	"packages/forgejo-mcp": "0.3.0",
 	"packages/council": "0.3.1",
 	"packages/gitignore": "1.0.1",
-	"packages/jj": "1.0.1"
+	"packages/jj": "1.0.1",
+	"packages/memory": "0.0.0"
 }
