@@ -4,11 +4,23 @@
 export type Exhausted = Record<string, number>;
 
 const USAGE_LIMIT =
-	/usage.?limit|out of (?:usage|credits?|quota)|run out of|quota|insufficient.?(?:credits?|balance|funds)|credit balance|billing|limit (?:reached|exceeded)|exceeded.{0,40}(?:limit|plan|allowance)|payment.?required|\b402\b|no (?:remaining )?(?:credits|usage)/i;
+	/usage.?limit|out of (?:usage|credits?|quota)|run out of|quota|insufficient.?(?:credits?|balance|funds)|credit balance|billing|exceeded.{0,40}(?:plan|allowance)|payment.?required|\b402\b|no (?:remaining )?(?:credits|usage)/i;
+/** Wording shared with rate limits and context overflow; counts only without `NOT_USAGE`. */
+const SOME_LIMIT = /limit (?:reached|exceeded)|exceeded.{0,40}limit/i;
+const NOT_USAGE = /rate.?limit|context|tokens?\b|too many requests/i;
+/** A per-minute budget recovers by itself, whatever else the message says. */
+const PER_MINUTE = /per.(?:minute|second)|\b[rt]pm\b/i;
 
-/** Whether a provider error means the account has no usage left (as opposed to a transient failure). */
+/**
+ * Whether a provider error means the account has no usage left. Rate limits and context overflow
+ * are not: failing over on those would sideline a working account for the whole cooldown.
+ */
 export function isUsageLimitError(errorMessage: string | undefined): boolean {
-	return !!errorMessage && USAGE_LIMIT.test(errorMessage);
+	if (!errorMessage || PER_MINUTE.test(errorMessage)) return false;
+	return (
+		USAGE_LIMIT.test(errorMessage) ||
+		(SOME_LIMIT.test(errorMessage) && !NOT_USAGE.test(errorMessage))
+	);
 }
 
 export function isExhausted(exhausted: Exhausted, key: string, now: number): boolean {

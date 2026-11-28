@@ -24,6 +24,18 @@ test("usage-limit detection", () => {
 	assert.ok(isUsageLimitError('{"error":"insufficient_quota"}'));
 	assert.ok(!isUsageLimitError("503 overloaded"));
 	assert.ok(!isUsageLimitError(undefined));
+	assert.ok(isUsageLimitError("Weekly limit reached, resets Monday"));
+});
+
+test("rate limits and context overflow are not usage limits", () => {
+	for (const m of [
+		"429 Rate limit exceeded, retry in 2s",
+		"Request exceeded the context window limit",
+		"token limit exceeded for this request",
+		"Quota exceeded for quota metric 'Generate requests' and limit 'requests per minute'",
+	]) {
+		assert.ok(!isUsageLimitError(m), m);
+	}
 });
 
 test("failover message is retryable and not a quota error", async () => {
