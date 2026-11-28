@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/rackrot/pi-tools/compare/pi-jj-v1.0.2...pi-jj-v1.0.3) (2026-11-28)
+
+
+### Bug Fixes
+
+* **jj:** skill review fixes and eval cases ([85c7f96](https://github.com/rackrot/pi-tools/commit/85c7f965515ad94df72d920cbd70d498550722ae))
+
 ## [1.0.2](https://github.com/rackrot/pi-tools/compare/pi-jj-v1.0.1...pi-jj-v1.0.2) (2026-11-28)
 
 
