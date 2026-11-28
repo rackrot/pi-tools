@@ -2,18 +2,17 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { type ExtensionAPI, getAgentDir } from "@earendil-works/pi-coding-agent";
 import { registerConfigSection } from "@rackrot/pi-core/config-ui";
+import {
+	createEmbedder,
+	createReranker,
+	type Embedder,
+	type Reranker,
+} from "@rackrot/pi-core/retrieval";
 import { Type } from "typebox";
 import { loadLayers, MODES, mergeLayers, modeOf } from "./config.ts";
 import { SkillDb, type SkillRow } from "./db.ts";
 import { indexSection, plan, type SkillInfo, skillBody } from "./plan.ts";
-import {
-	createEmbedder,
-	createJudge,
-	createReranker,
-	type Embedder,
-	type Judge,
-	type Reranker,
-} from "./providers.ts";
+import { createJudge, type Judge } from "./providers.ts";
 import { searchSkills, skillText } from "./search.ts";
 import { openSettings } from "./ui.ts";
 

@@ -17,6 +17,8 @@
 		"./json": "./src/json.ts",
 		"./config": "./src/config.ts",
 		"./config-ui": "./src/config-ui.ts",
+		"./model-call": "./src/model-call.ts",
+		"./retrieval": "./src/retrieval.ts",
 		"./thinking-binding": "./src/thinking-binding/binding.ts"
 	},
 	"scripts": {
@@ -28,6 +30,7 @@
 		]
 	},
 	"dependencies": {
+		"@huggingface/transformers": "^4.3.2",
 		"jsonc-parser": "^3.3.1"
 	},
 	"peerDependencies": {

@@ -1,13 +1,7 @@
 import { readConfigLayers } from "@rackrot/pi-core/config";
+import { type ModelRef, parseRef, THINKING, type Thinking } from "@rackrot/pi-core/model-call";
 
-export const THINKING = ["minimal", "low", "medium", "high", "xhigh", "max"] as const;
-export type Thinking = (typeof THINKING)[number];
-
-/** One model to call: `provider/model` plus optional thinking level. */
-export interface ModelRef {
-	model: string;
-	thinking?: Thinking;
-}
+export { type ModelRef, parseRef, THINKING, type Thinking } from "@rackrot/pi-core/model-call";
 
 export interface SecondOpinionOption extends ModelRef {
 	/** Name the agent passes as `model`. Defaults to the model string. */
@@ -68,18 +62,6 @@ const isObj = (v: unknown): v is Record<string, unknown> =>
 const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : undefined);
 const num = (v: unknown) => (typeof v === "number" && v > 0 ? v : undefined);
 const thinking = (v: unknown) => THINKING.find((t) => t === v);
-
-/** Accepts `"provider/model"` or `{ model, thinking? }`. */
-export function parseRef(v: unknown, inherit?: Thinking): ModelRef | undefined {
-	if (typeof v === "string") {
-		const model = str(v);
-		return model && model.includes("/") ? { model, thinking: inherit } : undefined;
-	}
-	if (!isObj(v)) return undefined;
-	const model = str(v.model ?? v.id);
-	if (!model?.includes("/")) return undefined;
-	return { model, thinking: thinking(v.thinking) ?? inherit };
-}
 
 /** Accepts a ref or an array of refs (fallback chain). `thinking` applies to entries without their own. */
 export function parseChain(v: unknown, inherit?: Thinking): ModelRef[] {

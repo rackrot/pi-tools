@@ -1,4 +1,9 @@
 import { configPath, editConfig, readConfig } from "@rackrot/pi-core/config";
+import {
+	DEFAULT_EMBEDDING,
+	DEFAULT_RERANKER,
+	type ModelProviderConfig,
+} from "@rackrot/pi-core/retrieval";
 
 /**
  * How much of a skill the system prompt carries.
@@ -13,30 +18,12 @@ export type Mode = (typeof MODES)[number];
 export const SETTINGS_KEY = "skillIndex";
 export const DEFAULT_MODE: Mode = "title";
 export const DEFAULT_LIMIT = 5;
-export const DEFAULT_EMBEDDING: ModelProviderConfig = {
-	provider: "onnx",
-	model: "Xenova/bge-small-en-v1.5",
-};
-export const DEFAULT_RERANKER: ModelProviderConfig = {
-	provider: "onnx",
-	model: "Xenova/bge-reranker-base",
-};
 export const DEFAULT_DECISION: DecisionConfig = {
 	enabled: false,
 	provider: "typesafe",
 	model: "jev-latest",
 	threshold: 0.5,
 };
-
-/** `onnx` runs locally, `http` calls an OpenAI-style `/embeddings` or Cohere/Jina-style `/rerank` endpoint. */
-export interface ModelProviderConfig {
-	provider: "onnx" | "http" | "none";
-	model: string;
-	/** Required for `http`. */
-	baseUrl?: string;
-	/** Name of the environment variable holding the API key. Never store keys in config. */
-	apiKeyEnv?: string;
-}
 
 /**
  * Optional relevance filter: a System One model answers one yes/no (noul) question per candidate.

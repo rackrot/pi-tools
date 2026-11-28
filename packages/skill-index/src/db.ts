@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import { nearestIds, toBlob } from "@rackrot/pi-core/retrieval";
 
 /** A skill as stored: pi's listing plus its SKILL.md body. */
 export interface SkillRow {
@@ -22,9 +23,6 @@ export interface Stored extends SkillRow {
 
 const hash = (s: SkillRow) =>
 	createHash("sha256").update(`${s.name}\0${s.description}\0${s.body}`).digest("hex");
-
-const toBlob = (v: number[]) => Buffer.from(new Float32Array(v).buffer);
-const fromBlob = (b: Uint8Array) => new Float32Array(b.buffer, b.byteOffset, b.byteLength / 4);
 
 /**
  * Every skill with its body, FTS5 index and embedding. Rows are tagged `global` or
@@ -152,16 +150,9 @@ export class SkillDb {
 		const rows = this.#db
 			.prepare(`SELECT id, embedding FROM skills WHERE ${VISIBLE} AND embed_model = ?`)
 			.all(scope.projectRoot, model) as { id: number; embedding: Uint8Array }[];
-		const scored = rows.map((r) => {
-			const v = fromBlob(r.embedding);
-			let dot = 0;
-			for (let i = 0; i < v.length; i++) dot += v[i] * query[i];
-			return { id: r.id, dot };
-		});
-		scored.sort((a, b) => b.dot - a.dot);
-		return scored
-			.slice(0, limit)
-			.flatMap((s) => this.#rows("SELECT * FROM skills WHERE id = ?", [s.id]));
+		return nearestIds(rows, query, limit).flatMap((id) =>
+			this.#rows("SELECT * FROM skills WHERE id = ?", [id]),
+		);
 	}
 
 	#rows(sql: string, params: (string | number | null)[]): Stored[] {

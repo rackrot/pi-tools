@@ -1,65 +1,16 @@
+import { type Embedder, ftsQuery, fuse, type Reranker } from "@rackrot/pi-core/retrieval";
 import type { Scope, SkillDb, Stored } from "./db.ts";
-import type { Embedder, Judge, Reranker } from "./providers.ts";
-
-const STOP = new Set([
-	"a",
-	"an",
-	"and",
-	"are",
-	"as",
-	"at",
-	"be",
-	"by",
-	"for",
-	"from",
-	"in",
-	"is",
-	"it",
-	"of",
-	"on",
-	"or",
-	"that",
-	"the",
-	"this",
-	"to",
-	"use",
-	"when",
-	"with",
-]);
+import type { Judge } from "./providers.ts";
 
 /** Candidates taken from each of BM25 and vector search before fusion. */
 const POOL = 50;
 /** Fused candidates sent to the reranker and decision model. */
 const RERANK_POOL = 20;
-const RRF_K = 60;
 const BODY_CHARS = 1500;
-
-/** Words of the query as an FTS5 OR query; each word is quoted so punctuation cannot break the syntax. */
-export function ftsQuery(query: string): string {
-	const words = query
-		.toLowerCase()
-		.split(/[^\p{L}\p{N}]+/u)
-		.filter((w) => w && !STOP.has(w));
-	return [...new Set(words)].map((w) => `"${w}"`).join(" OR ");
-}
 
 /** Text that represents a skill to the embedder and reranker. */
 export const skillText = (s: Stored) =>
 	`${s.name}: ${s.description}\n${s.body.slice(0, BODY_CHARS)}`;
-
-/** Reciprocal rank fusion of ranked lists. */
-export function fuse(lists: Stored[][]): Stored[] {
-	const score = new Map<number, number>();
-	const byId = new Map<number, Stored>();
-	for (const list of lists)
-		list.forEach((s, rank) => {
-			byId.set(s.id, s);
-			score.set(s.id, (score.get(s.id) ?? 0) + 1 / (RRF_K + rank + 1));
-		});
-	return [...byId.values()].sort(
-		(a, b) => (score.get(b.id) ?? 0) - (score.get(a.id) ?? 0) || a.name.localeCompare(b.name),
-	);
-}
 
 export interface Pipeline {
 	db: SkillDb;
@@ -95,7 +46,7 @@ export async function searchSkills(
 			errors.push(`embedding: ${(e as Error).message}`);
 		}
 	}
-	let skills = fuse(lists).slice(0, RERANK_POOL);
+	let skills = fuse(lists, (a, b) => a.name.localeCompare(b.name)).slice(0, RERANK_POOL);
 
 	if (p.reranker && skills.length > 1) {
 		try {

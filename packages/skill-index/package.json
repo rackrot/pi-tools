@@ -21,7 +21,6 @@
 		]
 	},
 	"dependencies": {
-		"@huggingface/transformers": "^4.3.2",
 		"@rackrot/pi-core": "workspace:*",
 		"@typesafe-ai/sdk": "^0.7.0"
 	},
