@@ -1,6 +1,6 @@
 ---
 name: cold-read
-description: Cold-reads an artifact through a fresh subagent that sees only its contents and reports where a stranger would stall. Use when asked "would someone new follow this?", "does this stand on its own?", or for a fresh-eyes read before a handoff, publish or merge. Diagnoses only. Not for disproving a decision or checking docs against code.
+description: Checks whether a README, runbook, plan or other artifact makes sense to someone who was not there, by handing only its contents to a fresh subagent and reporting where a stranger would stall. Use for "would someone new follow this?", "does this stand on its own?", "what will the next person trip over?", "I have looked at this too long to judge it", or a fresh-eyes read before a handoff, publish or merge, also when the text is pasted in. Read this before judging the artifact yourself or writing the reader's brief; the session that wrote it cannot do the read, and the brief has rules. Diagnoses only. Not for disproving a decision (doubt-review) or checking docs against code (docs-audit).
 ---
 
 # Cold read
@@ -11,11 +11,12 @@ Check whether an artifact stands on its own by letting a reader with no session 
 
 - Attacking a decision or plan: use `doubt-review`.
 - Comparing docs against code: use `docs-audit`.
+- Scoring, rewriting or polishing a README: use `readme` or `forgejo-readme`.
 
 ## Workflow
 
 1. Pin the artifact in focus. If it is ambiguous, confirm with the user or take the one just produced. Note privately, in one line, what it is meant to be and who it is for. This is the yardstick for step 4, and the reviewer never sees it.
-2. Spawn one fresh subagent (`Agent`, general-purpose, no worktree). Give it the artifact's contents inline or as a copy, never a path. Tell it not to open the README, docs or neighbouring files. Give it nothing about your intent or reasoning.
+2. Spawn one fresh subagent (`Agent`, general-purpose, no worktree). Give it the artifact's contents inline or as a copy, never a path. Tell it not to open the README, docs or neighbouring files. Give it nothing about your intent or reasoning. If you cannot spawn a subagent, say so and stop: offer the brief (the step 3 questions plus the artifact contents) for the user to run in a fresh session, and do not substitute your own read.
 3. Have it read the whole artifact blind and report, from the artifact alone:
    - what it takes the artifact to be, to do and to expect;
    - what is unclear, ambiguous, or assumed but unstated;
@@ -36,4 +37,4 @@ Check whether an artifact stands on its own by letting a reader with no session 
 ## Before finishing
 
 1. The read came from a fresh subagent that never saw your intent.
-2. The report carries the verdict and hands the fixes back to the main session.
+2. The report says how much was read, gives a fix per defect, carries the verdict and hands the fixes back to the main session.

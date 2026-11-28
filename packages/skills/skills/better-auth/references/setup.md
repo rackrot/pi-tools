@@ -9,7 +9,7 @@ Read this when installing Better Auth, choosing an adapter, running the CLI, or 
 <pm> add -D auth@<same version as better-auth>
 ```
 
-The `auth` package is the CLI. Its version tracks `better-auth` (both 1.7.10 when last checked, October 2026), so pin it to match. The docs use `npx auth@latest ...`, which fetches an unpinned package on each run. With the pinned dev dependency, run the local binary (`npx auth generate`, `pnpm exec auth generate`) so the CLI that reads your config is the one that matches the library. `auth upgrade` moves `better-auth` and the synchronized official `@better-auth/*` packages together.
+The `auth` package is the CLI. Its version tracks `better-auth` (the two are released in lockstep on the 1.7 line), so pin it to match. The docs use `npx auth@latest ...`, which fetches an unpinned package on each run. With the pinned dev dependency, run the local binary (`npx auth generate`, `pnpm exec auth generate`) so the CLI that reads your config is the one that matches the library. `auth upgrade` moves `better-auth` and the synchronized official `@better-auth/*` packages together.
 
 Scoped packages install separately when needed: `@better-auth/passkey`, `@better-auth/sso`, `@better-auth/api-key`, `@better-auth/oauth-provider`, `@better-auth/stripe`, `@better-auth/scim`, `@better-auth/expo`. Keep them at the same version as `better-auth`.
 

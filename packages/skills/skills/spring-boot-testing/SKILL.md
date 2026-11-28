@@ -1,13 +1,13 @@
 ---
 name: spring-boot-testing
-description: 'Writes and fixes Spring Boot 3/4 tests that need a Spring context. Use for @WebMvcTest, @DataJpaTest, @RestClientTest, @JsonTest or @WebFluxTest slices, @MockitoBean and @MockitoSpyBean, MockMvcTester, RestTestClient, Testcontainers with @ServiceConnection, Spring Security tests (@WithMockUser, jwt(), csrf()), a controller or slice test whose context fails to start ("No qualifying bean"), @MockBean errors after an upgrade, 403 on a mock POST, or a slow @SpringBootTest that rebuilds its context.'
+description: 'Read before answering any question about a Spring Boot test that starts a Spring context, even when the fix looks obvious: Boot 3.4+ and 4 changed test APIs (@MockBean removed, slice packages and test starters moved). Use for a controller or slice test that fails to start ("No qualifying bean"), 403 on a mock POST or DELETE, @MockBean errors after an upgrade, a slow @SpringBootTest that rebuilds its context, and for writing @WebMvcTest, @DataJpaTest or @WebFluxTest slices, @MockitoBean, MockMvcTester, Testcontainers with @ServiceConnection and Spring Security tests (@WithMockUser, jwt(), csrf()). Not for plain JUnit or Mockito without Spring (java-testing) or application code (spring-boot).'
 ---
 
 # Spring Boot testing
 
 Pick the narrowest test that proves the behavior, then keep the application context cache warm. Match the Boot line first: read the parent or `org.springframework.boot` plugin version (3.5.x vs 4.x). Boot 4 changed packages, starters and a few test types; see [references/sb4-migration.md](references/sb4-migration.md).
 
-Not for: plain JUnit or Mockito with no Spring context (`java-testing` or `kotlin-testing`), application code, configuration or wiring (`spring-boot`), general test strategy (`unit-testing`), or build files (`maven`, `gradle`).
+Not for: plain JUnit or Mockito with no Spring context (`java-testing` or `kotlin-testing`), application code, configuration or wiring (`spring-boot`), or build files (`maven`, `gradle`).
 
 ## Choose the test
 
@@ -28,7 +28,7 @@ Read [references/slices.md](references/slices.md) for what each slice includes a
 - Replace beans with `@MockitoBean` and `@MockitoSpyBean` (`org.springframework.test.context.bean.override.mockito`). `@MockBean` and `@SpyBean` are deprecated on Boot 3.4+ and removed in Boot 4. Never write them.
 - A `@WebMvcTest` slice does not load `@Service` or `@Repository` beans. Add a `@MockitoBean` for each constructor dependency of the controller, or the context fails with "No qualifying bean".
 - Do not put `@MockitoBean` in a `@DataJpaTest`; the point of that slice is the real repository.
-- Assert with AssertJ. For MVC use `MockMvcTester`, and read [references/mockmvc.md](references/mockmvc.md) for request, body and `convertTo` patterns. On Boot 4 an in-server client test uses `RestTestClient`; on Boot 3 use `TestRestTemplate`.
+- Assert with AssertJ. For MVC use `MockMvcTester`, and read [references/mockmvc.md](references/mockmvc.md) for request, body and `convertTo` patterns. On Boot 4 an in-server client test uses `RestTestClient` (add `@AutoConfigureRestTestClient` and the `spring-boot-resttestclient` module or `spring-boot-starter-restclient-test`); on Boot 3 use `TestRestTemplate`.
 - Use a real database through Testcontainers and `@ServiceConnection`, not H2, when SQL dialect matters. Read [references/testcontainers.md](references/testcontainers.md) for setup, reuse and the `@DynamicPropertySource` fallback.
 - Share fixtures through `@TestConfiguration` classes (or `@Import`), not per-class mock variations.
 - Cover the failure path too: a not-found service call, a validation error, a 401 and a 403. Name tests for the behavior.
@@ -53,15 +53,7 @@ Read [references/context-caching.md](references/context-caching.md) when the sui
 - Boot 3: `spring-boot-starter-test` covers JUnit, AssertJ, Mockito and Spring Test. Add `spring-security-test` for security and `spring-boot-testcontainers` plus `org.testcontainers:postgresql` (or the module you need) for containers.
 - Boot 4: add the test starter for each technology under test (`spring-boot-starter-webmvc-test`, `-data-jpa-test`, `-restclient-test`, `-security-test`, `-webflux-test`). Testcontainers 2 module names are `testcontainers-postgresql` and so on.
 
-## Verified on 2026-10-20
-
-Against docs.spring.io (Boot and Framework testing reference, Framework 7.0.9) and the Boot 4.0 migration guide, plus Maven Central for Boot 4.1.1 (JUnit Jupiter 6.0.3, Testcontainers 2.0.5, Mockito 5.23.0).
-
-- `MockMvcTester` is the AssertJ entry point for MockMvc and is auto-configured in `@WebMvcTest`. It arrived with Spring Framework 6.2 (Boot 3.4), not Boot 3.2. The docs page does not state the version, so that introduction point is from release history.
-- `RestTestClient` is new in Framework 7 and Boot 4. It needs `@AutoConfigureRestTestClient` and the `spring-boot-resttestclient` module (or `spring-boot-starter-restclient-test`).
-- `@ServiceConnection` is `org.springframework.boot.testcontainers.service.connection.ServiceConnection`, usable on a `@Container` field or a `@Bean` in a `@TestConfiguration`.
-- `@MockBean` and `@SpyBean` are removed in Boot 4.
-- Unverified: Boot 3.5 specifics beyond the above, and the exact deprecation date of `@MockBean`.
+<!-- Maintainer note: verified 2026-10-20 against docs.spring.io (Boot and Framework testing reference, Framework 7.0.9), the Boot 4.0 migration guide and Maven Central for Boot 4.1.1. -->
 
 ## References
 

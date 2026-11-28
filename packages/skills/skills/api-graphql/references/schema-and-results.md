@@ -22,11 +22,11 @@ Keep the selection argument apart from the change data, and make selection non-n
 
 ```graphql
 type Mutation {
-  collectionUpdate(id: ID!, collection: CollectionInput!): CollectionUpdatePayload!
+  collectionUpdate(id: ID!, collection: CollectionUpdateInput!): CollectionUpdatePayload!
 }
 ```
 
-A merged input with a nullable `id` leaves it unclear whether `id` is a filter or the target. Either style is fine if applied schema-wide.
+Keep the target `id: ID!` a separate non-null argument, or a non-null field of the input; never a nullable `id` inside a merged input.
 
 ## Connections
 

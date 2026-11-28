@@ -1,6 +1,6 @@
 ---
 name: dotnet-native-interop
-description: Writes, reviews and debugs .NET native interop with P/Invoke and LibraryImport, covering signatures from C headers, string and struct marshalling, memory ownership, SafeHandle, callbacks and library loading. Use for wrapping a C library, a DllNotFoundException or AccessViolationException at a native call, or moving DllImport to LibraryImport for AOT.
+description: "Read before writing, reviewing or debugging any C# code that calls a native (C, C++, Rust) library through [DllImport] or [LibraryImport]. Covers signatures from a C header, string and struct marshalling, memory ownership, SafeHandle, callbacks and library loading. Use for wrapping a C library, DllNotFoundException, EntryPointNotFoundException, an AccessViolationException or intermittent crash in or after a native call, SYSLIB1054, or converting DllImport to LibraryImport for Native AOT. Not for IL2026/IL3050 trim warnings in managed code (dotnet-upgrade-guide)."
 ---
 
 # .NET native interop
@@ -14,7 +14,7 @@ Not for: COM interop or C++/CLI; general C# work (`csharp`); trimming and AOT re
 - Read the C header, not only the docs. When docs and header disagree, trust the header (Win32 docs often simplify types and struct layout).
 - Read the TFM (`<TargetFramework>`), RIDs and `<PlatformTarget>`. They decide `DllImport` vs `LibraryImport` and whether calling conventions matter.
 - Pin down the memory contract for every buffer and handle: who allocates, who frees, and with which function.
-- Find existing declarations with the codebase-memory tools when the repo is indexed (`search_code` for `DllImport`/`LibraryImport`, `trace_path` for callers), else the C# language server (csharp-ls) or Grep.
+- Find existing declarations by grepping for `DllImport` and `LibraryImport`, or with the C# language server (csharp-ls).
 
 ## Scope the answer
 
@@ -30,7 +30,7 @@ Not for: COM interop or C++/CLI; general C# work (`csharp`); trimming and AOT re
 | Mechanism | Runtime marshalling | Source generator, compile time |
 | Native AOT and trim safe | No | Yes |
 | Strings | `CharSet` | `StringMarshalling` |
-| OS error code | `SetLastError = true` | `SetLastPInvokeError = true` |
+| OS error code | `SetLastError = true` | `SetLastError = true` (read with `Marshal.GetLastPInvokeError()`) |
 | Available | .NET Framework and every .NET | .NET 7+ |
 
 .NET Framework: `DllImport`. .NET 7+: `LibraryImport` for new code, and it is the only option under Native AOT.
@@ -41,7 +41,7 @@ The mappings behind most bugs:
 
 | C / Win32 | .NET | Why |
 |---|---|---|
-| `long`, `unsigned long` | `CLong`, `CULong` | 32-bit on Windows, 64-bit on 64-bit Unix. With `LibraryImport` they need `[assembly: DisableRuntimeMarshalling]` (else SYSLIB1051) |
+| `long`, `unsigned long` | `CLong`, `CULong` | 32-bit on Windows, 64-bit on 64-bit Unix. |
 | `size_t` | `nuint` | Pointer-sized. Never `ulong` or `int` |
 | `BOOL` (Win32) | `int`, or `bool` with `[MarshalAs(UnmanagedType.Bool)]` | 4 bytes |
 | `bool` (C99) | `[MarshalAs(UnmanagedType.U1)] bool` | 1 byte; the default `bool` marshalling is 4 bytes |
@@ -75,12 +75,12 @@ internal static partial int ProcessRecords([In] Record[] records, nuint count, o
 
 Exactly one side owns each allocation, and it is freed with the matching allocator. `Marshal.FreeHGlobal` on `malloc`'d memory corrupts the heap. Prefer, in order: caller allocates and frees (`Span<byte>` + length); callee allocates and the library's own free function releases it in `finally`; a `SafeHandle` whose `ReleaseHandle` calls the library's destroy function.
 
-Read [references/memory-and-callbacks.md](references/memory-and-callbacks.md) for the three ownership models, a complete `SafeHandle` wrapper, pinning (`fixed` vs `GCHandle`), `SetLastPInvokeError` and HRESULT handling, and callbacks (`UnmanagedCallersOnly` function pointers, or rooted delegates with `GC.KeepAlive`).
+Read [references/memory-and-callbacks.md](references/memory-and-callbacks.md) for the three ownership models, a complete `SafeHandle` wrapper, pinning (`fixed` vs `GCHandle`), `SetLastError` and HRESULT handling, and callbacks (`UnmanagedCallersOnly` function pointers, or rooted delegates with `GC.KeepAlive`).
 
 ## 6. Migrate DllImport to LibraryImport (only when asked or for AOT)
 
 1. Make the containing type `partial` and the method `static partial`.
-2. `[DllImport]` to `[LibraryImport]`; `CharSet` to `StringMarshalling`; `SetLastError` to `SetLastPInvokeError`.
+2. `[DllImport]` to `[LibraryImport]`; `CharSet` to `StringMarshalling`; keep `SetLastError = true`.
 3. Remove `CallingConvention` unless Windows x86 is a target.
 4. Add explicit `MarshalAs` on every `bool`.
 5. Build with `<IsAotCompatible>true</IsAotCompatible>` (or `<EnableTrimAnalyzer>` and `<EnableAotAnalyzer>`) and clear SYSLIB1050-SYSLIB1057 diagnostics. SYSLIB1054 is the analyzer that flags a `DllImport` the generator could handle.
@@ -91,14 +91,13 @@ Read [references/memory-and-callbacks.md](references/memory-and-callbacks.md) fo
 - Every struct crossing the boundary: assert `Marshal.SizeOf<T>()` (or `sizeof(T)` for blittable structs) equals the native `sizeof`, with field offsets checked for packed structs.
 - Ownership is written down per buffer and handle, and frees use the matching function.
 - No raw `IntPtr` handle escapes the interop layer; delegates passed as callbacks stay rooted.
-- `SetLastPInvokeError`/`SetLastError` is set on APIs that report OS error codes.
+- `SetLastError = true` is set on APIs that report OS error codes, and the code is read with `Marshal.GetLastPInvokeError()`.
 - A round-trip test calls the native function with known input and checks output, including a non-ASCII string.
 
 For crashes, `DllNotFoundException`, `EntryPointNotFoundException` or silent corruption, read [references/diagnostics.md](references/diagnostics.md).
 
 ## Gotchas
 
-- `CLong` with `LibraryImport` fails with SYSLIB1051 until the assembly has `[assembly: DisableRuntimeMarshalling]`, which also changes how `bool` and `char` marshal across the whole assembly.
 - `#if WINDOWS` / `LINUX` / `MACOS` are defined only for OS-specific TFMs (`net10.0-windows`), not for `net10.0`. Use a `NativeLibrary` resolver for portable TFMs.
 - `Marshal.GetFunctionPointerForDelegate` does not root the delegate. A collected delegate crashes in native code later.
 - An `[UnmanagedCallersOnly]` method must be `static`, use blittable parameters, and never let an exception escape to native code.

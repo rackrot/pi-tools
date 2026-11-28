@@ -1,15 +1,15 @@
 ---
 name: ui-direction
-description: Art direction and build process for new UI or a visual reshape, such as a landing page, marketing site, portfolio, product page or a new app screen with no design system. Grounds the design in the subject, deals a researched direction, plans tokens and checks the render. Use when a page should look designed, or looks generic, templated or AI-made.
+description: Art direction and build process for any new page or screen that has no design system to follow, such as a landing page, a marketing or small-business website, a portfolio, a product page or a new app screen, even when the request says nothing about looks. Grounds the design in the subject, deals a researched direction, plans tokens and checks the render. Also holds the house rules for headline length and wrapping, large statements, picture sourcing and page copy. Use when building or planning such a page, for a question about its headlines, pictures or copy, or when a page looks generic, templated or AI-made. Not for throwaway prototypes, charts, or work inside an existing design system.
 ---
 
 # UI direction
 
 Approach this as the design lead at a studio known for giving every client a distinct visual identity. This client has rejected proposals that felt cliché or templated and is paying for a point of view: make deliberate, opinionated choices about palette, typography and layout that are specific to this brief, and take aesthetic risk where it is justified. **The brief's own words always win**, including when it asks for a look this skill would otherwise avoid.
 
-Scope: new UI or a replaced visual identity. To extend a product's existing design system or DESIGN.md, use `web-design`; for charts use `dataviz`; for claude.ai artifacts use `artifact-design`; for product microcopy alone use `ux-copy`; for a throwaway prototype, skip the procedure and keep only the defaults table.
+Scope: new UI or a replaced visual identity. Extending a product's existing design system or DESIGN.md is out of scope: follow that system. Charts are out of scope. For product microcopy alone use `ux-copy`; for a throwaway prototype use `prototype`, or skip the procedure and keep only the defaults table.
 
-Paths: `<skill>` below and in the references means `.`. Run scripts from the project root; their working files land in `.ui-direction/` there, which belongs in `.gitignore` (tell the user). `draw.mjs` needs Node 18+; `assets.mjs` needs network access and is optional.
+Paths: `<skill>` below and in the references is the directory that holds this SKILL.md. Run scripts from the project root; their working files land in `.ui-direction/` there, which belongs in `.gitignore` (tell the user). `draw.mjs` needs Node 18+; `assets.mjs` needs network access and is optional.
 
 ## 1. Read the brief and ground it in the subject
 
@@ -26,7 +26,7 @@ Before any design, list the page as claims with their proof, one line per sectio
 **Public pages** (landing, marketing, portfolio, event, product launch): deal directions from the library instead of inventing one, because a model asked to invent a look picks the category default.
 
 ```bash
-node "scripts/draw.mjs" --sector <sector> --brief "<one line>" \
+node "<skill>/scripts/draw.mjs" --sector <sector> --brief "<one line>" \
   --sections <roles in argument order> [--tone <tone>] [--have <assets>] [--keep palette,type] --options 3
 ```
 
@@ -68,7 +68,7 @@ Build with motion switched off in your head first; a page that needs animation t
 1. **Tokens** as CSS custom properties; everything downstream references them. `<skill>/assets/base.css` (and `base.js` for reveals) is an optional neutral foundation. Watch selector specificity: a type selector like `.section` and an element selector like `.cta` easily cancel each other's padding.
 2. **The hero** exactly as planned, at desktop and phone width. Big thing big, small things small.
 3. **Each section** from its blueprint with this project's content. Neighbours must not share a layout, and the idea reaches pricing, FAQ and footer too.
-4. **Imagery**, in this order: the project's own; generated, if an image tool exists; real pictures of the subject's world from open collections; drawn in code from the subject; the sheet's photographs as atmosphere only; type and colour alone. Search open collections (CC0, public domain and CC BY by default; share-alike only with `--license sa`) with `node "scripts/assets.mjs" "<query from the inventory>"`, then `--get <ref>` to download with its credit and `--credits` for the footer line. A found picture is never presented as the client's own product, room or team. Unless the brief is type-led, four or more real pictures usually beat drawings alone. Details in `references/imagery.md`; if the network is blocked, draw instead and say so.
+4. **Imagery**, in this order: the project's own; generated, if an image tool exists; real pictures of the subject's world from open collections; drawn in code from the subject; the sheet's photographs as atmosphere only; type and colour alone. Search open collections (CC0, public domain and CC BY by default; share-alike only with `--license sa`) with `node "<skill>/scripts/assets.mjs" "<query from the inventory>"`, then `--get <ref>` to download with its credit and `--credits` for the footer line. A found picture is never presented as the client's own product, room or team. Unless the brief is type-led, four or more real pictures usually beat drawings alone. Details in `references/imagery.md`; if the network is blocked, draw instead and say so.
 5. **The live thing**, in the section where it proves the claim.
 6. **Fullness**: each desktop screen holds one dominant thing and its content; one deliberate rest per page at most. Running text in full ink at 16px or more.
 7. **Quality floor**, without announcing it: responsive to 390px, visible keyboard focus, real links and buttons, alt text, reduced motion respected, contrast 4.5:1 for text.
@@ -78,9 +78,9 @@ Spend boldness in one place and keep everything around it quiet. Before leaving 
 
 ## 7. Gate and look
 
-Delegate to the **ui-critic** agent with the target (URL or HTML path), the mode (`new page`), the source folder, and any rules the brief explicitly asks for as allowances. It renders at 1440, 768 and 390, runs lint and inspect, critiques the screenshots, and returns at most three ranked fixes. Fix them and call it again: three rounds at most. Fix every FAIL unless the brief asked for that thing; treat each WARN as wrong unless you can defend it in one sentence.
+If a **ui-critic** agent is installed, delegate to it with the target (URL or HTML path), the mode (`new page`), the source folder, and any rules the brief explicitly asks for as allowances. It renders at 1440, 768 and 390, runs lint and inspect, critiques the screenshots, and returns at most three ranked fixes. Fix them and call it again: three rounds at most. Fix every FAIL unless the brief asked for that thing; treat each WARN as wrong unless you can defend it in one sentence.
 
-If the agent is not installed or no Chrome is available, take screenshots at the three widths with `playwright-cli` or Claude in Chrome, read `references/critique.md` and critique them yourself. Judge only the pictures: if a problem shows in a screenshot it is real.
+Otherwise (the usual case), take screenshots at 1440, 768 and 390 with any browser screenshot tool available, read `references/critique.md` and critique them yourself, at most three rounds of fixes. Judge only the pictures: if a problem shows in a screenshot it is real. If no screenshot tool is available, say in the report that the render was not checked.
 
 ## 8. Report
 
@@ -120,7 +120,7 @@ Removing ornament leaves space. Fill it with scale, full content, a picture made
 | `references/layout.md` | Grid, margins, rhythm, section variety, navigation, footer, the phone layout |
 | `references/imagery.md` | Finding, crediting, cropping and drawing pictures; video |
 | `references/motion.md` | The motion pass: budget, tokens, recipes, reduced motion |
-| `references/critique.md` | Critiquing screenshots yourself when ui-critic is unavailable |
+| `references/critique.md` | Critiquing screenshots yourself (the default gate) |
 | `references/tells.md` | The dated registry of generated-page tells |
 | `references/research-digest.md` | Citing a number from the 247-site study |
 | `references/redesign.md` | Reshaping an existing page |

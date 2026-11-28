@@ -35,6 +35,6 @@ Source: the Play 2.9 and 3.0 migration guides on playframework.com (checked 2026
 - `sbt test` and one `sbt run` request.
 - `grep -ril akka .` over `build.sbt`, `project/`, `conf/`, `app/`, `test/` returns nothing relevant.
 
-## Play 3.1 (not GA at last check)
+## Play 3.1 (pre-release when verified; check playframework.com)
 
 3.1 moves to Guice 7, which drops `javax.inject`. When a project targets a 3.1 milestone, switch to `jakarta.inject` in the same change and recheck the Java and Scala matrix on playframework.com.

@@ -14,7 +14,7 @@ Before you add a badge, confirm its source exists:
 | :- | :- |
 | CI status | the workflow file exists in `.forgejo/workflows/` (or `.gitea/workflows/`), Actions is enabled on the repo, and the branch name is right (`main`, `master`, `trunk`) |
 | Package version | the package is published under that exact name (`npm view`, `pip index versions`, crates.io, NuGet) |
-| Release | the repo has published releases (`fj release list`, or `git tag --sort=-creatordate` for tags) |
+| Release | the repo has published releases (`fj release -R <remote> list`, or `git tag --sort=-creatordate` for tags) |
 | Licence | it matches `LICENSE` and the manifest's licence field |
 | Coverage | the repo already uploads to Codecov or Coveralls in CI |
 | Runtime versions | the manifest declares them (`engines`, `requires-python` classifiers, `rust-version`) |

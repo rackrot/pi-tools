@@ -72,7 +72,7 @@ def both[A: {Ord, Show}](a: A): String = ???     // 3.6+; older: [A: Ord: Show]
 ```
 
 - Use `summon[Ord[A]]` only where a name is awkward. Prefer a named `using` parameter or `as` binding.
-- Order matters: `using` clauses come after ordinary parameter lists. Clause interleaving (`def f[A](a: A)[B](using ev: Ev[A, B])`) needs 3.6+.
+- By convention put `using` clauses after ordinary parameter lists; the language also allows them before or between them. Clause interleaving (`def f[A](a: A)[B](using ev: Ev[A, B])`) needs 3.6+.
 - Explicit argument for a using clause: `f(xs)(using myOrd)`.
 
 ## Extension methods
@@ -101,7 +101,7 @@ An opaque type is its underlying type only inside its defining scope; outside it
 
 ## Equality
 
-Scala's `==` is universal by default. `-language:strictEquality` requires a `CanEqual[A, B]` for each comparison, usually `derives CanEqual`. Turn it on only if the build does, and then give new types `derives CanEqual` instead of importing `scala.language.strictEqualEquality`.
+Scala's `==` is universal by default. `-language:strictEquality` requires a `CanEqual[A, B]` for each comparison, usually `derives CanEqual`. Turn it on only if the build does (`-language:strictEquality` or `import scala.language.strictEquality`), and then give new types `derives CanEqual`.
 
 ## Braces or indentation
 

@@ -2,7 +2,7 @@
 
 Several radically different UI variants on one route, switchable from a floating bar. The user flips between them in the browser, picks one or combines parts, and the rest are thrown away. Use it for "what should this page look like" and "show me options for this layout". If the question is about logic or state, use `logic.md` instead.
 
-The project's existing component library and styling system govern the variant code. This skill picks between structures; it does not set a visual direction. Once a variant wins and the user wants a considered look for it, hand over to `ui-direction` for new UI or `web-design` when the product has a design system, if installed.
+The project's existing component library and styling system govern the variant code. This skill picks between structures; it does not set a visual direction. Once a variant wins and the user wants a considered look for it, hand over to `ui-direction`.
 
 ## Where to put the variants
 
@@ -38,7 +38,7 @@ Variants are easier to judge next to the rest of the app (real header, real data
    - Make it look distinct from the page, such as a high-contrast pill, so it isn't mistaken for the design under review.
    - Hide it outside development, using the framework's dev flag (for example `import.meta.env.DEV` in Vite, or `process.env.NODE_ENV !== 'production'`), so a stray merge can't ship it to users.
 
-5. **Hand it over.** Give the URL and the `?variant=` keys. Feedback often comes as "the header from B with the sidebar from C", and that mix is the design the user actually wants. If `playwright-cli` is installed, use it to confirm each variant renders without console errors before handing over.
+5. **Hand it over.** Give the URL and the `?variant=` keys. Feedback often comes as "the header from B with the sidebar from C", and that mix is the design the user actually wants. Before handing over, load each `?variant=` key once and confirm it renders without console errors (with `playwright-cli` if installed, otherwise in the browser).
 
 6. **Clean up.** When a variant wins, record which and why. Fold it into the existing page, or promote it to a real route if it was a new page, then remove the other variants and the switcher from main. The full variant set can go to a throwaway branch on the user's say-so (see SKILL.md).
 

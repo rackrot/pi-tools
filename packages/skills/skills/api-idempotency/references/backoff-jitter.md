@@ -15,7 +15,7 @@ A single-instance batch job pays little of the fleet cost, so the choice matters
 
 ## Example schedule
 
-A documented schedule integrators can copy: `min(1000 * 2^attempt, 30000)` milliseconds plus up to one second of random jitter, so about 1s, 2s, 4s, 8s, capped at 30s. Prefer the language's library over hand-rolled math, for example tenacity's `wait_exponential_jitter(initial=1, max=10)` with `stop_after_attempt(5) | stop_after_delay(60)`. Bound attempts and total duration together.
+A documented schedule integrators can copy: `random(0, min(30000, 1000 * 2^attempt))` milliseconds, so waits drawn from up to 1s, 2s, 4s, 8s, capped at 30s. Prefer the language's library over hand-rolled math, for example tenacity's `wait_random_exponential(multiplier=1, max=30)` with `stop_after_attempt(5) | stop_after_delay(60)`. Bound attempts and total duration together.
 
 ## Retry budget
 

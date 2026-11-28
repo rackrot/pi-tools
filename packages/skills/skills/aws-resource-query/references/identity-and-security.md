@@ -21,7 +21,7 @@ aws iam get-account-summary
 aws iam simulate-principal-policy --policy-source-arn <role-arn> --action-names <service:Action> --resource-arns <arn>
 ```
 
-`list-access-keys` shows key IDs and status only, never the secret. `iam create-*`, `generate-credential-report`, and every `update-*` verb are denied.
+`list-access-keys` shows key IDs and status only, never the secret. `iam create-*`, `generate-credential-report`, and every `update-*` verb are state-changing: only on request, see Changes in SKILL.md.
 
 ## KMS
 

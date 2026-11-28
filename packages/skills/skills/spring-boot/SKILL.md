@@ -1,13 +1,13 @@
 ---
 name: spring-boot
-description: 'Writes and debugs Spring Boot 3/4 applications: @ConfigurationProperties, bean wiring and auto-configuration, MVC and WebFlux controllers, validation, Spring Data JPA, @Transactional, SecurityFilterChain, Actuator, the 3.x to 4 upgrade (Jackson 3). Use for @SpringBootApplication code, application.yml or application.properties, spring-boot-starter-* dependencies, startup failures such as "No qualifying bean" after moving classes, and a @Transactional method that does not roll back.'
+description: 'Spring Boot 3/4 application code and config. Read this before answering about a @SpringBootApplication service, even when the fix looks obvious: Boot 4 changed starters, Jackson and defaults. Use for startup failures ("required a bean of type ... that could not be found", "No qualifying bean", APPLICATION FAILED TO START) such as after moving classes to another package, a @Transactional method that does not roll back or leaves half-saved rows, @ConfigurationProperties, application.yml, MVC/WebFlux controllers, Spring Data JPA, SecurityFilterChain, Actuator, spring-boot-starter-* dependencies, the 3.x to 4 upgrade (Jackson 3). Not for tests that start a Spring context (spring-boot-testing).'
 ---
 
 # Spring Boot
 
 Follow the Boot line the project already uses. Keep the existing observable contract (endpoints, property names, transaction boundaries) unless the request changes it.
 
-Not for: tests (`spring-boot-testing`), plain Java language questions (`java`), Maven or Gradle build problems (`maven`, `gradle`), API contract design (`api-rest-design`), database schema design (`db-schema-design`).
+Not for: tests (`spring-boot-testing`), plain Java language questions (`java`), Maven or Gradle build problems (`maven`, `gradle`), API contract design (`api-rest-design`), database schema design (out of scope).
 
 Verified on 2026-10-20 against spring.io and docs.spring.io: Boot 4.1 is the current line (4.1.1), 4.0 and 3.5 are older lines, and 3.5 is the last 3.x. Boot 4 sits on Spring Framework 7, Jakarta EE 11 (Servlet 6.1) and Java 17+; Boot 3.5 uses Framework 6.2. Support end dates were not published on the pages checked, so confirm them at spring.io/projects/spring-boot#support before promising a window.
 
@@ -61,12 +61,3 @@ Verified on 2026-10-20 against spring.io and docs.spring.io: Boot 4.1 is the cur
 - Boot 4 uses Jackson 3 (`tools.jackson.*`, except `jackson-annotations`), so Jackson 2 imports fail to compile; `@JsonComponent` is now `@JacksonComponent`.
 - Boot 4 liveness and readiness probes are on by default.
 - Relaxed binding matches `app.payments.base-url`, `appPayments.baseUrl` and `APP_PAYMENTS_BASEURL`-style env names to the same field, but it ignores unknown keys, so a typo or renamed key silently leaves the default. `spring-boot-properties-migrator` reports renamed keys on an upgrade.
-
-## References
-
-- [references/config.md](references/config.md) when working with properties, profiles or config import.
-- [references/web.md](references/web.md) when working with controllers, errors or HTTP clients.
-- [references/data.md](references/data.md) when working with JPA, transactions or repositories.
-- [references/security.md](references/security.md) when working with Spring Security or secrets.
-- [references/observability.md](references/observability.md) when working with Actuator, metrics or logs.
-- [references/migration-3-to-4.md](references/migration-3-to-4.md) when upgrading 3.x to 4.x.

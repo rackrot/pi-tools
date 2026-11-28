@@ -103,7 +103,7 @@ Check existence and uniform use only, then defer.
 
 - A versioning scheme exists and is applied uniformly: versioning.md.
 - Unsafe retries are covered by idempotency keys or documented: `api-idempotency` (if installed).
-- One auth model covers the surface: `api-oauth-provider` (keys or OAuth) or `app-auth` (each if installed).
+- One auth model covers the surface: `api-oauth-provider` for issuing keys or acting as an OAuth server (if installed).
 - Rate limits are signaled: rate-limits.md.
 - Every endpoint is documented: reference-gates.md.
 

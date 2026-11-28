@@ -2,7 +2,7 @@
 
 The required Gradle, JDK, SDK Build Tools and API level depend on the AGP version. Read them from the AGP release notes at https://developer.android.com/build/releases/gradle-plugin (the page documents the current release only; use the compatibility table there for any other AGP) before choosing.
 
-AGP 8 to 9 is not covered here: `android-skills:agp-9-upgrade`.
+AGP 8 to 9 is not covered here: use `android-skills:agp-9-upgrade` if installed; otherwise say the migration is out of scope for this skill.
 
 ## Choosing a set
 
@@ -10,7 +10,7 @@ AGP 8 to 9 is not covered here: `android-skills:agp-9-upgrade`.
 2. On the release-notes page for that AGP read the minimum Gradle, JDK and SDK Build Tools, and the maximum API level (this caps `compileSdk`).
 3. Check Kotlin: the Kotlin Gradle plugin version must be supported by that AGP and Gradle; a KSP release is tied to one Kotlin version, so bump them together (KSP version names the Kotlin it needs).
 4. Compare with the wrapper. If the current Gradle already meets the minimum, change only AGP in the catalog and sync. If not, you need a wrapper bump to the minimum or newer.
-5. For the wrapper, invoke `gradle-skills:gradle-wrapper-upgrade` naming the exact version (for example "upgrade to Gradle 9.6.0"). Without a named version it picks the latest, which may exceed what the AGP has been tested with.
+5. For the wrapper, invoke `gradle-skills:gradle-wrapper-upgrade` if installed, naming the exact version (for example "upgrade to Gradle 9.6.0"). Without a named version it picks the latest, which may exceed what the AGP has been tested with. If it is not installed, run `./gradlew wrapper --gradle-version <exact version>` twice; the second run updates the wrapper jar and scripts.
 6. Run `./gradlew :app:assembleDebug :app:lintDebug` plus the unit tests before finishing, and read new deprecation warnings. Move only the pieces the warnings require.
 
 ## Do not

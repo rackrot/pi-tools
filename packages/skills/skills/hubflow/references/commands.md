@@ -1,6 +1,6 @@
 # git hf commands (v1.5.4)
 
-Ask the user before any of these push or delete remote state: `start`/`finish` (feature, release, hotfix), every `push`, `update -p` (assume it pushes unless checked), and every `cancel` (may delete the remote branch; unverified). `gh pr create` also needs a go-ahead.
+Ask the user before any of these push or delete remote state: `start`/`finish` (feature, release, hotfix), every `push`, `git hf update` (pushes the current branch, and master and develop after merging origin into them; `-p` only toggles pruning), and every `cancel` (`feature cancel` is refused without `-f`; with it, it pushes the branch, deletes it on origin and force-deletes it locally). `gh pr create` also needs a go-ahead.
 
 ```bash
 git hf init [-af]
@@ -14,7 +14,7 @@ git hf feature rebase [-i] [<name|nameprefix>]
 git hf feature checkout [<name|nameprefix>]   # alias: co
 git hf feature pull [-r] [<remote> [<name>]]
 git hf feature push [<remote> [<name>]]
-git hf feature cancel [-f] <name>
+git hf feature cancel -f [-k] <name>          # refused without -f; pushes, deletes the origin branch, then branch -D (-k keeps local)
 git hf release [list] [-v]
 git hf release start <version> [<base>]
 git hf release finish [-sumpk] <version>      # -s sign, -u key, -m tag msg, -p push (default on), -k keep, -n notag, -b nobackmerge
@@ -28,7 +28,7 @@ git hf support [list] [-v]
 git hf support start [-F] <version> <base>
 git hf push [-F]          # fetch, merge origin/<current> into current, push current (creates upstream if new)
 git hf pull [-r]          # fetch and merge (or rebase) origin/<current> into current
-git hf update [-p]        # merge origin/master and origin/develop into local master/develop; prune deleted remote branches
+git hf update [-p]        # merge origin/master and origin/develop into local master/develop, then push the current branch, master and develop; -p toggles pruning (default on)
 git hf version
 git hf upgrade           # self-upgrade from GitHub; do not run unasked
 ```

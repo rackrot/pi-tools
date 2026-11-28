@@ -24,7 +24,7 @@ play {
 - `publishReleaseBundle`: uploads the AAB to the configured track. Publishes; confirm first.
 - `promoteReleaseArtifact`: moves the latest release between tracks (`--from-track`, `--promote-track`). Confirm first.
 - `publishReleaseListing`: pushes listing text and images. Confirm first.
-- `bootstrapReleasePlayResources` (check `./gradlew tasks --group publishing` for the exact name): downloads the existing listing into `src/<variant>/play/`. Read-only against Play.
+- `bootstrapListing` (`bootstrapReleaseListing` per variant; check `./gradlew tasks --group publishing` for the exact name): downloads the existing listing into `src/main/play/`. Read-only against Play, but it resets an existing local `play/` folder, so check for uncommitted listing edits first.
 - Command-line overrides such as `--track`, `--release-status`, `--user-fraction`: show them in the confirmation.
 
 List the real task names with `./gradlew :app:tasks --all | grep -i play` before running.

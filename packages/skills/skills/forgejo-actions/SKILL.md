@@ -1,6 +1,6 @@
 ---
 name: forgejo-actions
-description: "Creates, reviews, hardens and debugs Forgejo Actions workflows for forgejo-runner on Forgejo and Codeberg: runner labels, uses: resolution, GitHub keys Forgejo ignores, fork-PR approval, secrets. Use when editing .forgejo/workflows/*.yml (or .github/workflows on a Forgejo repo), or when a run fails (a pasted <host>/<owner>/<repo>/actions/runs/<n> URL, \"CI failed\", \"the build is red\") on a Forgejo or Codeberg remote. Not for GitHub-hosted Actions (`gh-actions`)."
+description: "Creates, reviews, hardens and debugs Forgejo Actions workflows for forgejo-runner on Forgejo and Codeberg: runner labels, uses: resolution, GitHub keys Forgejo ignores, fork-PR approval, secrets. Use when editing .forgejo/workflows/*.yml (or .github/workflows on a Forgejo repo), or when a run fails (a pasted <host>/<owner>/<repo>/actions/runs/<n> URL, \"CI failed\", \"the build is red\") on a Forgejo or Codeberg remote. Not for workflows on github.com or GitHub Enterprise, or for commit-time hooks and what a prek CI step runs (`pre-commit`)."
 ---
 
 # Forgejo Actions
@@ -15,7 +15,7 @@ Run `git remote -v`, then `git remote get-url <remote>` for the remote the work 
 
 - github.com, or a host that `gh auth status --hostname <host>` knows: this is GitHub. Stop and point to `gh-actions` if installed.
 - codeberg.org, a host where `curl -fsS https://<host>/api/forgejo/v1/version` answers, or a repo with `.forgejo/workflows` or `.gitea/workflows`: Forgejo, continue.
-- A repo with only `.github/workflows` is not necessarily GitHub's. Forgejo runs only the first existing directory of `.forgejo/workflows`, `.gitea/workflows`, `.github/workflows`, so on a Forgejo remote `.github/workflows` is Forgejo's workflow set, unless one of the other two directories exists (then it is ignored, even if that directory is empty).
+- A repo with only `.github/workflows` is not necessarily GitHub's. Forgejo runs only the first existing directory of `.forgejo/workflows`, `.gitea/workflows`, `.github/workflows`, so on a Forgejo remote `.github/workflows` is Forgejo's workflow set, unless one of the other two directories exists (then it is ignored, even if that directory contains no workflow files, for example only a README or .gitkeep).
 
 ## Before any edit
 

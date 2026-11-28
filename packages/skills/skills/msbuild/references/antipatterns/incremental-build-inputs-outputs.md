@@ -3,10 +3,7 @@
 Expensive artifact-producing targets need complete inputs and real outputs. This is not a rule
 that every validation/orchestration target must have a stamp file.
 
-The original catalog's project-file-only example was incomplete when generation depended on
-`$(Version)`: a command-line property can change without touching the project file. A stable
-value-input file can represent that dependency while a separate target registers outputs even
-when generation is skipped:
+When generation depends on a property such as `$(Version)`, listing the project file as an input is not enough: a command-line property can change without touching the project file. A stable value-input file can represent that dependency. A separate registration target is optional: items inside a skipped incremental target are still added by output inference (see [targets](../targets.md#generated-files)). Use one only when an item depends on task output that cannot be inferred:
 
 ```xml
 <Target Name="WriteBuildInfoInputs">

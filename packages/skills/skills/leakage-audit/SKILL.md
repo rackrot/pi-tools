@@ -1,6 +1,6 @@
 ---
 name: leakage-audit
-description: Audits an eval, metric, experiment or benchmark for leakage and reports which independence checks fail, each with a fix. Use when asked "is this A/B actually measuring anything?", "is the grader the same model a problem?", "is this holdout clean?", or when a result looks too clean. Read-only. Not for writing evals or a pre-mortem.
+description: "Audits an eval, metric, experiment or benchmark for leakage and reports which independence checks fail, each with a fix. Use when asked \"is this A/B actually measuring anything?\", \"is the grader the same model a problem?\", \"is this holdout clean?\", before reporting a score whose outputs and judging (or test set and tuning) came from the same model or person, or when a result is better than anyone expected. Works from a design described in the message; no files needed. Read-only. Not for writing evals or a pre-mortem."
 ---
 
 # Leakage audit
@@ -9,7 +9,6 @@ Check whether a validation is independent: does outside ground truth enter, or a
 
 ## Not for
 
-- Writing or running evals: not this skill.
 - Stress-testing a plan or claim with a pre-mortem or evidence audit: use `devils-advocate`.
 
 ## Workflow
@@ -24,9 +23,9 @@ Check whether a validation is independent: does outside ground truth enter, or a
 
 1. **Recall, not reason**: a memorized answer is recited instead of derived, so the system already knows the result it is supposedly computing.
 2. **Wrong null**: an ablation removes a surface label but not the underlying signal the system exploits, so the control still leaks.
-3. **Shared hallucination**: two components verify each other, and the circularity is reported as a number.
-4. **Tautology**: a scorer grades buckets it drew itself.
-5. **Verifier is designer**: a private, unreproducible recipe dressed as a holdout.
+3. **Shared hallucination**: two separate components verify each other, and the circularity is reported as a number.
+4. **Tautology**: one component scores buckets or partitions it drew itself (one component, unlike the two in pattern 3).
+5. **Verifier is designer**: the person or model that built the system also chose the holdout or wrote the scorer, by a recipe nobody else can rerun. Does not fire when the recipe is published and the ground truth comes from outside.
 6. **Shared-pool bias**: train and holdout come from one labeler pool, so one bias enters both sides.
 7. **Frame injection**: the question hands the subject the hypothesis.
 8. **Demand characteristics**: measured subjects know they are being measured.
@@ -35,7 +34,7 @@ Check whether a validation is independent: does outside ground truth enter, or a
 
 - Blinding the output value does not blind the collection recipe. Check both.
 - Read-only. Name the leak and the independence fix; do not rewrite the experiment.
-- For high stakes, add one independent fresh-context auditor, handed only the validation design and not this session's reasoning, to run the patterns blind. The default stays same-session.
+- When a ship, publish or spend decision rests on the number, add one independent fresh-context auditor: spawn a subagent given only the validation design text, not this session's reasoning, to run the patterns blind. Otherwise the audit stays same-session.
 
 ## Before finishing
 

@@ -61,7 +61,7 @@ Ask only what selects the right players, and avoid revealing the game so applica
 ```text
 Intro (2 min)
   "Thanks for coming. We're testing the game, not you. Nothing you do is wrong.
-   I didn't make this, so you won't hurt my feelings." (Say it even if you did.)
+   Please be blunt: the problems help us more than the praise."
   "I'll mostly stay quiet and may not answer questions, because we want to see
    what happens when you're on your own. Ask anyway; it helps us."
   Think-aloud only if chosen: "Please say what you're thinking as you play: what

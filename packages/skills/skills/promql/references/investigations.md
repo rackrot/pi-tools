@@ -30,7 +30,7 @@ Metric names here are node_exporter's; other exporters differ.
 | --- | --- |
 | Per-second rate of a counter | `rate(x[5m])` |
 | Total over a window | `increase(x[1h])` |
-| Share of observations under a bound | `histogram_fraction(0, 0.5, x)` (native histograms) |
+| Share of observations under a bound | `histogram_fraction(0, 0.5, sum by (route) (rate(x[5m])))` (native histograms) |
 | Trend and time to exhaustion | `predict_linear(x[6h], 4*3600)`, `deriv(x[1h])` |
 | Quantile of a gauge over time | `quantile_over_time(0.95, x[1h])` |
 | Detect a vanished series | `absent(x{job="<job>"})`, `absent_over_time(x[10m])` |

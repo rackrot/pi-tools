@@ -122,6 +122,17 @@ Conditions use symbol names in parentheses. Exclude build output too: add `"excl
 "constraints": {
   "cli-only": {
     "type": "host",
+    "args": [{ "hostname": "dotnetcli" }]
+  }
+}
+```
+
+Add a `version` range or an `sdk-version` constraint only when the user asks for one:
+
+```json
+"constraints": {
+  "cli-only": {
+    "type": "host",
     "args": [{ "hostname": "dotnetcli", "version": "[10.0.100,)" }]
   },
   "sdk": {

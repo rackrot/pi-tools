@@ -50,7 +50,7 @@ class OrderControllerTest {
 }
 ```
 
-- Prefer `.bodyJson().convertTo(Type.class)` plus AssertJ over string JSON comparison. For lists use `convertTo(new ParameterizedTypeReference<List<OrderResponse>>() {})`-style types per the Spring docs; check the overload your Framework version offers.
+- Prefer `.bodyJson().convertTo(Type.class)` plus AssertJ over string JSON comparison.
 - `bodyJson().isLenientlyEqualTo(...)` compares whole documents leniently. `extractingPath("$.x")` reads one value.
 - Failures: `assertThat(result).failure().isInstanceOf(...)` asserts an unhandled exception. Async requests complete before assertions, so no special handling is needed.
 - Query params: `.param("page", "2")`. Headers: `.header("X-Trace", "abc")`.

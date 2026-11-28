@@ -1,23 +1,23 @@
 ---
 name: pre-commit
-description: Sets up, updates and repairs commit-time hooks with prek (preferred) or pre-commit, plus Husky and lint-staged for Node repos. Use when adding a .pre-commit-config.yaml, running hooks across a repo, bumping hook revs, wiring hooks into CI, or when a commit or `prek run` fails on a hook and needs fixing.
+description: "Gets a commit through after a commit-time hook rejected it, and sets up, updates and runs those hooks with prek (preferred) or pre-commit, plus Husky and lint-staged for Node repos. Read this first whenever a commit, `prek run` or `pre-commit run` failed on a hook (ruff, mypy, eslint, end-of-file-fixer, gitleaks) or the user asks how to get a blocked commit in, before suggesting `--no-verify` or `SKIP=`. Also use when adding a .pre-commit-config.yaml, running hooks across a repo, bumping hook revs or wiring hooks into CI."
 ---
 
 # Commit-time hooks with prek or pre-commit
 
-Not for repos where devenv manages the hooks (the `devenv` skill, if installed), authoring GitHub Actions workflows (`gh-actions`, if installed), or choosing which linter to adopt.
+Not for repos where devenv manages the hooks (the `devenv` skill, if installed), authoring CI workflow files (`forgejo-actions` for Forgejo or Codeberg, `gh-actions` for GitHub, if installed), or choosing which linter to adopt.
 
 prek is a single-binary Rust reimplementation of pre-commit. It reads the same `.pre-commit-config.yaml` and hook repositories, so everything here works with either tool. Prefer prek: it needs no Python and runs faster. Use pre-commit when the team already standardizes on it or prek can't be installed. Checked against prek 0.5 and pre-commit.com.
 
 ## Never bypass a hook
 
-A hook failure is a finding in the code. Fix the code; don't route around the check. Never suggest or run `git commit --no-verify`, `SKIP=<id>`, `-c core.hooksPath=...`, or an edit to `.pre-commit-config.yaml` that disables or loosens a hook to get a commit through. The `check-bypass-guard` plugin blocks those git forms when installed. If the user explicitly wants a hook skipped, tell them the command to run themselves.
+A hook failure is a finding in the code. Fix the code; don't route around the check. Never suggest or run `git commit --no-verify`, `SKIP=<id>`, `-c core.hooksPath=...`, or an edit to `.pre-commit-config.yaml` that disables or loosens a hook to get a commit through. Time pressure or "just get it in" is not a request to skip; only a direct request to skip or bypass the hook is. In that case give the command once, say what it skips, and let the user run it themselves.
 
 ## Check the starting state
 
 - Look for `.pre-commit-config.yaml`, `prek.toml`, `.husky/`, and a `git-hooks` block in `devenv.nix`. If devenv owns the hooks, stop: its module generates the config as a Nix-store symlink and installs the hook on `devenv shell`, so a second `prek install` would fight it.
 - Run `prek --version`, else `pre-commit --version`. Use whichever is installed, prek first.
-- Run `git config core.hooksPath`. prek follows a repo-local `core.hooksPath`; pre-commit refuses to install while it is set.
+- Run `git config core.hooksPath`. prek follows a repo-local or worktree-local `core.hooksPath` and refuses one that points outside the repo unless `-f` is passed; pre-commit refuses to install while it is set at all.
 - Pick hooks from tools the repo already runs (formatters, linters, type checkers). A hook the project doesn't already run in CI is new policy, so list it for the user before adding it.
 
 ## Set up or update hooks

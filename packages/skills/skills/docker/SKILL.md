@@ -1,11 +1,11 @@
 ---
 name: docker
-description: 'Writes and reviews Dockerfiles, Compose files and .dockerignore: multi-stage builds, layer caching, non-root runtime, daemon.json hardening, secrets and container debugging. Use when creating or changing a Dockerfile, compose.yaml or daemon.json, hardening an image or host, or debugging a container that won''t build, start or connect.'
+description: 'Project rules for Docker work that differ from common habits: cache-ordered multi-stage Dockerfiles, non-root runtime, .dockerignore, file-mounted secrets, loopback-only published ports, Compose startup order, daemon.json keys, image signing after the Docker Content Trust retirement, and exit-code triage. Use whenever a task writes, reviews or debugs a Dockerfile, compose.yaml, .dockerignore or /etc/docker/daemon.json, an image build is slow or the image is too big, a container exits, restarts, gets ECONNREFUSED or cannot reach another service, or a Docker host is audited or hardened. Read it before answering, even when the fix looks obvious or no files are at hand.'
 ---
 
 # Docker and Compose
 
-Not for Kubernetes manifests (the `kubernetes` skill), Helm charts (`helm`), CI workflow authoring (`gh-actions`), or rollout planning (`rollout-plan`).
+Not for Kubernetes manifests (the `kubernetes` skill), Helm charts (`helm`), CI workflow authoring (`forgejo-actions` for Forgejo), or rollout planning (`rollout-plan`).
 
 Change Dockerfiles and Compose files from what the repo already builds and runs. Match its base images, package manager, and service names before applying the rules below.
 
@@ -97,7 +97,7 @@ services:
 - Set memory and CPU limits so one container can't starve the host.
 - Don't mount the Docker socket into an app container. Access to it is root on the host.
 - A published port (`-p 8080:80`) binds all host addresses, and Docker routes its traffic before ufw's rules apply, so a ufw deny does not close it. Bind to loopback (`127.0.0.1:8080:80`) unless the service must be reachable from outside.
-- For the host itself (`/etc/docker/daemon.json`, socket, remote API, rootless mode, CIS section 2), read [daemon hardening](references/daemon-hardening.md).
+- For the host itself (`/etc/docker/daemon.json`, socket, remote API, rootless mode, CIS section 2) or image signing (`DOCKER_CONTENT_TRUST` is retired), read [daemon hardening](references/daemon-hardening.md).
 
 ## Debugging
 
@@ -128,4 +128,4 @@ See [debugging](references/debugging.md) for build failures, networking and DNS,
 - [dockerfiles](references/dockerfiles.md): read when writing a multi-stage Dockerfile for Node, Python, Go, or Java.
 - [compose](references/compose.md): read when writing or changing a Compose stack, overrides, networking, or volumes.
 - [debugging](references/debugging.md): read when a build fails, a container exits or restarts, or services can't reach each other.
-- [daemon hardening](references/daemon-hardening.md): read when hardening or auditing a Docker host's daemon.json, socket or remote access.
+- [daemon hardening](references/daemon-hardening.md): read when hardening or auditing a Docker host's daemon.json, socket or remote access, or when DOCKER_CONTENT_TRUST or image signature verification comes up (Content Trust is retired).

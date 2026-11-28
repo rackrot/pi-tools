@@ -1,15 +1,15 @@
 ---
 name: api-keys
-description: Designs the API-key system a platform issues to its own API consumers. Use when building or hardening key issuance for a public or partner API, choosing a key format (prefix, checksum, entropy), hash-only storage and lookup, scopes, dual-key rotation and revocation, service-account ownership and offboarding, or deciding keys versus OAuth.
+description: Designs the API-key system a platform issues to its own API consumers. Use when building or hardening key issuance for a public or partner API, choosing a key format (prefix, checksum, entropy), hash-only storage and lookup, scopes, dual-key rotation and revocation, service-account ownership and offboarding (an integration still running on a departed person's key), or deciding keys versus OAuth.
 ---
 
 # API keys you issue
 
 A key identifies the calling application, not a user. Design the system so a leaked, lost, or orphaned key stays a contained event.
 
-Not for logging in to your own app or validating tokens (`app-auth`), OAuth authorization-server design (`api-oauth-provider`), webhook signing (`api-webhooks`), each if installed, or consuming another vendor's keys.
+Not for logging users in to your own app or validating their session tokens, OAuth authorization-server design (`api-oauth-provider`), webhook signing (`api-webhooks`), each if installed, or consuming another vendor's keys.
 
-The schema, validation steps, hash rationale, rotation procedure, offboarding and self-service details are in [references/storage-and-rotation.md](references/storage-and-rotation.md). Read it when implementing any of those.
+The schema, validation steps, hash rationale, rotation procedure, offboarding and self-service details are in [references/storage-and-rotation.md](references/storage-and-rotation.md). Read it when designing, implementing or reviewing any of those.
 
 ## Keys or OAuth
 
@@ -31,14 +31,14 @@ Get these facts before designing: greenfield or retrofit (and how existing keys 
 - Use `prefix_` plus a random body plus a checksum. The prefix encodes type and environment (`sk_live_`, `rk_test_`), and the checksum allows offline rejection and cuts scanner false positives.
 - Draw the body from a CSPRNG with at least 120 bits of entropy.
 - Put test or live in the prefix from day one.
-- Webhook signing secrets are not API keys. Follow this skill for their storage and rotation only, and `api-webhooks`, if installed, for the signing scheme.
+- Webhook signing secrets are not API keys. They must stay retrievable for signing, so hash-only storage does not apply. Their generation, storage and rotation belong to `api-webhooks`, if installed.
 
 ## Store and look up
 
 - Show the full key once at creation and store only a SHA-256 hash, with an indexed plaintext prefix as the lookup handle.
 - Validate format and checksum before any database call, compare hashes in constant time, check expiry and revocation, then scopes.
 - Update `last_used_at` asynchronously.
-- Use SHA-256, not argon2id or bcrypt: the key is high-entropy, so a slow hash adds cost without adding safety. Enforce the entropy floor at generation, because that is what makes this safe.
+- Use SHA-256, not argon2id or bcrypt: the key is high-entropy, so a slow hash adds cost without adding safety. Enforce the entropy floor at generation, because that is what makes this safe. Because the hash is unsalted, only the part of the key body not stored in plaintext counts toward the 120-bit floor.
 - Fail secure. A missing server-side secret (for example a KMS key) must stop the service at startup and never fall back to a built-in default.
 
 ## Scopes
@@ -52,7 +52,7 @@ Get these facts before designing: greenfield or retrofit (and how existing keys 
 
 ## Rotate
 
-Rotation works only when two keys are valid at once. Provide one roll operation that creates the new key and schedules the old key's end, then watch the old key's `last_used_at` until traffic stops, and deactivate before deleting.
+Rotation works only when two keys are valid at once. Provide one roll operation that creates the new key and schedules the old key's end, then watch the old key's `last_used_at` until traffic stops, and deactivate before deleting. If the old key still has traffic near the end of its window on a routine roll, extend the window and tell the customer which caller is still on it. Do not cut off a live consumer on schedule.
 
 - On confirmed compromise or offboarding, revoke at once with no grace and accept the downtime.
 - Never delete a key before its traffic reads zero, and never create a replacement without scheduling the old key's end.
@@ -65,6 +65,7 @@ Rotation works only when two keys are valid at once. Provide one roll operation 
 ## Review checklist
 
 - Plaintext or reversibly encrypted keys outside a KMS design.
+- A hash-only scheme over a key not generated to the entropy floor, such as a short or human-chosen key.
 - A missing secret that falls back to a default.
 - A fail-open scope default.
 - No rate limit on validation or creation.

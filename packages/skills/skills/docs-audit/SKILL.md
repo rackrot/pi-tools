@@ -1,13 +1,13 @@
 ---
 name: docs-audit
-description: "Audits documentation against the code read-only, then fixes it on request. Finds stale, missing or contradictory README, setup, API, config, CLI and changelog docs, ranks them P0 to P3 with cited lines, checks commands, links and env vars with a script. Also owns one fact repeated across code, config, CI and docs whose copies disagree: finds every copy, proposes one home, edits only after approval. Use when asked whether docs are stale, to check docs after a change, or for one source of truth."
+description: "Checks whether documentation still matches the code and reports stale, missing or contradictory claims, read-only until asked to fix. Use when someone asks to audit or review docs against the code, asks whether a README, setup guide, API, config, CLI or changelog doc is stale, out of date or still correct, wants docs checked after a code change or before a release, or finds the same steps (such as rollback steps) written in several docs that have drifted apart and need one owner doc. Ranks findings P0 to P3 with cited lines. Not for one fact copied across code, config, CI and docs (ssot-consolidate), README layout or badges (readme), or rewriting one document (doc-tidy)."
 ---
 
 # Docs Audit
 
 Compare what the docs claim with what the code does, and report the gaps with evidence. Stay read-only until the person asks for fixes, because an audit that edits mid-way destroys the evidence it is reporting.
 
-Not for CLAUDE.md or AGENTS.md files (`agent-instructions`, if installed), architecture decisions (`adr-writing`), project vocabulary (`domain-modeling`), or a README's structure, badges and visuals (`readme`, if installed); stale facts in a README are still in scope. It does cover assigning doc roles so each fact has one owner, choosing a doc type, and one fact whose copies disagree across code, config, CI and docs.
+Not for CLAUDE.md or AGENTS.md files (`agent-instructions`, if installed), architecture decisions (`adr-writing`, if installed), project vocabulary (`domain-modeling`), a README's structure, badges and visuals (`readme`), rewriting or trimming one document (`doc-tidy`), or one fact whose copies span code, config, CI and docs (`ssot-consolidate`); stale facts in a README are still in scope. It does cover assigning doc roles so each fact has one owner and choosing a doc type.
 
 ## Workflow
 
@@ -16,7 +16,7 @@ Not for CLAUDE.md or AGENTS.md files (`agent-instructions`, if installed), archi
 3. **Find the docs.** Look for README files, `docs/`, API specs, changelogs, setup and deploy guides, `.env.example`, examples, runbooks, and comments near the code. For generated docs, identify the generator and its command before recommending an edit.
 4. **Run the drift script.** `python3 scripts/docs_drift.py <repo>` checks documented `npm run` scripts and `make` targets (inside code only, not prose), relative links, and env vars in both directions (names also come from `.env*.example` files, and a documented-but-unread name is flagged only when it ends in `_URL`, `_KEY`, `_TOKEN`, `_HOST`, `_PORT`, or `_SECRET`), and it flags docs whose `Fingerprint` and `Monitored` header paths changed since the stamped commit, or whose commit cannot be resolved. It judges no prose and uses name matching, so confirm each finding before reporting it. Placeholder links (such as `NNNN-title.md` in a template) show up as findings and are not real drift.
 5. **Compare by hand.** The script does not read meaning, and prose is where the serious drift hides. Check commands and arguments, API routes, auth and status codes, config defaults, UI labels and steps, schema fields, and whether the examples still run.
-6. **Verify safely.** Run checks that write nothing: a docs build to a temp dir, a link check, CLI `--help`, a focused test. Do not run anything that writes into the repo, such as formatters, installers, or `compileall`, which leaves `.pyc` files while `git status` looks clean. Record each check and each skipped check.
+6. **Verify safely.** Run checks that write nothing: a docs build to a temp dir, a link check, CLI `--help`, a focused test run with caches disabled (for pytest: `PYTHONDONTWRITEBYTECODE=1` and `-p no:cacheprovider`). Do not run anything that writes into the repo, such as formatters, installers, or `compileall`, which leaves `.pyc` files while `git status` looks clean. Record each check and each skipped check.
 7. **Report.** Use the format below.
 
 ## Evidence rules
@@ -66,5 +66,4 @@ Fix only when the person asks, and only confirmed drift or the inferred gaps the
 ## Structure and doc types
 
 - Read `references/doc-roles.md` when the problem is structural: docs duplicate each other, agents keep re-deriving context, or deleted things get recreated. It assigns one owner to each fact and adds a staleness stamp.
-- Read `references/one-fact.md` when one value, spec or definition is repeated across code, config, CI and docs and the copies disagree, or the person asks for a single source of truth. It is a different job from the audit: find every copy, propose a canonical home, and edit only after approval.
 - Read `references/doc-types.md` when writing or reorganizing a page, to pick tutorial, how-to, reference, or explanation, and for README rules.

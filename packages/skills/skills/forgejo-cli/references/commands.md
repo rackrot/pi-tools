@@ -12,7 +12,7 @@ Release binaries (Linux x86_64 and aarch64, Windows), `cargo install --locked fo
 
 ## Issues (`fj issue`)
 
-`create <TITLE>` (`--body`, `--body-file`, `--template`, `--no-template`, `--milestone`, `--web`), `edit <N> title|body|comment|labels|milestone`, `comment <N> [BODY] [--body-file]`, `assign`/`unassign`, `close <N> [-w [MSG]]`, `search [QUERY]`, `view <N> [body|comment|comments|assignees]`, `templates`, `browse`, `depend add|remove|list`, `block add|remove|list`. There is no `reopen`. Details in [issues](issues.md).
+`create <TITLE>` (`--body`, `--body-file`, `--template`, `--no-template`, `--milestone`, `--web`), `edit <N> title|body|comment|labels|milestone`, `comment <N> [BODY] [--body-file]`, `assign`/`unassign`, `close <N> [-w [MSG]]`, `search [QUERY]`, `view <N> [body|comment|comments|assignees]`, `templates`, `browse`, `depend add|remove|list`, `block add|remove|list`. There is no `reopen`. For issue work use `forgejo-issues`.
 
 ## Pull requests (`fj pr`)
 
@@ -37,4 +37,4 @@ Release binaries (Linux x86_64 and aarch64, Windows), `cargo install --locked fo
 
 ## What fj cannot do
 
-JSON output, raw API calls, issue reopen, run logs, a draft PR flag, a label flag on issue create, branch protection, repo merge settings. Use forgejo-mcp tools (`mcp__plugin_forgejo-mcp_forgejo__*`) if present, else the web UI (`fj <cmd> browse`), else ask the user to paste.
+JSON output, raw API calls, issue reopen, run logs, a draft PR flag, a label flag on issue create, branch protection, repo merge settings. Use forgejo-mcp tools if present (names start with `mcp__forgejo` in pi, `mcp__plugin_forgejo-mcp_forgejo__` in Claude Code), else the web UI (`fj <cmd> browse`), else ask the user to paste.

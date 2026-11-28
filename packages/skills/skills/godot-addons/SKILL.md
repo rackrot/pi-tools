@@ -1,13 +1,13 @@
 ---
 name: godot-addons
-description: Godot addon APIs for Beehave and LimboAI behavior trees, Phantom Camera and Dialogue Manager v4. Use when a project has addons/beehave, addons/limboai, addons/phantom_camera or addons/dialogue_manager, or when choosing, installing or writing code and .dialogue files for one of them.
+description: Godot addon APIs for Beehave and LimboAI behavior trees, Phantom Camera and Dialogue Manager v4. Use when a project has addons/beehave, addons/limboai, addons/phantom_camera or addons/dialogue_manager, or when choosing, installing or writing code and .dialogue files for one of them. Not for writing or fixing your own EditorPlugin or plugin.cfg (godot-editor-tools).
 ---
 
 # Godot addons
 
 Covers four widely used MIT addons for Godot 4. Each has its own reference; read only the one the task needs.
 
-Start by reading the project's Godot version from `config/features` in `project.godot` and follow that version, not the newest; per-version changes are in the `godot` plugin's `references/version-notes.md`, if installed.
+Start by reading the project's Godot version from `config/features` in `project.godot` and follow that version, not the newest; per-version changes are in the `godot` skill's `references/version-notes.md`.
 
 | Addon | Folder | Read | Use it for |
 |---|---|---|---|
@@ -24,7 +24,7 @@ Each reference starts with an "Addon vX checked against Godot 4.x" line. The ver
 2. **Confirm it is enabled.** `project.godot` lists it under `[editor_plugins] enabled=PackedStringArray(...)`. If it is missing, enabling it is one line there or a tick in Project Settings → Plugins. Phantom Camera and Dialogue Manager register their autoloads on enable, so never add them by hand.
 3. **Read the matching reference** and follow its checklist.
 4. **Write GDScript first.** Each reference has a short C# note where the addon's C# story differs. General C# idioms belong to `godot-csharp`.
-5. **Verify** by running the scene from the editor (or the editor MCP's run tools, if `godot-mcp-setup` was done) and watching the addon's own debugger tab: Beehave and LimboAI both ship one, and Dialogue Manager 4 has a state debugger panel.
+5. **Verify** by running the scene from the editor (or an editor MCP's run tools, if one is connected) and watching the addon's own debugger tab: Beehave and LimboAI both ship one, and Dialogue Manager 4 has a state debugger panel.
 
 ## Choosing an addon
 
@@ -44,5 +44,5 @@ Each reference starts with an "Addon vX checked against Godot 4.x" line. The ver
 - Beehave keeps its own per-run state on the blackboard keyed by the actor's instance id. Do the same for leaf state, and reset it in `before_run`/`after_run`/`interrupt`, so restarts and interrupted runs start clean.
 - LimboAI's GDExtension build cannot be used from C#. Only the module build ships the NuGet package.
 - A Phantom Camera `PhantomCameraHost` must be a **child** of the real `Camera2D`/`Camera3D`. PCam nodes never render on their own.
-- Dialogue Manager 4 renamed titles to **cues**, made response conditions self-closing (`[if cond /]`), and replaced `set`/`do` with `$>`. Code or docs written for 3.x will not parse cleanly.
+- Dialogue Manager 4 renamed titles to **cues**, made response conditions self-closing (`[if cond /]`, so a 3.x `[if cond]` on a response no longer parses), and deprecated `set`/`do` in favour of `$>` (they still parse).
 - Dialogue Manager's C# events stay silent until C# code touches `DialogueManager.Instance` (the bridge is lazy).

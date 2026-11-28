@@ -1,13 +1,13 @@
 ---
 name: gradle
-description: 'Diagnoses and writes Gradle build logic: configuration cache failures, "Could not resolve" and no matching variant errors, dependencyInsight, build cache misses, Kotlin DSL scripts, libs.versions.toml catalogs, convention plugins in build-logic, toolchains. Use for "Task.project at execution time is unsupported", "Configuration cache problems found in this build", "Unresolved reference: libs", or a request to add a task, dependency or convention plugin to a *.gradle.kts file.'
+description: 'Gradle builds: ./gradlew failures, slow or never-cached tasks, build.gradle(.kts), settings.gradle(.kts), libs.versions.toml catalogs, convention plugins in build-logic. Read this before answering any Gradle question, even when the build files are not in the workspace and the user only describes the build or pastes an error. Use for configuration cache failures ("Task.project at execution time is unsupported"), "Could not resolve" or "No matching variant", a task that reruns or misses the build cache, the same setup copied into every module, or adding a task, dependency or convention plugin. Not for Maven POMs (maven) or the Android android {} block, variants and signing (android-build).'
 ---
 
 # Gradle
 
 Fix the cause the build reports and keep its observable outputs (task names, artifacts, dependency versions) unless the request changes them.
 
-Not for: audits and "check my build" requests (`gradle-skills:gradle-best-practices`), wrapper upgrades (`gradle-skills:gradle-wrapper-upgrade`), Maven POMs (`maven`), tests with no Gradle question (`java-testing`, `kotlin-testing`), Android Gradle Plugin DSL, variants, signing and release builds (`android-build`), and the AGP 8 → 9 migration (`android-skills:agp-9-upgrade`).
+Not for: Maven POMs (`maven`), tests with no Gradle question (`java-testing`, `kotlin-testing`), or Android Gradle Plugin DSL, variants, signing and release builds (`android-build`). Whole-build audits, wrapper upgrades and the AGP 8 → 9 migration are out of scope and no skill here covers them.
 
 Verified on 2026-10-20 against docs.gradle.org: Gradle 9 runs on a JVM from 17 through 27, and the configuration cache is off by default in 9.x.
 
@@ -56,7 +56,7 @@ Before any build with a scan, ask the user first: `--scan` uploads build data to
 ## Gotchas
 
 - `Task.project` at execution time is the most common configuration cache failure. A `doLast` or `doFirst` block that reads `project` fails only when the cache is on, so a build can pass without the cache and fail with it.
-- Wrapping the read in `providers.provider { project.version }` does not fix it. The lambda runs when the action calls `.get()`, which is execution time. Read the value into a `val` inside the `register` block, outside the action.
+- A provider built in the `register` block and read in the action works with the cache on: `val v = providers.provider { project.version }` then `doLast { println(v.get()) }`. Gradle evaluates it when it stores the cache entry (checked on Gradle 9.8.2). What fails is creating the provider inside the action, as in `doLast { providers.provider { project.version }.get() }` (reported as "cannot serialize object of type DefaultProject"), or touching `project` or `providers` through the script object in `doLast`/`doFirst`.
 - `implementation` keeps a dependency off consumers' compile classpaths; `api` leaks it. Choose by whether the type appears in the module's public signatures.
 - `resolutionStrategy.force` overrides every path silently. Prefer a platform (BOM) or a constraint, and say why when you use force.
 - A plugin version set in one module's script and used in another needs the `plugins {}` block to declare `apply false` at the root.
@@ -65,5 +65,4 @@ Before any build with a scan, ask the user first: `--scan` uploads build data to
 
 ## Old patterns
 
-- `buildSrc/` still works. For new shared build logic, prefer an included build in `build-logic/`.
 - `compile`, `testCompile` and `runtime` configurations were removed in Gradle 7; use `implementation`, `testImplementation` and `runtimeOnly`.

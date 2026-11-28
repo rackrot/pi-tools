@@ -1,13 +1,13 @@
 ---
 name: codebase-design
-description: Shared vocabulary and method for designing deep modules. Use when designing or improving a module's interface, deciding where a seam goes, finding deepening opportunities, making code more testable or AI-navigable, or when the user asks for an architecture review or to improve the codebase architecture. Not for making a specific mistake impossible to write (mistake-proof).
+description: 'Restructures code into fewer, deeper modules, each with a small interface. Decides which thin classes, wrappers or forwarding chains to merge, what callers should see, where an injected port is justified, and which tests to replace. Use it, even when the code is pasted into the prompt, for "how should I restructure this package", "what should the public surface be", tests that need many mocks or break on internal renames, "should this be an interface", "review the architecture" or "find refactor candidates". Not for making one specific misuse impossible to write (mistake-proof), naming domain terms (domain-modeling) or enforcing import rules (ts-module-boundaries).'
 ---
 
 # Codebase Design
 
 Design **deep modules**: a lot of behaviour behind a small interface, placed at a clean seam, testable through that interface. Use this language and these principles wherever code is being designed or restructured. The aim is leverage for callers, locality for maintainers, and testability for everyone.
 
-Not for project vocabulary (`domain-modeling`, if installed), recording a decision (`adr-writing`), or HTTP API conventions (`api-rest-design`).
+Not for project vocabulary (`domain-modeling`, if installed), recording a decision (`adr-writing`, if installed), or HTTP API conventions (`api-rest-design`).
 
 ## Glossary
 

@@ -26,7 +26,7 @@ quest    = { id, state: available | active | complete | turned_in,
              objectives: [ { id, event, filter, count, needed } ], rewards }
 ```
 
-- Modifier order: base, then flat adds, then percent multipliers, then overrides, then clamp. Equip pushes the item's modifiers with its id as `source_id`; unequip removes by that id.
+- Modifier order: base, then flat adds, then percent multipliers, then overrides, then clamp. The order effects were applied in never matters: sum all flat adds, sum all percent values, and multiply once, `(base + sum(flats)) * (1 + sum(percents))`; for example base 50 with +10, +20% and +10% gives (50 + 10) * 1.3 = 78. Equip pushes the item's modifiers with its id as `source_id`; unequip removes by that id.
 - Effects that can stack or refresh key on source plus effect id, never on the effect resource alone, or reapplying silently resets it. Ability, effect and stat-modifier architecture is in `game-architecture` (patterns reference).
 - Quest definitions are data; quest progress (state, objective counts) goes in the save.
 - Inventory: `add_item` returns the leftover that didn't fit; fill existing stacks before empty slots; emit one change event per operation.

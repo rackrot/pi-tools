@@ -1,13 +1,11 @@
 ---
 name: jetpack-compose
-description: 'Writes everyday Jetpack Compose UI. Use for "LaunchedEffect restarts on every keystroke", state that resets on recomposition, a card or button component with many boolean flags, an ignored modifier, or adding a screen, theme or animation. Covers where state lives and which effect runs which work, component APIs with modifier and slot parameters, LazyColumn keys, unstable parameters, Material 3 theming, animation, focus and previews.'
+description: 'Jetpack Compose (Android @Composable) authoring rules. Read before writing or changing any composable and before answering a Compose question, even when the answer seems known: an effect that restarts or fires too often, state that resets or lands on the wrong list row, a card or button component growing boolean show/is/has parameters, an ignored modifier, or a new screen, component, theme, animation or @Preview. Covers state ownership and effect keys, modifier and slot parameters, LazyColumn keys, strong skipping and unstable parameters, Material 3 theming, AnimatedContent, focus, and when not to add a preview. Not for Compose UI tests, ViewModels or Docker Compose.'
 ---
 
 # Jetpack Compose
 
 Write Composable code that follows the project's existing patterns; the rules below are defaults for new code, not a reason to rewrite working screens.
-
-Not for: edge-to-edge and insets (`android-skills:edge-to-edge`), window sizes and foldables (`android-skills:adaptive`), Navigation 3 and predictive back (`android-skills:navigation-3`, `android-skills:navigation-event`), XML to Compose migration (`android-skills:migrate-xml-views-to-jetpack-compose`), auditing or diagnosing recomposition and jank in existing code (`android-skills:jetpack-compose-performance`), Wear, TV and Glance UI (their `android-skills` skills), ViewModels and data (`android`), UI tests (`android-testing`), visual direction for a new screen (`ui-direction`), and Docker Compose files (`docker`).
 
 ## Orient
 
@@ -27,6 +25,15 @@ Not for: edge-to-edge and insets (`android-skills:edge-to-edge`), window sizes a
 9. **Semantics.** Interactive custom surfaces need `Modifier.semantics` or `clickable(role = ...)`, and images a `contentDescription` (or `null` when decorative). Tests find nodes through semantics, so stable test tags help.
 10. **Previews.** Add `@Preview` only when the module already has preview tooling in its dependencies. Preview the content composable with sample state, never the wiring one.
 
+## Not for
+
+- ViewModels, repositories and data (`android`).
+- Compose UI tests (`android-testing`).
+- Visual direction for a new screen (`ui-direction`).
+- A cited UX rule or dated guideline row such as a WCAG criterion or touch-target size (`uiux-lookup`).
+- Docker Compose files (`docker`).
+- Edge-to-edge and insets, window sizes and foldables, Navigation 3 and predictive back, XML-to-Compose migration, auditing recomposition or jank in existing code, and Wear, TV or Glance UI: out of scope here; use the matching `android-skills` skill if installed.
+
 ## Done when
 
 - Every state value has one owner and every effect has a justified key.
@@ -39,4 +46,4 @@ Not for: edge-to-edge and insets (`android-skills:edge-to-edge`), window sizes a
 - A bare `var` in a composable resets on recomposition and does not invalidate UI; use `remember { mutableStateOf(...) }`.
 - `rememberUpdatedState` is for a long-lived effect that needs the latest callback. If a changed value should restart the work, make it a key.
 - `mutableStateOf(list)` observes replacement, not in-place mutation; use `mutableStateListOf` or replace the list.
-- Navigation Compose 2.x (`NavHost`, `composable(route)`) is fine when the project already uses it; for new Navigation 3 work use `android-skills:navigation-3`.
+- Navigation Compose 2.x (`NavHost`, `composable(route)`) is fine when the project already uses it; new Navigation 3 work is out of scope here (use an `android-skills` Navigation 3 skill if installed).

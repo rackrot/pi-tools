@@ -1,6 +1,6 @@
 ---
 name: gitops
-description: Sets up and reviews GitOps delivery to Kubernetes with Argo CD or Flux (choosing between them, repo layout, Application, ApplicationSet, GitRepository and Kustomization resources, sync policy, secrets with External Secrets, Sealed Secrets or SOPS). Use when bootstrapping a cluster from Git or debugging sync and drift.
+description: "Sets up, reviews and debugs GitOps delivery to Kubernetes with Argo CD or Flux: choosing between them, repo layout, Application, ApplicationSet, AppProject, GitRepository, Flux Kustomization and HelmRelease resources, sync policy and sync windows, secrets with External Secrets, Sealed Secrets or SOPS. Use when a cluster should deploy itself from a Git repo, and when an Argo CD app is OutOfSync, Degraded or keeps re-syncing, a Flux Kustomization or HelmRelease is not Ready, or a sync fails; read it before answering even when no repo files are at hand. Not for plain Kustomize overlays or workload manifests (kubernetes) or Helm chart authoring (helm)."
 ---
 
 # GitOps with Argo CD or Flux

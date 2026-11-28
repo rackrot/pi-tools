@@ -1,6 +1,6 @@
 ---
 name: nuget
-description: Manages NuGet dependencies and packages in .NET repos. Use for Directory.Packages.props and Central Package Management, bumping or aligning package versions, NU1xxx restore warnings, nuget.config sources and source mapping, vulnerable-package audits, lock files, dotnet pack metadata, publishing to nuget.org with trusted publishing, or authoring, validating and packing `dotnet new` templates (template.json, a template missing from `dotnet new list`).
+description: 'NuGet dependency rules for .NET repos, several of which differ from the usual defaults (when a Central Package Management conversion must stop, which version to align to, what to re-test). Read it before planning, advising on or editing, also for "what would you do" questions: Directory.Packages.props and CPM, bumping or aligning package versions, NU1xxx restore warnings, nuget.config feeds and source mapping, vulnerable-package audits (NU1901-NU1904), packages.lock.json, dotnet pack metadata, publishing to nuget.org with trusted publishing. Not for authoring `dotnet new` templates (dotnet-template-authoring) or packages.config migration (dotnet-upgrade-guide).'
 license: MIT
 ---
 
@@ -8,7 +8,7 @@ license: MIT
 
 Change package versions and package configuration without changing anything else about the build, and prove it with a before/after restore.
 
-Not for: MSBuild failures that aren't about packages (`msbuild`), C# code changes after an API break (`csharp`), vetting whether a new third-party package is trustworthy (`dependency-vetting`), CI workflow hardening beyond the publish job (`gh-actions`), `packages.config` to `PackageReference` migration (`dotnet-upgrade-guide`), using an existing `dotnet new` template to scaffold a project.
+Not for: MSBuild failures that aren't about packages (`msbuild`), C# code changes after an API break (`csharp`), CI workflow hardening beyond the publish job, `packages.config` to `PackageReference` migration (`dotnet-upgrade-guide`), authoring, validating or packing `dotnet new` templates (`dotnet-template-authoring`); using an existing `dotnet new` template to scaffold a project.
 
 ## Pick the mode first
 
@@ -19,7 +19,6 @@ Decide before running builds or editing files.
 3. **CPM conversion.** Only when the user asks to adopt, enable or convert to Central Package Management. Follow [references/cpm.md](references/cpm.md).
 4. **Sources, audit and lock files.** `nuget.config`, `packageSourceMapping`, `NuGetAudit*`, NU1900-NU1904, `packages.lock.json`: [references/sources-and-audit.md](references/sources-and-audit.md).
 5. **Packing and publishing.** `dotnet pack` metadata, tool/MCP-server packages, pushing to nuget.org from GitHub Actions: [references/trusted-publishing.md](references/trusted-publishing.md).
-6. **`dotnet new` templates.** Turning a project into a template, `template.json` symbols, conditions, post-actions and constraints, a template pack (`PackageType` `Template`), validating a template.json before publishing, a template that installs but is missing from `dotnet new list`: [references/templates.md](references/templates.md), which links [references/template-json.md](references/template-json.md) and [references/template-validation-rules.md](references/template-validation-rules.md). Template work skips the `packages.config` guard and the resolved-package comparison below; prove it by instantiating and building the template instead.
 
 Ask once if the scope (which projects or solution) is unclear. If the user gave a conflict strategy ("use the highest version"), apply it without asking again.
 

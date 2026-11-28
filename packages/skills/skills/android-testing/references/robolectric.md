@@ -1,6 +1,6 @@
 # Robolectric
 
-Robolectric runs Android framework code on the local JVM, so tests live in `src/test` and run with `testDebugUnitTest`. Verified 2026-11-01: Robolectric 4.17 is the latest release. Use the version the project already pins.
+Robolectric runs Android framework code on the local JVM, so tests live in `src/test` and run with `testDebugUnitTest`. Use the version the project already pins.
 
 ## Setup
 

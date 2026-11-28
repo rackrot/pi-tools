@@ -33,8 +33,8 @@ Read when you need the concrete endpoint, grant, and refresh-token checklist beh
 
 ## Storage
 
-- Store refresh and access tokens as hashes (SHA-256 suits high-entropy random tokens, for the reasons in `api-key-storage.md`).
-- Inside the grace window, a re-presented consumed token gets the successor already issued, not a new one. Minting a sibling lets a replayed stolen token fork the family past reuse detection. If you re-issue instead, allow it once and revoke the family on the next presentation.
+- Store refresh and access tokens as hashes. SHA-256 suits them: random high-entropy tokens resist brute force at any hash speed, so a slow hash such as argon2id or bcrypt only adds per-request cost.
+- Inside the grace window, a re-presented consumed token gets the successor already issued, not a new one. Minting a sibling lets a replayed stolen token fork the family past reuse detection. To return the successor without storing it in plaintext, keep its token response encrypted, keyed by the predecessor's hash, until the grace window closes, then delete it. If you re-issue instead, allow it once and revoke the family on the next presentation.
 - The grace window must recognize a just-consumed token. Keep the predecessor's hash with a validity timestamp, and don't drop hashing to solve it.
 - Opaque tokens revoke instantly through the database. JWTs don't, so a short lifetime is their revocation story.
 - When you issue JWT access tokens, include an audience that names the resource server, and have resource servers check it.

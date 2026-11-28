@@ -1,11 +1,11 @@
 ---
 name: esp-idf
-description: Writes, reviews and debugs ESP-IDF firmware for ESP32-family chips, with confirmation gates before any flash, eFuse burn or partition change. Use in an ESP-IDF project (sdkconfig, idf_component.yml, partitions CSV), for FreeRTOS tasks, drivers, Wi-Fi/BLE, OTA, Secure Boot, LVGL, idf.py build/flash/monitor, or a Guru Meditation panic.
+description: "Writes, reviews and debugs ESP-IDF firmware for ESP32-family chips (ESP32, S2, S3, C3, C6, H2), with confirmation gates before any flash, eFuse burn or partition change. Use for any ESP32 or ESP-IDF question, with or without project files: FreeRTOS tasks, drivers, Wi-Fi/BLE, OTA and rollback, partitions, sdkconfig, sleep and wakeup, Secure Boot, LVGL, idf.py build/flash/monitor. Also use when pasted serial output is an Espressif crash even if no chip is named: `Guru Meditation Error`, `Core N panic'ed (LoadProhibited, ...)`, a `Backtrace: 0x400...` line, an `rst:0x.. (..._RESET),boot:0x..` boot line, task watchdog or brownout resets. Not for STM32, nRF, RP2040 or other non-Espressif MCUs."
 ---
 
 # ESP-IDF firmware
 
-Focused on ESP-IDF; Arduino-ESP32 and PlatformIO projects get general embedded C guidance only. Not for bugs with no ESP angle (the `problem-solving` skill) or general shell scripts (`bash`, if installed).
+Focused on ESP-IDF; Arduino-ESP32 and PlatformIO projects get general embedded C guidance only. Not for bugs with no ESP angle or general shell scripts (`bash`, if installed).
 
 A wrong pin, a small task stack, or an ISR-unsafe call shows up as a reset, not an error message. Keep changes small, check them with the build, and say what only hardware can confirm.
 
@@ -14,7 +14,7 @@ A wrong pin, a small task stack, or an ISR-unsafe call shows up as a reset, not 
 Read the project before asking. Most answers are already in it.
 
 - **Chip.** `CONFIG_IDF_TARGET` in `sdkconfig`, or `idf.py set-target` history. The chip decides core count, peripherals, memory map, and sleep and wakeup APIs, so it matters. Ask only when the task depends on it and nothing in the repo shows it.
-- **ESP-IDF version.** `idf.py --version`, or `dependencies.idf` in `idf_component.yml`. As of 2026-10-17, v6.1 (2026-08-27) is the latest feature release; v6.0.3 and v5.5.6 are the newest patch releases of the older supported lines. v6.0 removed the legacy ADC, DAC, timer group, RMT, I2S, PCNT, MCPWM and sigma-delta drivers and marked legacy I2C (`driver/i2c.h`) end-of-life (removal planned for v7.0). Follow the driver style the project already uses unless the task is a migration.
+- **ESP-IDF version.** `idf.py --version`, or `dependencies.idf` in `idf_component.yml`. Check `idf.py --version` and the ESP-IDF release page for the current patch level. v6.0 removed the legacy ADC, DAC, timer group, RMT, I2S, PCNT, MCPWM and sigma-delta drivers and marked legacy I2C (`driver/i2c.h`) end-of-life (removal planned for v7.0). Follow the driver style the project already uses unless the task is a migration.
 - **Hardware facts.** Pin map, pull-ups, PSRAM, flash size, display controller, console transport. When missing, state the values you assume and carry them into the report.
 - **Components.** Exact LVGL, ESP-ADF, and ESP-SR versions (`dependencies.lock`).
 
@@ -71,7 +71,7 @@ Check power and reset, then the console, then one peripheral at a time with a kn
 ## Build, flash, monitor
 
 1. Run `idf.py --version`. A path that exists is not proof the toolchain works. If it fails, the user loads the environment with `. $IDF_PATH/export.sh` in that shell, and the setup is theirs to fix.
-2. Build with the project's wrapper when it has one, otherwise `idf.py build`. Copy wrappers from [templates/scripts](templates/scripts/) when the project has none: `common.sh`, `build.sh`, `flash.sh`, `monitor.sh`. They check the toolchain and target, and never run `set-target`, which wipes `sdkconfig`. `flash.sh` also refuses when `sdkconfig` enables `CONFIG_SECURE_BOOT` or `CONFIG_SECURE_FLASH_ENC_ENABLED` unless `ACK_EFUSE=1` is set.
+2. Build with the project's wrapper when it has one, otherwise `idf.py build`. Copy wrappers from [templates/scripts](templates/scripts/) when the project has none: `common.sh`, `build.sh`, `flash.sh`, `monitor.sh`. They check the toolchain and target, and never run `set-target`, which wipes `sdkconfig`. `flash.sh` also refuses when `sdkconfig` enables any of the eFuse-burning options listed above (except a changed `CONFIG_BOOTLOADER_APP_SECURE_VERSION`, which it cannot detect) unless `ACK_EFUSE=1` is set.
 3. A failing build, or one that warns about something real, is not done. Fix it and rebuild; try `idf.py fullclean build` when stale config could explain the failure.
 4. `idf.py flash monitor` is the usual hardware loop. `monitor` needs an interactive terminal, so hand the user the command when you cannot run one. Flash only after the confirmation above.
 5. If the project depends on ESP-ADF, ESP-SR, or similar frameworks, record exact versions and compatibility evidence before building ([dependency compatibility](references/dependency-compatibility.md)).

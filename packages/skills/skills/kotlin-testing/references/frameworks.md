@@ -38,7 +38,7 @@ class PriceTest : FunSpec({
 ```
 
 - Matchers: `shouldBe`, `shouldNotBe`, `shouldBeNull`, `shouldThrow<T> { }`, `shouldContainExactly`, and `assertSoftly { }` to report all failures of one result.
-- Test bodies are `suspend`, so a plain call to a suspend function works. For virtual time, enable Kotest's coroutine test scope in the spec or project config (check the option name for your Kotest version) or call `runTest { }` inside the test.
+- Test bodies are `suspend`, so a plain call to a suspend function works. For virtual time, call `runTest { }` inside the test.
 - Waiting for async work: `eventually(5.seconds) { ... }`, never `Thread.sleep`.
 - Set up and tear down with `beforeTest`/`afterTest`, `beforeSpec`/`afterSpec`; isolation defaults to one spec instance for all tests, so don't keep state in spec-level vars unless it's reset.
 - Property tests (`checkAll`, `forAll` with `Arb`) fit pure functions with a clear invariant (round-trip, ordering). Keep the iteration count and a fixed seed in the failure output for reproduction.

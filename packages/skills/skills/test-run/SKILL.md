@@ -1,6 +1,6 @@
 ---
 name: test-run
-description: Run the project's tests, show only compact failures, and fix them in a bounded loop. Manual command (`/test-run:test-run`). Only the detected-runner script is pre-approved; a custom `--cmd` goes through `run_custom.py` and prompts.
+description: "Runs the project's tests (affected tests by default, `--all` for the full suite), prints only compact failures, and fixes them in a loop of at most 3 attempts per failure. Manual command: `/skill:test-run [targets | --all | --cmd \"...\"]`. Runs project code, so use on trusted projects only."
 disable-model-invocation: true
 ---
 
@@ -10,15 +10,15 @@ disable-model-invocation: true
 
 ## 1. Run
 
-From the project root, run this with a Bash timeout of 600000 ms:
+The scripts live in this skill's directory (the directory of this SKILL.md), not in the project. Write their absolute path in every command; `<skill-dir>` below stands for that directory. From the project root, run this with a 10-minute Bash timeout (600 seconds in pi):
 
 ```sh
-python3 scripts/run_tests.py the arguments given with the command
+python3 <skill-dir>/scripts/run_tests.py the arguments given with the command
 ```
 
 - With no arguments it runs the tests affected by changes against the default branch, or the full suite when nothing maps. The `scope:` line says which.
-- `run_tests.py` rejects `--cmd` (exit 2). For a command the user gave, run `python3 scripts/run_custom.py --cmd "…" [targets]`. It shares the parse and plan code but is not pre-approved, so each call prompts.
-- This closes the arbitrary-command escape hatch. A detected runner such as `npm test` still runs project code, which is inherent, so use this skill on trusted projects only.
+- `run_tests.py` rejects `--cmd` (exit 2). For a command the user gave, run `python3 <skill-dir>/scripts/run_custom.py --cmd "…" [targets]`. It shares the parse and plan code.
+- A detected runner such as `npm test` still runs project code, so use this skill on trusted projects only.
 - Run `--help` for the other flags.
 
 Detected runners, scanning the repo root and two levels down:
@@ -44,19 +44,19 @@ For each failure:
 3. Rerun only the failing tests. Each `### n.` id is a valid target:
 
    ```sh
-   python3 scripts/run_tests.py "<id>" ["<id>" ...]
+   python3 <skill-dir>/scripts/run_tests.py "<id>" ["<id>" ...]
    ```
 
    If the first run used `run_custom.py --cmd "…"`, rerun with the same script and `--cmd`.
 4. Allow at most 3 materially distinct attempts per failure. After the third, stop working on it and record it as remaining.
 
-Stop and ask the user with AskUserQuestion, explaining each option, when:
+Stop and ask the user (with the ask-user tool if the harness has one, otherwise in plain text), explaining each option, when:
 
 - the fix would change intended behavior;
 - the test itself looks wrong (say what it asserts and why that seems incorrect);
 - the failure is environmental or flaky (missing service, credentials, network, timing, or a failure that changes between identical runs).
 
-For deeper method, use `problem-solving` for hard diagnoses and `unit-testing` for test-quality questions, if installed.
+For deeper method, use `problem-solving` for hard diagnoses, if installed, and the stack's testing skill (`dotnet-testing`, `java-testing`, `kotlin-testing`, `godot-testing`) for test-quality questions.
 
 ## 3. Confirm
 

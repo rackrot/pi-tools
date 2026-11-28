@@ -18,7 +18,7 @@ client = api.get_client(domain="test-client")
 ctx = EvaluationContext(targeting_key="d45e303a-...", attributes={"email": "john.doe@gofeatureflag.org"})
 v = client.get_boolean_value(flag_key="flag-only-for-admin", default_value=False, evaluation_context=ctx)
 ```
-Options: `endpoint` (required), `evaluation_type` (INPROCESS), `api_key`, `flag_config_poll_interval_seconds` (120), `wasm_file_path`, `wasm_pool_size` (CPU count), `data_flush_interval` (ms, 60000), `max_pending_events` (10000), `disable_data_collection`, `exporter_metadata`, `log_level` ("WARNING"), `urllib3_pool_manager`.
+Options: `endpoint` (required), `evaluation_type` (INPROCESS), `api_key`, `flag_config_poll_interval_seconds` (120), `wasm_file_path`, `wasm_pool_size` (CPU count), `data_flush_interval` (ms, 60000), `max_pending_events` (10000), `disable_data_collection`, `exporter_metadata`, `log_level` ("WARNING"), `urllib3_pool_manager`, `evaluation_flag_list`, `custom_headers`, `data_collector_base_url`, `timeout` (10000).
 
 ## PHP (Composer `open-feature/go-feature-flag-provider`)
 

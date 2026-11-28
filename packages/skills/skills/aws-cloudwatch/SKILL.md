@@ -1,6 +1,6 @@
 ---
 name: aws-cloudwatch
-description: 'Investigates AWS incidents from CloudWatch alarms, metrics, Logs Insights and CloudTrail: blast radius, change correlation, timeline, resource health; read-only, fixes only after approval. Use when an alarm fired, an AWS-hosted service is erroring or slow, or to find what changed before a failure. Not for the write-up (postmortem), Sentry errors (sentry-sdk) or PromQL (promql).'
+description: 'Investigates AWS incidents from CloudWatch alarms, metrics, Logs Insights and CloudTrail: blast radius, change correlation, timeline, resource health, and the findings report (severity, cause category, confidence, proposed fixes); read-only, fixes only after approval. Use when an alarm fired, an AWS-hosted service is erroring or slow, to find what changed before a failure, or to finish an investigation and report findings from metrics and CloudTrail data someone already pulled, even when no command can be run. Not for the postmortem write-up (postmortem) or PromQL (promql).'
 ---
 
 # CloudWatch investigation
@@ -70,11 +70,9 @@ Not for application error tracking in Sentry (`sentry-sdk`, if installed), the w
 ## Traps
 
 - **Metric timestamps mark the start of the period.** A 60-second datapoint stamped 14:05 covers 14:05 to 14:06. Data aggregated over 7:00 to 8:00 is stamped 7:00 (CloudWatch concepts, "Periods").
-- **Retention limits resolution.** One-minute data lasts 15 days, five-minute data 63 days, and hourly data 455 days. An incident older than 15 days cannot be viewed at one-minute resolution.
 - **Missing data is not health.** Lambda publishes no `Errors` point for a period with no invocations, so a gap can mean no traffic. Check `Invocations` beside it.
 - **CloudTrail lags.** Trail log delivery averages about five minutes and is not guaranteed (How CloudTrail works), and event history can trail the API call as well. Widen the search window past the onset and sort by `eventTime`.
 - **Log timestamps come from the source.** Agent flush intervals and clock skew shift lines by seconds, so don't order events inside a one-minute window as if the clock were exact.
-- **`get-metric-statistics` caps at 1,440 datapoints.** Use `get-metric-data`, which allows up to 100,800.
 - **Alarms lag the symptom.** Compare against the metric, not the alarm's transition time.
 
 ## References

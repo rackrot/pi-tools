@@ -7,7 +7,7 @@ Source: Standard Webhooks 1.0.0 (standardwebhooks.com). It is a community specif
 ```
 webhook-id: msg_<unique-id>
 webhook-timestamp: <unix-seconds>
-webhook-signature: v1,<base64-signature> v1a,<base64-signature>
+webhook-signature: v1,<base64-signature> v2a,<base64-signature>
 ```
 
 All three are required. `webhook-id` is the same across retries of one event. `webhook-timestamp` is the time of this attempt, so it changes on every retry, while the event's own `timestamp` in the payload does not.
@@ -18,6 +18,11 @@ All three are required. `webhook-id` is the same across retries of one event. `w
 signed_content = "{webhook-id}.{webhook-timestamp}.{raw_body}"   # literal dots
 signature      = base64( HMAC-SHA256( key, signed_content ) )
 header value   = "v1," + signature
+
+# asymmetric (v2a)
+signed_content = "{endpoint_id}.{webhook-id}.{webhook-timestamp}.{raw_body}"
+signature      = base64( ed25519_sign( private_key, SHA-256( signed_content ) ) )   # signs the raw 32-byte hash
+header value   = "v2a," + signature
 ```
 
 - The id and timestamp must not be user-controlled, or at least must not contain a `.`.
@@ -30,9 +35,9 @@ header value   = "v1," + signature
 | Scheme | HMAC-SHA256 | ed25519 |
 | Secret | 24 to 64 random bytes | standard ed25519 key pair |
 | Serialization | base64 with `whsec_` prefix | base64 with `whsk_` (secret) and `whpk_` (public) prefixes |
-| Signature id | `v1` | `v1a` |
+| Signature id | `v1` | `v2a` (`v1a` is deprecated) |
 
-- Use a unique key per endpoint, and never share a key across customers.
+- Use a unique symmetric secret per endpoint, and never share one across customers. An asymmetric key pair may be shared across endpoints within one environment, because `v2a` binds the endpoint ID into the signed content.
 - The spec prefers asymmetric because only the sender holds the private key. Symmetric is faster and simpler. A consumer may switch between them.
 - Consumers should keep a trust list of public keys and must not read a public key from the request.
 

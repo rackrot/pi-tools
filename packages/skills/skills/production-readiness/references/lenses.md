@@ -12,8 +12,10 @@ Read when working through step 2 of the skill. Each list is questions to answer 
 ## Data integrity
 
 - Migrations run forward from the current production schema. Destructive changes (drop, rename, type change) are staged: add, backfill, switch readers, drop in a later release.
+- The migration tool and the deploy order are known: do migrations run before, during, or after the new code starts?
+- Long locks are avoided (for example, add indexes concurrently where the database supports it), and the largest table's migration time is estimated.
 - Backfills and imports are batched and resumable.
-- Each migration has a rollback or a stated recovery plan. A migration that cannot be reversed needs a backup or restore point named in the release notes.
+- Each migration has a rollback or a stated recovery plan, exercised on non-production data. A migration that cannot be reversed needs a backup or restore point named in the release notes.
 - Database grants and policies match the tenancy model.
 - Retried writes, jobs, and webhook handlers are idempotent.
 
@@ -69,10 +71,3 @@ Read when working through step 2 of the skill. Each list is questions to answer 
 - The release path runs `plan` and a human or policy reviews it before `apply`. Check the plan for replacements and destroys of stateful resources.
 - Stateful resources carry deletion protection or `prevent_destroy` where loss would be costly.
 - Variables hold no secret defaults, and sensitive outputs are marked.
-
-### Migrations
-
-- The migration tool and the deploy order are known: do migrations run before, during, or after the new code starts?
-- Old and new code both work against the schema during the rollout window.
-- Long locks are avoided (for example, add indexes concurrently where the database supports it), and the largest table's migration time is estimated.
-- The down path or restore plan has been exercised on non-production data.

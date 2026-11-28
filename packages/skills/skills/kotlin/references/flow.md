@@ -59,7 +59,7 @@ val name: StateFlow<String> = userState
 - `debounce` then `distinctUntilChanged` then `mapLatest` (or `flatMapLatest`) for search-as-you-type; `mapLatest` cancels the in-flight lookup.
 - `retryWhen { cause, attempt -> cause is IOException && attempt < 3 }` with a `delay` for backoff; never retry on `CancellationException`.
 - `combine` for the latest of several flows; `zip` pairs by position.
-- Do not create a `Flow` inside a composable without `remember`, and do not collect in `init {}` without a launch in an owner scope.
+- Do not collect in `init {}` without a launch in an owner scope.
 
 ## Tests
 

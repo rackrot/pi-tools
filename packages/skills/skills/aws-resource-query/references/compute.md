@@ -47,7 +47,7 @@ aws lambda list-event-source-mappings --function-name <name> \
 aws lambda list-layers --query 'Layers[].[LayerName,LatestMatchingVersion.LayerVersionArn]' --output table
 ```
 
-Do not call `lambda get-function`: its response carries a time-limited download URL for the code package, and `lambda invoke` runs the function.
+Do not call `lambda get-function`: its response carries a time-limited download URL for the code package. `lambda invoke` runs the function, so it is state-changing: only on request, see Changes in SKILL.md.
 
 ## ECS
 
@@ -67,7 +67,7 @@ aws ecs describe-task-definition --task-definition <family> \
   --query 'taskDefinition.{Family:family,Rev:revision,Cpu:cpu,Mem:memory,Containers:containerDefinitions[].{Name:name,Image:image,Cpu:cpu,Memory:memory}}'
 ```
 
-`describe-task-definition` returns each container's `environment` values and `secrets` references, so never print it unprojected. `ecs execute-command` is denied.
+`describe-task-definition` returns each container's `environment` values and `secrets` references, so never print it unprojected. `ecs execute-command` is state-changing: only on request, see Changes in SKILL.md.
 
 ## EKS and others
 

@@ -22,7 +22,7 @@ If several resources match a name, ask for the region or account instead of pick
 
 ## EC2
 
-- **Find:** `aws ec2 describe-instances --instance-ids <id> --query 'Reservations[].Instances[].[State.Name,InstanceType,LaunchTime]'` and `aws ec2 describe-instance-status --instance-ids <id> --include-all-instances`.
+- **Find:** `aws ec2 describe-instances --instance-ids <id> --query 'Reservations[].Instances[].[State.Name,InstanceType,LaunchTime]'` and `aws ec2 describe-instance-status --instance-ids <id> --include-all-instances --query 'InstanceStatuses[].[InstanceId,InstanceState.Name,SystemStatus.Status,InstanceStatus.Status]'`.
 - **Metrics:** `AWS/EC2`, dimension `InstanceId`. `StatusCheckFailed_System` (AWS-side), `StatusCheckFailed_Instance` (guest OS), `CPUUtilization`, and `CPUCreditBalance` on burstable types. Memory and disk need the CloudWatch agent. Without it, say the data is missing.
 - **Logs:** only where the agent ships them.
 - **Usual causes:** a failed system check (hardware, host, or network) versus a failed instance check (OS hang, full disk, bad configuration), exhausted CPU credits, an instance retirement event.
@@ -39,7 +39,7 @@ If several resources match a name, ask for the region or account instead of pick
 
 ## ALB
 
-- **Find:** `aws elbv2 describe-load-balancers --names <name>`, then `describe-target-groups --load-balancer-arn <arn>` and `describe-target-health --target-group-arn <arn>`.
+- **Find:** `aws elbv2 describe-load-balancers --names <name> --query 'LoadBalancers[].[LoadBalancerArn,State.Code,Scheme]'`, then `describe-target-groups --load-balancer-arn <arn> --query 'TargetGroups[].[TargetGroupArn,HealthCheckPath,HealthCheckPort]'` and `describe-target-health --target-group-arn <arn> --query 'TargetHealthDescriptions[].[Target.Id,Target.Port,TargetHealth.State,TargetHealth.Reason]'`.
 - **Metrics:** `AWS/ApplicationELB`, dimension `LoadBalancer` (the `app/<name>/<id>` suffix of the ARN), plus `TargetGroup` for target metrics. `HTTPCode_ELB_5XX_Count` (the balancer), `HTTPCode_Target_5XX_Count` (the app), `TargetResponseTime`, `UnHealthyHostCount`, `RejectedConnectionCount`.
 - **Logs:** access logs in S3 when enabled. They are not in CloudWatch.
 - **Usual causes:** ELB 5XX with healthy targets points at the balancer or a reset connection, target 5XX points at the application, `UnHealthyHostCount` above 0 points at a health check path or security group that changed.

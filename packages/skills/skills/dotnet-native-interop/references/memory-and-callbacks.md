@@ -48,8 +48,8 @@ When native code must keep memory you hand it (a string it stores, a buffer it f
 ```csharp
 internal sealed partial class MyLibHandle : SafeHandleZeroOrMinusOneIsInvalid
 {
-    // Used by the marshaller to create the handle; no direct callers.
-    private MyLibHandle() : base(ownsHandle: true) { }
+    // Must be public: the LibraryImport generator needs a public parameterless constructor for a returned or out SafeHandle.
+    public MyLibHandle() : base(ownsHandle: true) { }
 
     [LibraryImport("mylib", StringMarshalling = StringMarshalling.Utf8)]
     private static partial MyLibHandle CreateHandle(string config);
@@ -85,13 +85,13 @@ using var handle = MyLibHandle.Create("config=value");
 ## Errors
 
 ```csharp
-[LibraryImport("kernel32", SetLastPInvokeError = true)]
+[LibraryImport("kernel32", SetLastError = true)]
 [return: MarshalAs(UnmanagedType.Bool)]
 internal static partial bool CloseHandle(nint hObject);
 
 if (!CloseHandle(h)) throw new Win32Exception(Marshal.GetLastPInvokeError());
 
-// POSIX errno: SetLastPInvokeError = true captures errno too; read it immediately.
+// POSIX errno: SetLastError = true captures errno too; read it immediately.
 // HRESULT:
 Marshal.ThrowExceptionForHR(hr);
 ```

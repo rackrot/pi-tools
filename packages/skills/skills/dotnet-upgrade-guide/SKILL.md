@@ -1,6 +1,6 @@
 ---
 name: dotnet-upgrade-guide
-description: Upgrades .NET projects - TFM hops from .NET 8 to 11 with breaking changes by area, legacy csproj to SDK-style, packages.config to PackageReference, AOT and trim warnings, Thread.Abort removal, test framework moves. Use for "upgrade to .NET 10", SDK-style conversion, IL2026/IL3050 warnings, or moving to xUnit v3, MSTest v4 or MTP.
+description: "Upgrades .NET projects and says what breaks between versions - build errors and run-time behavior changes for each hop net8.0 -> net9.0 -> net10.0 -> net11.0, legacy csproj and packages.config to SDK-style, AOT and trim warnings (IL2026/IL3050), Thread.Abort removal, and migrating tests to xunit.v3, MSTest v3/v4 or Microsoft.Testing.Platform (package, project and CI filter changes). Use for \"upgrade to .NET 10\", \"what changes going from net9.0 to net10.0\", something that broke or behaves differently after a TargetFramework bump, or SDK-style conversion. Read it before answering from memory, even with no repo to inspect - these change lists are newer than training data."
 ---
 
 # .NET upgrades
@@ -14,7 +14,7 @@ Upgrade one hop at a time, commit at each boundary, and treat a clean build as h
 1. Find the entry point (`*.sln`, `*.slnx`, or the `.csproj` files) and how the repo builds and tests (scripts, CI files, `global.json`).
 2. Installed SDKs: `dotnet --list-sdks`. If the target SDK is missing, stop and tell the user; don't install one silently (the `csharp` skill's SDK setup guidance covers a local, repo-scoped install).
 3. Per project: `TargetFramework(s)`, the `Sdk` attribute (`Microsoft.NET.Sdk.Web` -> ASP.NET Core; `UseWPF`/`UseWindowsForms` -> desktop), whether it's SDK-style at all, `packages.config`, and the package set (`Microsoft.EntityFrameworkCore.*`, `Microsoft.Extensions.Hosting`, `Microsoft.Data.Sqlite`, `System.Linq.Async`, test frameworks). Note Dockerfiles, P/Invoke, `BinaryFormatter`, System.Text.Json polymorphism, and crypto or X.509 use: each selects a reference.
-4. Use codebase-memory (`search_graph`, `search_code`) or the C# language server (csharp-ls) to find usages of affected APIs; fall back to `grep`.
+4. Find usages of affected APIs with whatever symbol search is available (a code graph or C# language server if present), else `grep`.
 5. Build clean on the current TFM (`dotnet build --no-incremental`), run the tests, and record pre-existing warnings and test counts as the baseline.
 
 ## 2. Pick the path

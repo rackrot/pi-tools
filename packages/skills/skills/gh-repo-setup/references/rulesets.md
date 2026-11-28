@@ -23,7 +23,7 @@ The docs list every PUT body field as optional and do not say how an omitted `ru
 2. Edit the saved body. Keep only the fields PUT accepts: `name`, `target`, `enforcement`, `bypass_actors`, `conditions`, `rules`.
 3. Show the user the diff between the old and new bodies, then `PUT` the complete body with `gh api -X PUT <path> --input <file>`.
 
-To trial a new rule, create the ruleset with `"enforcement": "evaluate"` where the plan allows it (`evaluate` needs GitHub Enterprise; otherwise use `disabled`, check, then flip to `active`). Deleting is a separate approval.
+To trial a new rule on GitHub Enterprise, create the ruleset with `"enforcement": "evaluate"`. On Free, Pro or Team never send `evaluate` (the API rejects it): a `disabled` ruleset checks nothing, so trial the same rules as an `active` ruleset scoped to a throwaway branch pattern, then create the real one. Deleting is a separate approval.
 
 ## Body shape
 

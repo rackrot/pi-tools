@@ -1,17 +1,17 @@
 ---
 name: issue-breakdown
-description: Turns a spec, plan or conversation into a reviewed set of linked GitHub issues, cut as vertical slices with blocking edges, writing a spec first when none exists, and publishes them with gh after a dry run and approval. Use when the user wants work split into issues, unmet spec requirements filed, or a spec written up as an issue. GitHub only, not for Forgejo, Codeberg or Gitea.
+description: "Splits a spec, plan or conversation into several linked GitHub issues (vertical slices with blocked-by dependencies), writing a spec first when none exists, and publishes the set with gh issue create after a dry-run command list and approval. Use when the user wants work split into issues or tickets, unmet spec requirements filed, a spec written up as an issue, or an agreed list of issues created with dependency links between them, including when they only ask for the gh commands. GitHub only, not for Forgejo, Codeberg or Gitea; not for one issue (`gh-issues`)."
 ---
 
 # Break work into GitHub issues
 
 Produce a numbered breakdown, get it approved, dry-run the publish, then publish in dependency order. Nothing is posted before the user approves the exact command list.
 
-Not for filing or editing one issue (`gh-issues`), triaging issues that already exist (`gh-triage`), or planning the work without publishing it (`planning`).
+Not for filing or editing one issue (`gh-issues`), triaging issues that already exist (`gh-triage`), or planning the work without publishing it.
 
 ## Forge gate
 
-Before anything else, run `git remote -v` and name the remote the work concerns rather than assuming `origin`. If it is `codeberg.org`, a host where `curl -fsS https://<host>/api/forgejo/v1/version` answers, or the repo has a `.forgejo/` directory or `.gitea/workflows`, stop and tell the user this skill publishes with `gh` and is GitHub-only. For single issues on Forgejo, point to `forgejo-cli`; there is no Forgejo breakdown skill. Continue only on github.com or a host `gh auth status --hostname <host>` knows.
+Before anything else, run `git remote -v` and name the remote the work concerns rather than assuming `origin`. If it is `codeberg.org`, a host where `curl -fsS https://<host>/api/forgejo/v1/version` answers, or the repo has a `.forgejo/` directory or `.gitea/workflows`, stop and tell the user this skill publishes with `gh` and is GitHub-only. For single issues on Forgejo, point to `forgejo-issues`; there is no Forgejo breakdown skill. Continue only on github.com or a host `gh auth status --hostname <host>` knows.
 
 ## 1. Gather the source
 
@@ -40,14 +40,6 @@ Each issue is a tracer bullet: a narrow but complete path through every layer it
 
 Give each issue its blocking edges, meaning the issues that must finish before it can start. An issue with no blockers can start now. Add an edge only when the work truly can't start without the other, since false edges serialize work that could run in parallel. The frontier is every issue whose blockers are all done; name it in the breakdown so the user sees what can start in parallel.
 
-Wide mechanical refactors (rename a column, retype a shared symbol) are the exception, because one edit breaks every call site and no slice lands green. Sequence them as expand and contract:
-
-1. Expand: add the new form beside the old one.
-2. Migrate callers in batches sized by blast radius (per package or directory), each blocked by the expand.
-3. Contract: delete the old form, blocked by every migrate batch.
-
-If the batches can't stay green alone, give them a shared integration branch and a final integrate-and-verify issue that all of them block.
-
 When the input is an implementation plan with phases, one issue per phase is a fine start, but split any phase that isn't a vertical slice.
 
 ## 5. Present for approval
@@ -60,7 +52,7 @@ Publishing follows the approval gate in `gh-issues`.
 
 1. **Dry run.** Write the bodies to files and print the full command list in dependency order, with the target repo, so the user sees exactly what will be posted. Blocked-by flags cite placeholders (`#<1>`, `#<2>`) for issues not yet created. Use a parent issue (the source issue, a published spec, or a new tracking issue) only if one exists or the user wants one; when the source was an existing issue, make each slice its sub-issue.
 2. **Ask before posting.** Get explicit approval for the batch. A request to "break this into issues" is not approval of the commands.
-3. **Create blockers first,** so every later command can cite real issue numbers: `gh issue create --title ... --body-file ... [--type ...] [--label ...] [--parent N] [--blocked-by N,M]`. gh older than 2.94.0 lacks those relationship flags, so use the REST calls in the `gh-issues` api reference.
+3. **Create blockers first,** so every later command can cite real issue numbers: `gh issue create --title ... --body-file ... [--type ...] [--label ...] [--parent N] [--blocked-by N,M]`. Check `gh --version` first: gh older than 2.94.0 lacks those relationship flags, so use the REST calls in `gh-issues/references/api.md`.
 4. Capture each new number from the printed URL and substitute it into the later commands. Stop at the first failure and report what was created. Rerunning the whole list would duplicate issues.
 5. **Report** a table of number, title, and blockers, plus the frontier: the issues with no open blockers.
 

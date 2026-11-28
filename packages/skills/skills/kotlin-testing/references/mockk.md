@@ -18,7 +18,7 @@ coVerify(exactly = 0) { repo.delete(any()) }
 verifyOrder { a.first(); b.second() }                            // only when order is the behavior
 ```
 
-Inside one stubbed call, use matchers for every argument or for none (`eq("1")` and `any()` together, not `"1"` and `any()`). Capture with `val slot = slot<User>()` and `capture(slot)`, or `mutableListOf` with `capture(list)`. Reach for `verify` only for side effects that are the behavior (an event published, a row saved); assert returned values and state first.
+Literal arguments and matchers can be mixed in one call; MockK wraps a literal in `eq()`. Capture with `val slot = slot<User>()` and `capture(slot)`, or `mutableListOf` with `capture(list)`. Reach for `verify` only for side effects that are the behavior (an event published, a row saved); assert returned values and state first.
 
 ## "no answer found for: Repo(#1).load()"
 

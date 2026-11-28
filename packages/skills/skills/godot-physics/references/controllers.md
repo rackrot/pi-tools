@@ -1,6 +1,6 @@
 # Controller recipes
 
-CharacterBody recipes in GDScript. Each slots into the platformer loop in SKILL.md: gravity, input, velocity, `move_and_slide()`, then read state. Feel targets (how long coyote time should be, why) belong to `game-craft` (feel reference); this file is the engine code.
+CharacterBody recipes in GDScript. Each slots into the platformer loop in SKILL.md: gravity, input, velocity, `move_and_slide()`, then read state. Feel targets (how long coyote time should be, why) belong to `game-feel` (or `game-craft`'s feel.md if that bundle is installed); this file is the engine code.
 
 ## Contents
 

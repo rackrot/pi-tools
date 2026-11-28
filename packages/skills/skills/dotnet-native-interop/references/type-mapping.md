@@ -19,7 +19,7 @@ Every parameter must match the native type exactly. Read this when a type is not
 
 | C / Win32 | .NET | Why |
 |---|---|---|
-| `long` / `unsigned long` | `CLong` / `CULong` (.NET 6+) | 32-bit on Windows, 64-bit on 64-bit Unix. Never `int` or `long`. With `LibraryImport`, needs `[assembly: DisableRuntimeMarshalling]` or the generator reports SYSLIB1051; `DllImport` works without it |
+| `long` / `unsigned long` | `CLong` / `CULong` (.NET 6+) | 32-bit on Windows, 64-bit on 64-bit Unix. Never `int` or `long`. Works with both `DllImport` and `LibraryImport` |
 | `size_t` | `nuint` | Pointer-sized. `nuint` and `UIntPtr` are the same type on C# 11 / .NET 7+. Never `ulong`: wrong on 32-bit |
 | `ssize_t`, `intptr_t`, `ptrdiff_t` | `nint` | Pointer-sized |
 | `BOOL` (Win32) | `int`, or `[MarshalAs(UnmanagedType.Bool)] bool` | 4 bytes |

@@ -8,7 +8,7 @@ Pick the smallest API that expresses the motion and its lifecycle.
 |---|---|
 | Show or hide a subtree, with removal after exit | `AnimatedVisibility` |
 | One value follows state | `animate*AsState` |
-| Several values follow one boolean, enum or sealed state | `rememberTransition` with child animations |
+| Several values follow one boolean, enum or sealed state | `updateTransition` with child animations (`rememberTransition` only with a `MutableTransitionState` or `SeekableTransitionState`) |
 | Child size changes | `Modifier.animateContentSize()` |
 | Different composable trees fill one region | `AnimatedContent`, or `Crossfade` for the simple case |
 | Drag, fling, interruption, imperative control | `Animatable` |
@@ -19,7 +19,7 @@ Pick the smallest API that expresses the motion and its lifecycle.
 - Values that must stay in sync live on one transition, not several independent `animate*AsState` calls.
 
 ```kotlin
-val transition = rememberTransition(targetState = phase, label = "phase")
+val transition = updateTransition(targetState = phase, label = "phase")
 val alpha by transition.animateFloat(label = "alpha") { if (it == Phase.Visible) 1f else 0f }
 val offset by transition.animateDp(label = "offset") { if (it == Phase.Visible) 0.dp else 24.dp }
 ```

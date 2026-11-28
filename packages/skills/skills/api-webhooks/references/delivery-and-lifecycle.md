@@ -26,16 +26,16 @@ Move to per-endpoint configurable schedules and a circuit breaker with half-open
 | Response | Action |
 | --- | --- |
 | `2xx` | Success, stop retrying |
-| `3xx` | Failure. Do not follow redirects. Tell the customer to update the URL. |
+| `3xx` | Failed attempt: do not follow redirects, retry per schedule, tell the customer to update the URL. |
 | `410` | Disable the endpoint and stop sending |
 | `429` | Throttle and honor `Retry-After` |
 | `502`, `504` | Throttle, the consumer is likely under load |
 | `503` with `Retry-After` | Schedule the next attempt from the header |
 | `408` | Retry per schedule |
-| other `4xx` | Dead-letter (permanent failure) |
+| other `4xx` | Dead-letter on the first response (permanent failure) |
 | other `5xx`, timeout, reset | Retry per schedule |
 
-A persistent `4xx` other than `408` and `429` goes straight to the dead-letter queue, because retrying a permanent failure wastes the budget and looks like an attack. Use a 15 to 30 second request timeout.
+Any `4xx` other than `408` and `429` goes to the dead-letter queue on the first response (this skill's rule; the spec only says to treat other codes as failure), because retrying a permanent failure wastes the budget and looks like an attack. Use a 15 to 30 second request timeout.
 
 ## SSRF
 

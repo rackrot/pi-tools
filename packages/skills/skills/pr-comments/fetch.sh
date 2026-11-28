@@ -4,8 +4,8 @@
 # Read-only: runs only `gh pr view`, a `gh api graphql` query, and, when GraphQL fails,
 # GET requests to the REST pulls endpoints.
 #
-# The skill runs this on load, and a non-zero exit aborts the whole invocation. So
-# anything that only means "nothing was fetched" (a Forgejo or Codeberg origin, no gh,
+# The agent runs this with the Bash tool and reads stdout, so
+# anything that only means "nothing was fetched" (a non-GitHub origin, no gh,
 # no PR, pasted text instead of a reference) prints a "Review feedback not fetched"
 # line on stdout and exits 0, and the skill decides what to do next. Only a bad
 # option exits 2.
@@ -85,7 +85,7 @@ fi
 
 if [ -n "$host" ] && [ "$host" != github.com ] &&
   ! { command -v gh >/dev/null && gh auth status --hostname "$host" >/dev/null 2>&1; }; then
-  unavailable "origin host $host is not a GitHub host gh knows. For Forgejo, Codeberg or Gitea fetch with references/forgejo.md; with several remotes, ask which forge."
+  unavailable "origin host $host is not a GitHub host gh knows. For Forgejo, Codeberg or Gitea use /forgejo-pr-comments; with several remotes, pass the PR URL."
 fi
 
 for tool in gh jq; do

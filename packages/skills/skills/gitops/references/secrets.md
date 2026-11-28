@@ -29,7 +29,7 @@ spec:
         key: <remote-path>
 ```
 
-- `external-secrets.io/v1` is the current API (GA since ESO 1.0). `v1beta1` has been deprecated since ESO 0.17, so migrate manifests that still use it, and check what the installed operator serves with `kubectl api-resources --api-group external-secrets.io`.
+- `external-secrets.io/v1` is the current API (available since ESO 0.16). ESO 0.17 stopped serving `v1beta1`, so manifests that still use it fail to apply; migrate them before upgrading, and check what the installed operator serves with `kubectl api-resources --api-group external-secrets.io`.
 - The `SecretStore` credentials are themselves a bootstrap secret. Create them out of band or use workload identity where the provider supports it.
 - `refreshPolicy` can be `Periodic` (default), `OnChange`, or `CreatedOnce`. `CreatedOnce` needs an immutable target to avoid overwrites on recreation.
 

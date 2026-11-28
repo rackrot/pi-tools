@@ -1,17 +1,17 @@
 ---
 name: forgejo-readme
-description: "Writes, restructures, audits and beautifies a repository's README.md, its Forgejo or Codeberg landing page, from facts in the repo. Section order by project type, a scored audit, honest badges, alerts, Mermaid and relative links that Forgejo actually renders. Use when asked to write, review, fix, reorder or polish a README or a repo's front page on a Forgejo or Codeberg repo. Not for github.com repos (`gh-readme`)."
+description: "Writes, restructures, audits and beautifies a repository's README.md, its Forgejo, Codeberg or Gitea landing page, from facts in the repo, and answers how Forgejo treats a README: which README file is shown, the CI and release badge URLs the instance serves itself, and which HTML, alerts, Mermaid and relative links render. Section order by project type, a scored audit, honest badges. Use for any README, badge or repo front-page task or question on a Forgejo, Codeberg or Gitea repo, and read it before answering from GitHub habits, which are often wrong there. Not for github.com repos (`readme`), or a README whose forge is unknown or that is shown on several forges (`readme`)."
 ---
 
 # Forgejo README
 
-**Forge gate.** Run `git remote -v` first. If the README's home is github.com (or a host `gh auth status --hostname <host>` knows), this is GitHub: stop and point the user at `gh-readme` if it is installed. Codeberg, a host where `curl -fsS https://<host>/api/forgejo/v1/version` answers, or a repo with `.forgejo/workflows` or `.gitea/workflows` means Forgejo. With several remotes, ask which one hosts the landing page and never assume `origin`.
+**Forge gate.** Run `git remote -v` first. If the README's home is github.com (or a host `gh auth status --hostname <host>` knows), this is GitHub: stop and point the user at `readme`. Codeberg, a host where `curl -fsS https://<host>/api/forgejo/v1/version` answers, or a repo with `.forgejo/workflows` or `.gitea/workflows` means Forgejo. With several remotes, ask which one hosts the landing page and never assume `origin`. If no signal settles the forge, or the landing page is shown on more than one forge, stop and point the user at `readme` if it is installed.
 
 A README is a landing page and a router, not a manual. In a minute a stranger should know what the project is, why to pick it over the obvious alternative, whether it fits their stack and licence, whether it is alive, and what to run first. Then it points them at the docs. A reader who decides *not* to use the project is a good outcome too, so don't try to stop that.
 
 ## Rules that hold in every mode
 
-- **Facts come from the repo.** Before you write a word, read the manifest (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `*.csproj`, `pom.xml`, `composer.json`, `*.gemspec`), the `LICENSE` file, the CLI's argument parser or the `--help` of a binary that is already built, `.forgejo/workflows/` or `.gitea/workflows/`, examples on disk, tags and releases (`fj release list`, else `git tag --sort=-creatordate`), and recent commit dates.
+- **Facts come from the repo.** Before you write a word, read the manifest (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `*.csproj`, `pom.xml`, `composer.json`, `*.gemspec`), the `LICENSE` file, the CLI's argument parser or the `--help` of a binary that is already built, `.forgejo/workflows/` or `.gitea/workflows/`, examples on disk, tags and releases (`fj release -R <remote> list`, else `git tag --sort=-creatordate`), and recent commit dates.
 - **Never invent.** That covers badges, version numbers, benchmarks, user counts, adopters, compatibility, features and status words such as "production ready" or "battle-tested". A claim with no source in the repo gets cut or downgraded to what you can verify. If you need a fact the repo cannot give you (audience, alternatives, status), ask the user. Never fill the gap with a guess or leave a placeholder.
 - **Every command, flag, default, env var, path and version you write must match its source of truth**, such as the parser, the definition site or the CI matrix. A flag missing from the parser is a hallucination, not a typo.
 - **Text first, decoration second.** Install steps, commands and decision facts live in Markdown, never only in an image. Every image gets alt text that says what it shows. The page has to read correctly when images fail and in registries that strip HTML.
@@ -59,7 +59,7 @@ Run Audit, get the user's agreement on the diagnosis, then:
 Read [references/badges-and-visuals.md](references/badges-and-visuals.md) for badges, headers, hero images, screenshots, demos and tables, and [references/forgejo-rendering.md](references/forgejo-rendering.md) for what Forgejo actually renders.
 
 - **Badges:** at most about four, and each one backed by something real: a CI workflow file that exists in `.forgejo/workflows/`, a package published under that name, the licence in `LICENSE`. Forgejo serves workflow and release badges itself (URL shapes in the reference). Cut intent-only badges such as "PRs welcome" or "made with love".
-- **Header:** a centred logo when the repo has one. Forgejo's sanitizer drops `<picture>`, so pick one logo that reads on both themes (an SVG that paints its own background). Put the one-liner right under it, never a badge wall or a screen-sized image above the first sentence.
+- **Header:** a centred logo when the repo has one. Forgejo's sanitizer drops `<picture>` and `<source>`, so never write them, even when the user asks for a theme-following logo: emit one plain `<img>`, say that Forgejo cannot switch logos by theme, and suggest one logo that reads on both themes (an SVG that paints its own background). Put the one-liner right under it, never a badge wall or a screen-sized image above the first sentence.
 - **Visuals:** prefer real proof (a terminal transcript, a screenshot of the real UI, real output) over decoration. Use a Mermaid diagram for architecture (Forgejo renders it in the browser). Build custom SVG heroes and banners only when asked, from the project's own motif, following the SVG rules in the reference.
 - **Asset-only requests** ("just make a banner") leave the README unchanged. Offer the embed snippet and insert it only after approval.
 - Keep emoji sparse, use at most one or two alerts (`> [!NOTE]` and the like) per page, and use `<details>` for long optional material.
@@ -71,7 +71,7 @@ Once a draft is done, if the `avoid-ai-writing` skill is installed, offer to run
 ## Boundaries
 
 - Docs drift across `docs/`, setup guides, API or config references after a code change: `docs-audit`.
-- General docs, guides or tutorials outside the README: the `scribe` agent.
+- General docs, guides or tutorials outside the README: out of scope for this skill.
 - CHANGELOG entries and release notes: `forgejo-release` if installed.
 - `CONTRIBUTING.md`, issue templates and repo settings such as description and topics: suggest them, but they are not this skill's output. Repo settings are changed in the Forgejo web UI.
 

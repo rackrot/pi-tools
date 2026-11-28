@@ -1,6 +1,6 @@
 ---
 name: readme
-description: Writes, restructures, audits and beautifies a repository's README.md, its landing page on GitHub, Forgejo, Codeberg or Gitea, from facts in the repo. Detects the forge from the git remote, then applies that forge's badge URLs, relative links, alerts and logo rules. Section order by project type, a scored audit, honest badges. Use when asked to write, review, fix, reorder or polish a README or a repo's front page. Not for docs drift in docs/ or config references (`docs-audit`) or changelogs and release notes (`gh-release`, `forgejo-release`).
+description: "Use for any work on a repository's README.md or what visitors see on the repo's front page, on GitHub or where the forge is unknown or mixed: writing a README, reviewing why visitors bounce or cannot tell what the project is, reordering sections, polishing the top of the page (centred logo, dark/light logo, badge row, callouts, screenshots), and README images or links that break on the npm, PyPI or crates.io page. Not for repos hosted on Forgejo, Codeberg or Gitea (`forgejo-readme`), a blind stranger read of a README ('would someone new follow this?', `cold-read`), docs drift in docs/ or config references (`docs-audit`), or changelogs and release notes (`gh-release`, `forgejo-release`)."
 ---
 
 # README
@@ -17,6 +17,8 @@ Run `git remote -v`. The forge decides the badge URLs, where a README is looked 
 | `codeberg.org`; a host where `curl -fsS https://<host>/api/forgejo/v1/version` answers; a `.forgejo/` directory or `.gitea/workflows` | **forgejo** |
 
 With several remotes, ask which one hosts the landing page and never assume `origin`. When no signal settles it (no remote, an unknown self-hosted host) and the answer changes the output, ask once. Then read the matching reference in full before you write anything: [references/github.md](references/github.md) or [references/forgejo.md](references/forgejo.md). A Gitea host is treated as forgejo, but the reference was checked against Forgejo only.
+
+When the signal is forgejo and the `forgejo-readme` skill is installed, stop and use `forgejo-readme` instead. The forgejo column below, [references/forgejo.md](references/forgejo.md) and `--forge forgejo` are kept as a fallback for when `forgejo-readme` is absent and for a README shown on several forges.
 
 What differs, with the detail in those two files:
 
@@ -65,7 +67,8 @@ Ask once if the request is ambiguous. "Make the README better" means Audit first
 1. Read the whole README once, cold, and note where you got confused.
 2. Run `bash scripts/readme_audit.sh --forge <github|forgejo> <repo-root>`. It reports facts (shadowed copies, headings, words before the first code block, badges, alt text, raw HTML, broken links, placeholders), not verdicts.
 3. Score with [references/audit-checklist.md](references/audit-checklist.md): five blocking checks, eight scored checks, a claim check against the source, and a fix list ordered by value per hour. Cite evidence for every check: a line number, a quote or command output.
-4. Report in the format that file gives, then stop. Rewrite only if the user asks.
+4. Order the fix list by value per hour, not by how quick or visible a fix is. Default order: status line > install path > claim check > differentiation paragraph > badge row > full restructure. Move the restructure up only for a launch or when readers miss things because they never scroll far enough.
+5. Report in the format that file gives, then stop. Rewrite only if the user asks.
 
 ## Restructure
 
@@ -74,7 +77,7 @@ Run Audit, get the user's agreement on the diagnosis, then:
 1. Reorder so readers can rule the project out quickly: identity and one-liner, proof (output, screenshot), why this over the alternative, usage, install, then detail. Put a non-permissive licence near the top.
 2. Rewrite one section at a time and confirm each before moving on. Keep the user's voice and the facts that are still true.
 3. Move overflow into linked files (ask before creating `CONTRIBUTING.md`, `docs/...` and the like).
-4. Re-run the script and re-score. The README passes when every blocking check passes and the scored checks total at least 14 of 16, or the user accepts a lower bar for a stated reason. Optionally run the cold-reader test from the checklist with a fresh subagent that has no repo context.
+4. Re-run the script and re-score. The README passes when every blocking check passes and the scored checks total at least 14 of 16, or the user accepts a lower bar for a stated reason. Optionally run the cold-reader test with the `cold-read` skill, passing the five questions from the checklist as the reader's questions.
 
 ## Beautify
 
@@ -86,14 +89,9 @@ Read [references/badges-and-visuals.md](references/badges-and-visuals.md) for th
 - **Asset-only requests** ("just make a banner") leave the README unchanged. Offer the embed snippet and insert it only after approval.
 - Keep emoji sparse, use at most one or two alerts (`> [!NOTE]` and the like) per page, and use `<details>` for long optional material.
 
-## Prose pass
-
-Once a draft is done, if the `avoid-ai-writing` skill is installed, offer to run it on the prose. Generated-sounding copy undermines a page that is trying to earn trust.
-
 ## Boundaries
 
 - Docs drift across `docs/`, setup guides, API or config references after a code change: `docs-audit`.
-- General docs, guides or tutorials outside the README: the `scribe` agent.
 - CHANGELOG entries and release notes: `gh-release` on GitHub, `forgejo-release` on Forgejo, if installed.
 - `CONTRIBUTING.md`, issue templates and repo settings such as description, topics and social preview: suggest them, but they are not this skill's output. `gh-repo-setup` covers GitHub settings; on Forgejo they are changed in the web UI.
 

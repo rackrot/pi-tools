@@ -4,7 +4,7 @@ The order of work for reshaping a page that already exists: scan, diagnose, then
 grain, tinted shadows, gradients) is not given here; the direction comes from SKILL.md.
 
 If the product's visual system stays and only a part changes, this is not a redesign: follow the
-system (the `web-design` skill when installed). Use this file when the visual identity is being
+system. Use this file when the visual identity is being
 replaced or the page "looks generic" and the owner wants a new look.
 
 ## 1. Scan
@@ -13,7 +13,7 @@ replaced or the page "looks generic" and the owner wants a new look.
   styled-components), where tokens live, which components are shared.
 - List what is real and must survive: the content, the brand assets (logo, colours, fonts the owner
   wants to keep), every working behaviour (forms, links, routes, analytics hooks).
-- Have the ui-critic agent measure the current page (or run its lint and inspect yourself) and keep
+- Screenshot the current page at 1440, 768 and 390 (or have the ui-critic agent measure it, if installed) and keep
   the report as the "before".
 
 ## 2. Diagnose

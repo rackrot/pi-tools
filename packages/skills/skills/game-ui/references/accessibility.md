@@ -47,7 +47,7 @@ Copy this into the review and tick each item.
 
 ## 3. Subtitles and captions
 
-- Presentation ([clear subtitles](https://gameaccessibilityguidelines.com/if-any-subtitles-captions-are-used-present-them-in-a-clear-easy-to-read-way/)): at least about 46 px at 1080p by default or by option, no more than two lines (three only in exceptional cases), about 40 characters per line at most, on a solid or semi-opaque backing box, ideally with an outline or shadow too.
+- Presentation ([clear subtitles](https://gameaccessibilityguidelines.com/if-any-subtitles-captions-are-used-present-them-in-a-clear-easy-to-read-way/)): at least about 46 px at 1080p by default or by option (a smaller default passes when the size option reaches 46 px), no more than two lines (three only in exceptional cases), about 40 characters per line at most, on a solid or semi-opaque backing box, ideally with an outline or shadow too.
 - Offer subtitles before any audio plays, for example on the first boot screen ([before sound](https://gameaccessibilityguidelines.com/ensure-subtitles-captions-are-or-can-be-turned-on-before-any-sound-is-played/)).
 - Show who is speaking: a name label, colour plus name, or an on-screen marker ([speaker](https://gameaccessibilityguidelines.com/provide-a-visual-indication-of-who-is-currently-speaking/)).
 - Caption significant non-speech sounds (`[footsteps behind]`, `[alarm]`) ([captions](https://gameaccessibilityguidelines.com/provide-captions-or-visuals-for-significant-background-sounds/)); subtitle supplementary barks too ([supplementary](https://gameaccessibilityguidelines.com/provide-subtitles-for-supplementary-speech/)).
@@ -80,7 +80,7 @@ Copy this into the review and tick each item.
 
 ## 7. Motion, flashing and comfort
 
-- Flashing ([flicker](https://gameaccessibilityguidelines.com/avoid-flickering-images-and-repetitive-patterns/)). Avoid: more than three flashes in one second over 25% or more of the screen; flashing sequences longer than 5 seconds; moving high-contrast repeating patterns (about 5 or more stripes) over 25% of the screen; static ones (about 8 or more stripes) over 40%. A flash includes a big brightness jump, a fast cut, or a change to or from saturated red. The guideline points to the paid Harding test and Ofcom's broadcast guidance for formal checks.
+- Flashing ([flicker](https://gameaccessibilityguidelines.com/avoid-flickering-images-and-repetitive-patterns/)). Avoid: more than three flashes in one second over 25% or more of the screen; flashing sequences longer than 5 seconds; moving high-contrast repeating patterns (more than 5 stripes) over 25% of the screen; static ones (more than 8 stripes) over 40%. A flash includes a big brightness jump, a fast cut, or a change to or from saturated red. The guideline points to the paid Harding test and Ofcom's broadcast guidance for formal checks.
 - Offer reduce-motion, camera-shake, head-bob, motion-blur and screen-flash toggles; coordinate with `game-feel`.
 - Avoid sudden unexpected movement or events, or offer an option ([sudden](https://gameaccessibilityguidelines.com/avoid-any-sudden-unexpected-movement-or-events/)); don't decouple camera from controller movement without an option ([camera](https://gameaccessibilityguidelines.com/avoid-or-provide-option-to-disable-any-difference-between-controller-movement-and-camera-movement/)).
 - VR: avoid simulation-sickness triggers such as forced camera motion and acceleration ([VR](https://gameaccessibilityguidelines.com/avoid-vr-simulation-sickness-triggers/)).

@@ -109,14 +109,14 @@ Rules:
 - **Save** a list of `{id, qty}` (plus per-instance data such as durability). Load through a registry that maps `id` to definition.
 - **Build the registry from an explicit list** (an exported array, a manifest file or a generated index), not by scanning the source folder at runtime. Exported builds often rename, pack or convert asset files, so a directory scan that works in the editor finds nothing in the shipped game.
 - An `id` missing from the registry on load (removed in a patch) is dropped or substituted with a log line, never a crash.
-- Equipment is a second container keyed by slot type (an enum, not a string). Compute totals from equipped items when asked, rather than caching them.
+- Equipment is a second container keyed by slot type (an enum, not a string). Recompute totals when equipment or modifiers change and cache the result; never save the cached value.
 
 ## 6. Abilities, effects and stat modifiers
 
 Core rule: data in definition files, runtime state in a component on the entity, communication through events.
 
 - **Ability definitions are stateless** (name, cost, cooldown, cast time, required and blocked tags) and shared by every caster. Cooldown timers and charges live in the caster's ability component, keyed by ability `id`.
-- **Activation sequence:** check tags, cost and cooldown, then enter a casting state for `cast_time`. Commit at the end of the cast: spend the cost, start the cooldown and apply the effect. An interrupt (stun, moving if the ability requires standing still) cancels the cast with no cost. Decide whether cost is paid at start or at commit, and do it in one place. A `cast_time` field that nothing enforces is a common bug.
+- **Activation sequence:** check tags, cost and cooldown, then enter a casting state for `cast_time`. Commit at the end of the cast: spend the cost, start the cooldown and apply the effect. An interrupt (stun, moving if the ability requires standing still) cancels the cast with no cost. Default: pay the cost at commit, so an interrupted cast costs nothing. If the design charges at cast start, do it in one place and say so. A `cast_time` field that nothing enforces is a common bug.
 - The component emits `activated`, `failed(reason)`, `cooldown_started` and `cooldown_finished`. The HUD listens and never polls.
 
 **Effects (buffs and debuffs)** have a duration (zero or less means instant), an optional tick interval, and `on_apply`, `on_tick` and `on_expire` hooks. An effect holder on the target advances them and removes expired ones after the loop, never while iterating.

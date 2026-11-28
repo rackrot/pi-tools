@@ -39,7 +39,7 @@ OpenFeatureAPI.setProvider(
     ImmutableContext(targetingKey = "id", attributes = mapOf("age" to Value.Integer(22))))
 OpenFeatureAPI.getClient().getBooleanValue("my-flag", false)
 ```
-Options: `endpoint`, `timeout` (10000), `maxIdleConnections` (1000), `keepAliveDuration` (7200000), `apiKey`, `pollingIntervalInMillis` (300000), `flushIntervalMs` (1000), `customHeaders`. `setEvaluationContext(...)` re-fetches evaluations. A newly added flag shows up after the next poll or context change.
+Options: `endpoint`, `timeout` (10000), `maxIdleConnections` (1000), `keepAliveDuration` (7200000), `apiKey`, `pollingIntervalInMillis` (300000), `flushIntervalMs` (1000), `customHeaders`. `setEvaluationContext(...)` re-fetches evaluations. A newly added flag shows up after the next poll or context change. Worst case from a flag-file change is the proxy's retriever pollingInterval plus this provider interval.
 
 ## Testing
 

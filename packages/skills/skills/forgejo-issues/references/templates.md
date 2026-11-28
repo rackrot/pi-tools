@@ -47,4 +47,4 @@ The outcome, in one or two sentences.
 - [ ] ...
 ```
 
-Link related work with `Related to #123`, or with `fj issue depend` / `fj issue block` when the link carries meaning such as "blocked by". Write context that stays true: skip file paths and line numbers that will go stale.
+Write context that stays true: skip file paths and line numbers that will go stale.

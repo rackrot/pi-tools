@@ -1,13 +1,13 @@
 ---
 name: api-graphql
-description: Designs and reviews public GraphQL APIs that third-party developers query. Use when deciding whether GraphQL fits, writing or reviewing a schema (naming, nullability, Node IDs, input and payload types, Relay connections, result-union errors), setting depth and cost limits, exposing a federated graph, or planning field deprecation.
+description: Designs and reviews public GraphQL APIs that third-party developers query. Use when deciding whether GraphQL fits, writing or reviewing a schema (naming, nullability, Node IDs, input and payload types, Relay connections, result-union errors), setting depth and cost limits, exposing a federated graph, judging whether a schema change is breaking or safe to ship, or deprecating and removing fields.
 ---
 
 # Public GraphQL API design
 
 Design for strangers. A third party writes queries you have never seen, so schema conventions, ceilings, and the trust boundary matter more than they do for your own apps.
 
-Not for gqlgen or other server code (`golang`), REST contracts and rate-limit headers (`api-rest-design`), or gRPC (`api-grpc`). Each named skill applies if installed.
+Not for gqlgen or other resolver/server code, REST contracts and rate-limit headers (`api-rest-design`), or gRPC (`api-grpc`). Each named skill applies if installed.
 
 ## Gate: is GraphQL the right surface?
 
@@ -44,7 +44,7 @@ Paginate every list a third party can grow. A bare list can't gain pagination la
 - A plain `nodes` list with `endCursor` is a documented shortcut used by large public APIs, but it is not in the Relay spec. Take it only when no per-edge data will ever exist, and return a wrapper object so promotion to a full connection stays additive.
 - Don't offer offset arguments on a growing public list. Concurrent writes duplicate and skip items.
 - Clamp `first` to a documented maximum. The schema can't express the bound.
-- Avoid a non-null `totalCount` that forces an expensive count.
+- Add `totalCount` only when a cheap count exists, and declare it nullable (`Int`, not `Int!`).
 
 ## Errors
 

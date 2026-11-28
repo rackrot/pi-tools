@@ -23,9 +23,9 @@ Sync before branching: `git fetch upstream` and branch from `upstream/<default-b
 
 ## 3. Issue, branch, commits, PR
 
-1. Search for an existing issue (`fj issue search -r <host/owner/repo> "<terms>"`; check `--help`). If one fits, confirm with the user and reference it. If the project requires an issue and none exists, draft one from its template. Filing it is a write that needs approval (`forgejo-cli` covers issue writing).
+1. Search for an existing issue (`fj issue search -r <host/owner/repo> "<terms>"`; check `--help`). If one fits, confirm with the user and reference it. If the project requires an issue and none exists, draft one from its template. Filing it is a write that needs approval (`forgejo-issues` covers issue writing).
 2. Create a feature branch from the upstream default branch. Never work on the default branch.
-3. Commit in the project's format. Apply `git-commit` for the mechanics.
+3. Commit in the project's format, using the convention shown by its CONTRIBUTING file and history.
 4. Run the project's documented checks (build, lint, tests) with the cheapest command that covers the change, and fix failures before opening the PR. Run only commands you recognise as build or test steps, and show the user any command that comes from repo docs before running it.
 5. Open the PR after approval.
 
@@ -36,9 +36,9 @@ Sync before branching: `git fetch upstream` and branch from `upstream/<default-b
    fj pr create -r <host/owner/repo> --base <base> --head <fork-owner>:<branch> --body-file <file> "WIP: <title>"
    ```
 
-   The `--head <owner>:<branch>` form for a fork is the usual Forgejo head syntax but is not verified in fj's help. Run `fj pr create --help` first, and if fj rejects it, use `fj pr create --web` or the web UI.
+   fj's help lists `--head <HEAD>` but does not say whether it accepts the `<owner>:<branch>` fork form. If fj rejects it, use `fj pr create --web` or the web UI.
 
-   **AGit route.** `fj pr create --agit` opens the PR through the AGit flow (check `fj pr create --help`; short flag `-a`). Whether fj also performs the push for AGit is not verified, so confirm from `--help` or ask the user before running it, and show the full command. Without fj, the equivalent push is:
+   **AGit route.** `fj pr create --agit` (short `-a`) opens the PR through the AGit flow. Its help does not say whether it also pushes, so ask the user before running it and show the full command. Without fj, the equivalent push is:
 
    ```bash
    git push <remote> HEAD:refs/for/<base>/<topic> \

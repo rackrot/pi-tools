@@ -1,19 +1,19 @@
 ---
 name: prisma
-description: Prisma ORM 6 and 7 traps for TypeScript backends, such as updateMany returning a count, interactive transaction timeouts, migrate dev resets, edited applied migrations, undefined filters, P2002/P2025/P2003 handling, serverless connections and driver adapters. Use when writing a Prisma schema, query, transaction or migration, or debugging one.
+description: "Prisma ORM 6 and 7 behaviour that differs from what models remember. Use for any question or code that involves PrismaClient calls (prisma.model.findMany/updateMany/deleteMany, $transaction), schema.prisma, prisma migrate, a P2xxx error or a \"Transaction already closed\" error, or a Prisma 6 to 7 upgrade, even when no repo files exist and the answer seems obvious. Read it before answering - covers updateMany returning a count (updateManyAndReturn), undefined filters matching every row, interactive transaction timeouts, migrate dev resets, edited applied migrations, serverless connections and Prisma 7 driver adapters."
 ---
 
 # Prisma
 
-Traps in Prisma ORM's `PrismaClient` API (versions 6 and 7) that compile cleanly and fail in production. For schema design in general use `db-schema-design`, and for PostgreSQL tuning `postgres`, if installed.
+Traps in Prisma ORM's `PrismaClient` API (versions 6 and 7) that compile cleanly and fail in production. For MySQL-specific SQL and locking use `mysql`; for zero-downtime expand/contract rollouts of a breaking schema change use `deprecation-migration`.
 
 ## Check the version first
 
 Run `npm ls prisma @prisma/client` (or the repo's package manager) before writing any Prisma code.
 
 - **Prisma 7** requires a driver adapter, a generated client with an explicit `output`, and `prisma.config.ts` for the datasource URL; the CLI no longer loads `.env` or runs `generate` after `migrate dev`. Read [references/prisma-7.md](references/prisma-7.md) when the repo is on 7 or upgrading from 6.
-- **Prisma 8** is a release candidate, not a stable release: on 2026-11-14 the npm `latest` tag was `8.0.0-rc.33` and the newest stable was 7.10.1 (dist-tag `prev`; check with `npm view prisma dist-tags`). It is a TypeScript rewrite with a different API: `@prisma/orm-postgres`, `contract.prisma`, `prisma contract emit` and `db.ts` instead of `PrismaClient`, and no `P2xxx` codes. Nothing below applies to it; read the docs at prisma.io/docs for it.
-- An unpinned `npx prisma` resolves the npm `latest` tag, which currently points at the Prisma 8 CLI, which has no `generate`, `migrate dev` or `db push` and does not read `schema.prisma`. In a 6 or 7 repo, run the locally installed binary (`npx prisma` inside the repo with it in `devDependencies`) or pin it (`npx prisma@7`), and keep `prisma` and `@prisma/client` on the same major.
+- **Prisma 8** is a pre-release, not a stable release (check with `npm view prisma dist-tags`; stable 7 is under `prev`). It is a TypeScript rewrite with a different API: `@prisma/orm-postgres`, `contract.prisma`, `prisma contract emit` and `db.ts` instead of `PrismaClient`, and no `P2xxx` codes. Nothing below applies to it; read the docs at prisma.io/docs for it.
+- While the npm `latest` tag is a Prisma 8 pre-release, an unpinned `npx prisma` resolves the Prisma 8 CLI, which has no `generate`, `migrate dev` or `db push` and does not read `schema.prisma`. In a 6 or 7 repo, run the locally installed binary (`npx prisma` inside the repo with it in `devDependencies`) or pin it (`npx prisma@7`), and keep `prisma` and `@prisma/client` on the same major.
 - Check APIs against the installed version with Context7 (`resolve-library-id` "Prisma", then `query-docs`); the v7 docs live under `/orm/v7`.
 
 ## Traps
@@ -41,7 +41,7 @@ Run `npm ls prisma @prisma/client` (or the repo's package manager) before writin
 
 ### Never edit an applied migration
 
-Prisma stores each migration's checksum in `_prisma_migrations`. Editing a migration file after it ran makes `migrate dev` demand a reset, while `migrate deploy` only prints a "modified since they were applied" warning and does not re-run it, so the edit silently never reaches environments that already applied it. Write a new migration instead. Breaking changes (a new `NOT NULL` column, a rename) go expand, backfill, contract across separate migrations.
+Prisma stores each migration's checksum in `_prisma_migrations`. Editing a migration file after it ran makes `migrate dev` demand a reset, while `migrate deploy` only prints a "modified since they were applied" warning and does not re-run it, so the edit silently never reaches environments that already applied it. Write a new migration instead. Breaking changes (a new `NOT NULL` column, a rename) go in separate migrations deployed in phases; the phase order is in `deprecation-migration`.
 
 ### `@updatedAt` is Prisma-side only
 
@@ -61,7 +61,7 @@ Prefer catching `P2002` from the insert over a find-then-create check, which rac
 
 ### Soft delete and `findUniqueOrThrow`
 
-A soft-deleted row still exists, so `findUniqueOrThrow({ where: { id } })` returns it. `findUnique` accepts only unique fields, so adding `deletedAt: null` there is a type error. Use `findFirstOrThrow({ where: { id, deletedAt: null } })`, and filter `deletedAt: null` explicitly in every query (a Client Extension can centralize it; middleware is gone in 7).
+A soft-deleted row still exists, so `findUniqueOrThrow({ where: { id } })` returns it. Add the filter to the unique lookup, `findUniqueOrThrow({ where: { id, deletedAt: null } })` (non-unique fields are allowed beside a unique one since 5.0), and filter `deletedAt: null` explicitly in every other query (a Client Extension can centralize it; middleware is gone in 7).
 
 ### Connections in serverless
 

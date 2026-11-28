@@ -1,13 +1,13 @@
 ---
 name: android-build
-description: 'Diagnoses and writes Android Gradle Plugin builds. Use for "Manifest merger failed", "Duplicate class found in modules", "Namespace not specified", minSdk conflicts with a library, resource linking failures, 16 KB page size warnings, or ClassNotFoundException or NoSuchMethodError only in the release build (keep rules). Covers the android {} block, build types, flavors, androidComponents, signing, desugaring, KSP and kapt, lint baselines and AGP, Gradle and JDK versions within a major.'
+description: 'Android Gradle Plugin build failures and build-file authoring: "Manifest merger failed", "Duplicate class found in modules", "Namespace not specified", a minSdk conflict with a library, resource linking failures, 16 KB page size warnings, a ClassNotFoundException or NoSuchMethodError only in the release build (R8 keep rules), or adding a build type, flavor or signing config to an Android module. Covers the android {} block, androidComponents, desugaring, KSP and kapt, lint baselines and AGP, Gradle and JDK versions within a major. Not for Gradle task wiring or the configuration cache (gradle) or uploading to Play (play-publishing).'
 ---
 
 # Android build
 
 Fix the error the build reports in the module that reports it, and keep variant names, application IDs and artifacts unless the request changes them.
 
-Not for: AGP 8 to 9 migration (built-in Kotlin, new DSL, kapt move) (`android-skills:agp-9-upgrade`); keep-rule audits, broad or redundant rules and code shrinking (`android-skills:r8-analyzer`); APK or AAB size beyond R8, such as resources, native libraries and ABI splits (`android-performance`); Gradle providers, task wiring, configuration cache and dependency resolution, even inside an Android convention plugin (`gradle`); audits and "check my build" (`gradle-skills:gradle-best-practices`); uploading to Play (`play-publishing`); app code (`android`).
+Not for: AGP 8 to 9 migration (built-in Kotlin, new DSL, kapt move) (`android-skills:agp-9-upgrade`, if installed); keep-rule audits, broad or redundant rules and code shrinking (`android-skills:r8-analyzer`, if installed); APK or AAB size beyond R8, such as resources, native libraries and ABI splits (`android-performance`); Gradle providers, task wiring, configuration cache and dependency resolution, even inside an Android convention plugin (`gradle`); audits and "check my build" (`gradle-skills:gradle-best-practices`, if installed); uploading to Play (`play-publishing`); app code (`android`).
 
 Generic Gradle practice (version catalog, Kotlin DSL, convention plugins, `./gradlew`) is in `gradle`; this skill adds only what AGP changes.
 
@@ -36,7 +36,7 @@ Generic Gradle practice (version catalog, Kotlin DSL, convention plugins, `./gra
 
 ## Upgrades within a major
 
-Pick the AGP, Gradle, JDK and Kotlin set from the compatibility table, not from "latest". Then hand the wrapper change to `gradle-skills:gradle-wrapper-upgrade` and name the exact Gradle version, because it picks the latest release when none is named and does not check AGP. See [references/upgrades.md](references/upgrades.md). For targetSdk, link the Play target API page rather than restating its numbers.
+Pick the AGP, Gradle, JDK and Kotlin set from the compatibility table, not from "latest". Then hand the wrapper change to `gradle-skills:gradle-wrapper-upgrade` if installed, naming the exact Gradle version, because it picks the latest release when none is named and does not check AGP; without it, run `./gradlew wrapper --gradle-version <exact version>` twice. See [references/upgrades.md](references/upgrades.md). For targetSdk, link the Play target API page rather than restating its numbers.
 
 ## Boundaries
 

@@ -2,9 +2,9 @@
 
 > Impact figures come from the .NET team's performance blog microbenchmarks. Treat them as order-of-magnitude hints and confirm any change with a benchmark on your own workload.
 
-Contents: Never Block on Async (Sync-over-Async); Never Await a ValueTask Multiple Times; Use Span<T> / AsSpan Instead of Substring for Slicing; Use ArrayPool<T> for Temporary Buffers; Avoid stackalloc in Loops; Avoid Boxing Value Types; Use StringComparison.Ordinal for Non-Linguistic Comparisons; Use AsSpan Instead of Substring; Use Source-Generated Regex [GeneratedRegex]; Avoid Nested Quantifiers (Catastrophic Backtracking); Use TryGetValue Instead of ContainsKey + Indexer; Avoid LINQ in Hot Paths; Don't Iterate IEnumerable Multiple Times; Use System.Text.Json Source Generator; Cache JsonSerializerOptions; Reuse HttpClient Instances; Use SearchValues<T> for Repeated Set Searches.
+Contents: Never Block on Async (Sync-over-Async); Never Await a ValueTask Multiple Times; Use Span<T> / AsSpan Instead of Substring for Slicing; Use ArrayPool<T> for Temporary Buffers; Avoid stackalloc in Loops; Avoid Boxing Value Types; Use StringComparison.Ordinal for Non-Linguistic Comparisons; Use Source-Generated Regex [GeneratedRegex]; Avoid Nested Quantifiers (Catastrophic Backtracking); Use TryGetValue Instead of ContainsKey + Indexer; Avoid LINQ in Hot Paths; Don't Iterate IEnumerable Multiple Times; Use System.Text.Json Source Generator; Cache JsonSerializerOptions; Reuse HttpClient Instances; Use SearchValues<T> for Repeated Set Searches.
 
-17 patterns that cause deadlocks, order-of-magnitude regressions, or excessive allocations.
+16 always-check patterns. Check every one on each scan, but grade each finding with the severity table in SKILL.md: only deadlocks, crashes, unbounded regex and >10x regressions are Critical.
 
 ## Async / Tasks
 
@@ -50,6 +50,7 @@ string sub = input.Substring(5, 10);
 ✅
 ```csharp
 ReadOnlySpan<char> sub = input.AsSpan(5, 10);
+int val = int.Parse(str.AsSpan(5, 3)); // parse without allocating a substring
 ```
 **Impact: Eliminates per-slice allocations; 2-4x faster via vectorization.**
 
@@ -74,7 +75,10 @@ ArrayPool<byte>.Shared.Return(buf);
 ❌
 ```csharp
 for (int i = 0; i < 10_000; i++)
+{
     Span<byte> buf = stackalloc byte[1024];
+    Process(buf);
+}
 ```
 ✅
 ```csharp
@@ -110,19 +114,6 @@ bool found = text.IndexOf("Content-Type") >= 0;
 bool found = text.Contains("Content-Type", StringComparison.Ordinal);
 ```
 **Impact: 2-3x faster; OrdinalIgnoreCase hash codes ~3.3x faster.**
-
-### Use AsSpan Instead of Substring
-🔴 **DO** | .NET Core 2.1+
-
-❌
-```csharp
-int val = int.Parse(str.Substring(5, 3));
-```
-✅
-```csharp
-int val = int.Parse(str.AsSpan(5, 3));
-```
-**Impact: Eliminates one string allocation per parse operation.**
 
 ## Regular Expressions
 

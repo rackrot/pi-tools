@@ -18,6 +18,6 @@ MaterialTheme(colorScheme = colorScheme, content = content)
 ```
 
 - Use role-paired colors (`primary` with `onPrimary`, `surfaceContainer` with `onSurface`) so contrast holds under dynamic color. Do not assume a brand color survives dynamic color; if brand identity matters, make dynamic color an opt-in.
-- `Scaffold` passes `innerPadding` to its content; apply it, or the content sits under the bars. Insets beyond that go to `android-skills:edge-to-edge`.
+- `Scaffold` passes `innerPadding` to its content; apply it, or the content sits under the bars. Insets beyond that are out of scope here (use an `android-skills` edge-to-edge skill if installed).
 - Prefer `material3` components. If the project uses Material 2 (`androidx.compose.material`), follow it; mixing both in one screen needs a reason.
 - Component-level overrides go through the component's `XxxDefaults.colors(...)`, not by wrapping in another theme.

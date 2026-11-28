@@ -20,7 +20,7 @@ The editor writes `<Project>.csproj` and `<Project>.sln` when the first C# scrip
 ```
 
 - **SDK version:** follow the editor. After an editor upgrade, bump `Godot.NET.Sdk/<version>` to match, then rebuild. A mismatch builds against the wrong GodotSharp API.
-- **.NET version:** `net8.0` is the minimum. Since Godot 4.5, exporting C# to Android requires `net9.0` or later; other platforms accept net8.0 and newer. Change the TFM only on request or for that Android requirement.
+- **.NET version:** `net8.0` is the minimum for Godot 4.5 to 4.7. Since Godot 4.5, exporting C# to Android requires `net9.0` or later; other platforms accept net8.0 and newer. Change the TFM only on request or for that Android requirement.
 - **Assembly name:** the project setting `dotnet/project/assembly_name` names the assembly and the generated `.csproj`. Keep the two in step when renaming.
 - **One root `.csproj`.** The editor builds the project in the project root. The MCP's `build_dotnet` fails with `AMBIGUOUS_MATCH` when there are several. Put test or tool projects in subfolders with their own `.csproj`, and make sure the game project doesn't compile their sources (exclude the folder with `<Compile Remove="tests/**" />`).
 - **NuGet:** add `<PackageReference>` items, then `dotnet restore` or build. Prefer pure managed packages. A package that needs native binaries must ship them for every export platform.

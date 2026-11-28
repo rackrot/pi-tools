@@ -2,7 +2,7 @@
 
 Verified 2026-11-01. A crash that appears only with `isMinifyEnabled = true` (or `optimization { enable = true }` in AGP 9.3+) is R8 removing or renaming something reached by reflection, serialization or a native/JNI name lookup.
 
-Never "fix" it by turning minify off, using `-dontobfuscate` globally, or adding `-keep class com.example.** { *; }`. Those hide the problem and cost the size win. Broad or redundant rule sets are an audit: `android-skills:r8-analyzer`.
+Never "fix" it by turning minify off, using `-dontobfuscate` globally, or adding `-keep class com.example.** { *; }`. Those hide the problem and cost the size win. Broad or redundant rule sets are an audit: `android-skills:r8-analyzer`, if installed.
 
 ## Procedure
 
@@ -14,14 +14,14 @@ Never "fix" it by turning minify off, using `-dontobfuscate` globally, or adding
    - own class read by reflection or JSON: `@Keep` (`androidx.annotation.Keep`) on the class or member, or `-keepclassmembers class com.example.model.User { <fields>; }`;
    - Gson: keep fields of models and use `@SerializedName` so renaming does not change the JSON names;
    - kotlinx.serialization and Moshi codegen need no rule when the plugin or KSP processor is applied; do not add one without evidence.
-6. Put app rules in `proguard-rules.pro` (listed in `proguardFiles`); in AGP 9.3+ a `.keep` file in `src/<variant>/keepRules` also works. Add a comment naming the class and why.
+6. Where app rules go: with `isMinifyEnabled`, in `proguard-rules.pro` listed in `proguardFiles`. With `optimization { enable = true }` (AGP 9.3+), in a `.keep` file under `src/<variant>/keepRules`, for example `src/main/keepRules/app.keep`; this is required with the new DSL. Add a comment naming the class and why.
 7. Rebuild release, repeat the failing action, and confirm the retraced trace is gone. Do not keep a rule that did not change the outcome.
 
 ## Rule shapes, narrow to wide
 
 - `-keepclassmembers class X { <init>(); }`: constructor only.
 - `-keep class X`: the class name and nothing else survives under its name.
-- `-keepclassmembers,allowobfuscation class X { <fields>; }`: keep fields, allow renaming of the class.
+- `-keepclassmembers,allowobfuscation class X { <fields>; }`: fields survive shrinking but may be renamed; use only with `@SerializedName` or another name-independent lookup.
 - `-keep class com.example.model.** { *; }`: whole package; last resort and a smell.
 
 Default rules come from `proguard-android-optimize.txt`; AGP 9 dropped `proguard-android.txt` because it disables optimization.

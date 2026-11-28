@@ -1,6 +1,6 @@
 ---
 name: grafana-dashboards
-description: Designs, reviews and refactors Grafana dashboards from operator questions rather than the metric list, and keeps them as code. Use when creating or cleaning up a Grafana dashboard, choosing RED or USE panels, fixing dashboard JSON or datasource UIDs, or wiring file provisioning, Terraform or the Foundation SDK.
+description: "Designs, reviews and trims Grafana dashboards (boards) so they answer on-call questions, and keeps them in git. Use for any Grafana dashboard question, even when the workspace holds no dashboard files: too many panels, what goes at the top, RED or USE panels, dashboards lost after a rebuild, 'datasource not found' after an import, dashboard JSON and datasource UIDs, file provisioning, Terraform or the Foundation SDK. Not for writing the PromQL inside a panel (promql)."
 ---
 
 # Grafana dashboards
@@ -13,7 +13,7 @@ Not for PromQL authoring (the `promql` skill), metric instrumentation or SLO des
 
 1. Write the operator questions first: Is it healthy? Where is the bottleneck? What changed? What should someone do? Ask the user for the audience and the failure they fear.
 2. Choose the method. Use RED (rate, errors, duration) for services and USE (utilization, saturation, errors) for resources. Grafana recommends alerting on RED symptoms.
-3. Inspect an existing dashboard and the data source first: metric names, labels, variable conventions, and the current JSON schema. Do not invent metrics. Query the backend (the `promql` skill, if installed) to confirm each one exists.
+3. Inspect an existing dashboard and the data source first: metric names, labels, variable conventions, and the current JSON schema. Do not invent metrics. Query the backend (the `promql` skill, if installed) to confirm each one exists. If you have neither an export from the target instance nor the real metric names, stop and ask for them (Dashboard settings > JSON Model, and a /metrics sample or a metric-name query). Do not hand over JSON built from assumed metric names or a remembered schema. If the user still wants a draft, label every assumed metric name and the assumed schema version as unverified.
 4. Build the smallest board that answers the questions, top to bottom: overview (health, big numbers), performance (latency and traffic trends), resources (saturation), then service-specific detail.
 5. Cut every panel that no question needs. A panel earns its place by changing what someone does.
 6. Save the dashboard as code and review the diff (`references/provisioning.md`).
@@ -40,7 +40,7 @@ Not for PromQL authoring (the `promql` skill), metric instrumentation or SLO des
 
 ## Dashboard JSON
 
-Grafana has three JSON schema models: the Classic model (the default before v12.2), the V1 resource that wraps the Classic model in a Kubernetes-style `spec`, and the V2 resource for newer layouts and conditional rendering. Do not write dashboard JSON from memory. Export one from the target instance (Dashboard settings, JSON Model) or from the Foundation SDK, and edit that, so the schema matches the running version. Use `$datasource` or `{"type": "prometheus", "uid": "<datasource-uid>"}` for data sources.
+Grafana has three JSON schema models: the Classic model (the default before v12.2), the V1 resource that wraps the Classic model in a Kubernetes-style `spec` (the default API format from v12.2 to v13.0), and the V2 resource, the current schema, with newer layouts and conditional rendering. Export Classic when the target runs v12.4 or older. Do not write dashboard JSON from memory (see Workflow step 3). Export one from the target instance (Dashboard settings, JSON Model) or from the Foundation SDK, and edit that, so the schema matches the running version. Use `$datasource` or `{"type": "prometheus", "uid": "<datasource-uid>"}` for data sources.
 
 ## References
 

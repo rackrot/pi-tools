@@ -1,6 +1,6 @@
 # Triage rubric and reply drafts
 
-Read at triage when a thread's action isn't obvious (a bot suggestion, a design opinion, two reviewers disagreeing), and at the report when drafting replies. Applies on every forge. Everything here produces text for the user. Posting, resolving, and requesting reviews stay with the user.
+Read at triage when a thread's action isn't obvious (a bot suggestion, a design opinion, two reviewers disagreeing), and at the report when drafting replies. Everything here produces text for the user. Posting, resolving, and requesting reviews stay with the user.
 
 ## Reviewer type
 
@@ -29,6 +29,7 @@ Score each request on value (what the fix gains, minus the cost to make and revi
 - A real correctness bug: lifetime or race that loses data, an off-by-one, a null dereference, an unhandled error path, a check that skips legitimate cases.
 - A cross-cutting concern with a clean local fix, such as widening a lock's scope or pulling a duplicated check into a helper.
 - Drift between a code comment or the test plan in the repo and the code. When the PR description drifted, editing it is a write on the forge, so the row is `clarify` and the report includes corrected text for the user to paste.
+- A confirmed bug whose exact remedy is open. Pick the smallest conventional remedy and state the choice in the reason. Use `clarify` only when the choice changes a public contract.
 
 ## Push back when the request is
 
@@ -40,7 +41,7 @@ Score each request on value (what the fix gains, minus the cost to make and revi
 
 ## Check repo policy before a generic fix
 
-Some findings are settled by project convention rather than general reasoning. Look at `CLAUDE.md`, `CONTRIBUTING`, `.github/`, `.forgejo/` or `.gitea/` instructions, linter and spell-check config, and neighboring files before deciding.
+Some findings are settled by project convention rather than general reasoning. Look at `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING`, `.github/` instructions, linter and spell-check config, and neighboring files before deciding.
 
 - Spell-check findings follow the repo's own mechanism (reword, dictionary entry, or inline ignore).
 - Lint suppressions need the inline rationale the repo expects.

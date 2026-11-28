@@ -26,7 +26,9 @@ Every command takes `-s <serial>` (or `ANDROID_SERIAL`). Examples below omit it 
 
 ## Deep links
 
-`adb shell am start -W -a android.intent.action.VIEW -d 'https://example.com/item?id=1&x=2' <appId>`
+`adb shell "am start -W -a android.intent.action.VIEW -d 'https://example.com/item?id=1&x=2' <appId>"`
+
+- The outer double quotes reach the device shell intact; without them the device shell backgrounds the command at the first `&` and the app receives a truncated URL.
 
 - `-W` waits and prints the launched activity and timing.
 - Omit `<appId>` to see which app the system chooses; include it to test one app's filter.

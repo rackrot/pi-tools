@@ -45,7 +45,7 @@ An encounter is a designed problem, not a headcount.
 
 - **Roles over numbers.** Mix enemy roles: fodder (pressure), ranged (forces movement), tank (focus target), flanker (punishes standing still), support (priority target). Two roles that combine well beat many copies of one.
 - **Telegraph.** Show the enemies or the arena before the fight starts, so the player can plan. Ambushes are seasoning, not the main course.
-- **Spawns.** Never spawn in the player's view or behind them without warning. Spawn from readable places (doors, vents, the far side of the arena).
+- **Spawns.** Never spawn an enemy out of thin air in view, or behind the player without warning. Spawn from readable places (doors, vents, the far side of the arena).
 - **Waves.** Escalate across waves, trigger the next wave on a count left (for example two enemies left) rather than zero so tension holds, and cap the number alive at once.
 - **Escalation across the level.** Reuse a known enemy in a harder context before introducing a new one.
 - **Resources.** Place health and ammo where the curve dips, and a little before the spike, not after.

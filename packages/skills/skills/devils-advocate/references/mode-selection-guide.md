@@ -83,7 +83,7 @@ Based on [specific context signal], I recommend **[Mode Name]** because [1-sente
 After that, a follow-up with **[Secondary Mode]** would [1-sentence benefit].
 ```
 
-Then confirm with `AskUserQuestion`:
+Then confirm with `ask_user` (or the host's question tool; if none exists, state the recommended mode in one line and proceed):
 - Option 1: Recommended mode (with "(Recommended)" label)
 - Option 2: Secondary mode if applicable
 - Option 3: "Let me pick" — return to the full mode selection

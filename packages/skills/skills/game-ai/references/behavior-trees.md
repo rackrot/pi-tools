@@ -2,7 +2,7 @@
 
 Contents: the contract, node types, memory versus reactive composites, `Reset()`, decorators, the blackboard, a guard tree, cadence and cost, debugging.
 
-Pseudocode is language-neutral. Engine bindings (beehave, LimboAI, Unreal BT assets) have their own skills; the concepts here apply to all of them.
+Pseudocode is language-neutral. Beehave and LimboAI are covered by `godot-addons`; the concepts here apply to any BT tool.
 
 ## The contract
 

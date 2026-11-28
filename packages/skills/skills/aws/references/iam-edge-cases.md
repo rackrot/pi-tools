@@ -9,6 +9,7 @@ Read when writing or reviewing a policy that uses conditions, boundaries or cros
 - STS sessions and Regions
 - Confused deputy
 - PassRole
+- Actions that let a principal grant itself more access
 - Not carried over
 
 ## Set operators and missing keys

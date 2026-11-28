@@ -1,13 +1,11 @@
 ---
 name: ux-copy
-description: "Writes and reviews product microcopy: button and CTA labels, error messages, empty states, confirmation dialogs, tooltips, loading and onboarding text. Use for \"what should this button say?\", \"write copy for\", \"review this error message\" or wording a dialog. Not for marketing page copy or long-form docs."
+description: "Writes and reviews the words inside a product UI: button and CTA labels, dialog titles and buttons, error messages and toasts, empty states, tooltips, loading, onboarding and notification text. Read before proposing or changing any user-facing string, even a single label, and when users misread, ignore or complain about a message. Sets the answer format (alternatives, localization notes) and makes the project's style guide and existing terms win. Not for marketing page copy or long-form docs."
 ---
 
 # UX copy
 
 Write or review the words inside a product interface.
-
-Request: the arguments given with the command
 
 ## Scope
 
@@ -80,6 +78,8 @@ What this is + why it's empty + how to start.
 - **Neutral**: informative and concise.
 
 ## Output
+
+When the user asks for only the string, or the task is to edit a strings file, write the string and one line of rationale; use the full template below for open requests.
 
 ```markdown
 ## UX Copy: [Context]

@@ -114,7 +114,7 @@ Load this file for a UI review or audit pass, or for the full checklist of one c
 ### 6. Typography & Color (MEDIUM)
 
 - `line-height` - Use 1.5-1.75 for body text
-- `line-length` - Limit to 65-75 characters per line
+- `line-length` - Limit to 60-75 characters per line on desktop, 35-60 on mobile
 - `font-pairing` - Match heading/body font personalities
 - `font-scale` - Consistent type scale (e.g. 12 14 16 18 24 32)
 - `contrast-readability` - Darker text on light backgrounds (e.g. slate-900 on white)
@@ -224,7 +224,7 @@ Load this file for a UI review or audit pass, or for the full checklist of one c
 
 ### 10. Charts & Data (LOW)
 
-For building a chart, the `dataviz` skill owns form, colour and marks; these are the UX checks.
+These are only the UX checks for a chart; chart form, colour and marks are out of scope here.
 
 - `chart-type` - Match chart type to data type (trend → line, comparison → bar, proportion → pie/donut)
 - `color-guidance` - Use accessible color palettes; avoid red/green only pairs for colorblind users (WCAG, MD)

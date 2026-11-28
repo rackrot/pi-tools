@@ -23,10 +23,18 @@ Keep names plain ASCII, one prefix style per dimension, and distinguishable colo
 
 The API has no create-or-update call. Check, then create or update:
 
+For a label missing from `gh label list`:
+
 ```bash
-gh label create "<name>" --color <hex> --description "<text>" --force
+gh label create "<name>" --color <hex> --description "<text>"
 ```
 
-`--force` updates an existing label in place. The raw endpoints are `POST /repos/{owner}/{repo}/labels` and `PATCH /repos/{owner}/{repo}/labels/{name}` (URL-encode the name).
+For an existing label, only when the approved plan lists it as changed:
+
+```bash
+gh label edit "<name>" --color <hex> --description "<text>"
+```
+
+`gh label create --force` also overwrites an existing label's color and description, so use it only for labels the plan lists as changed. The raw endpoints are `POST /repos/{owner}/{repo}/labels` and `PATCH /repos/{owner}/{repo}/labels/{name}` (URL-encode the name).
 
 Deleting or renaming labels in use detaches them from issues and PRs. Show the count (`gh issue list --label "<name>" --state all --json number --jq length`) and ask before removing.

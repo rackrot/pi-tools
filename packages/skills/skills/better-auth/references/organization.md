@@ -12,7 +12,7 @@ Limits and creation policy are plugin options. `allowUserToCreateOrganization` t
 
 ## Active organization
 
-`organization.setActive({ organizationId })` stores the active organization in the session, and endpoints such as `listMembers` and `inviteMember` use it when no `organizationId` is passed. Don't treat the active organization as authorization. Check membership and permission for the organization in each request, with `app-auth` section 4, if installed.
+`organization.setActive({ organizationId })` stores the active organization in the session, and endpoints such as `listMembers` and `inviteMember` use it when no `organizationId` is passed. Don't treat the active organization as authorization. Check membership and permission for the organization in each request (see `app-auth`, if installed).
 
 ## Members and invitations
 

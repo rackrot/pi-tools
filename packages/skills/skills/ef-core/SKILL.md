@@ -1,18 +1,18 @@
 ---
 name: ef-core
-description: 'Writes, reviews and tunes EF Core data access: query shape, tracking, Include vs split queries, N+1, bulk ExecuteUpdate/Delete, DbContext lifetime, migrations, raw SQL parameters, and Dapper code beside it. Use for DbContext or LINQ-to-entities code, a slow EF query, dotnet ef migrations, or reviewing a repository or import job.'
+description: 'Writes, reviews and tunes EF Core data access: query shape, tracking, Include vs split queries, N+1, bulk ExecuteUpdate/Delete, DbContext lifetime, migrations, raw SQL parameters, EF Core 9 and 10 behavior changes, and Dapper code beside it. Use for any DbContext or LINQ-to-entities code or question, pasted in the chat or in the repo: a slow EF query, a review comment about tracking or SaveChanges, dotnet ef migrations, "what does EF Core 10 do here", or reviewing a repository or import job. Read it before answering from memory, even when the workspace has no code: EF Core 9 and 10 changed defaults.'
 ---
 
 # EF Core
 
 Fix data access by reducing round-trips, duplicated rows, scans and needless materialization, and keep the contract the caller depends on. Separate what the code proves from what only a SQL log or query plan can show.
 
-Not for: schema and relationship design in general (`db-schema-design`), engine tuning, indexes and plans beyond the model (`postgres`, `mysql`), raw ADO.NET, endpoint and DTO work (`aspnet-core`), integration test setup (`dotnet-testing`), EF version upgrades as a project (`dotnet-upgrade-guide`).
+Not for: schema and relationship design in general, engine tuning, indexes and plans beyond the model (`mysql` for MySQL), raw ADO.NET, endpoint and DTO work (`aspnet-core`), integration test setup (`dotnet-testing`), EF version upgrades as a project (`dotnet-upgrade-guide`).
 
 ## Orient
 
 - Read the `.csproj` (EF Core and provider package versions, TFM), the `DbContext` and its `OnModelCreating` / `IEntityTypeConfiguration` classes, the `Migrations/` folder, and where the context is registered (`AddDbContext`, `AddDbContextPool`, `AddDbContextFactory`).
-- Follow repository and unit-of-work implementations rather than trusting interface names. Use the codebase-memory tools when the repo is indexed (`search_graph` for `DbSet<`, `trace_path` from a slow endpoint to its queries), else the C# language server (csharp-ls) or Grep.
+- Follow repository and unit-of-work implementations rather than trusting interface names. Use a code graph or the C# language server when one is available, else Grep.
 - Don't use an API newer than the installed EF Core version (examples below are tagged). EF Core 10 needs .NET 10. Check provider-specific behavior with Context7 or the provider docs.
 
 ## Review workflow

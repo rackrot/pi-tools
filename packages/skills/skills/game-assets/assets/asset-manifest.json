@@ -11,6 +11,7 @@
         "dimensions": "64x64",
         "alpha": true,
         "anchor": "bottom-center",
+        "collision_role": "",
         "frames": 1,
         "filtering": "nearest"
       },

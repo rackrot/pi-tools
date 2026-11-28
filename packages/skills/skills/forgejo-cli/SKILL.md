@@ -1,6 +1,6 @@
 ---
 name: forgejo-cli
-description: "Uses the Forgejo CLI fj against Codeberg or a self-hosted Forgejo: install, per-host auth, host and remote selection (-H, -R, -r and where each goes), the command map and its gaps, and issues (view, search, create, edit, label, close, dependencies). Use when fj is missing, says it is not logged in, hits the wrong instance, for a Forgejo or Codeberg issue, or for a task no narrower forgejo skill covers. Not for github.com or GitHub Enterprise (`gh`, `gh-issues`)."
+description: "Sets up and troubleshoots the Forgejo CLI fj against Codeberg or a self-hosted Forgejo: install, per-host login (OAuth or token), host and remote selection (-H, -R, -r and where each goes), the command map and what fj cannot do. Use when fj is missing, says it is not logged in, hits the wrong instance or rejects -R or -r, when someone wants a gh-like terminal client for Forgejo or Codeberg, or for an fj task no narrower skill covers (wiki, repos, orgs, tags). Not for working on issues, their labels or milestones (`forgejo-issues`), pull requests (`forgejo-pr`), releases (`forgejo-release`), or github.com and GitHub Enterprise (`gh`, `gh-issues`)."
 ---
 
 # Forgejo CLI (fj)
@@ -13,7 +13,7 @@ Drive Codeberg and self-hosted Forgejo with `fj`. Reads run freely. Every write 
 git remote -v
 ```
 
-- `github.com`, or a host that `gh auth status --hostname <host>` knows: this is GitHub. Stop and name the GitHub skill ("`gh-issues`, `gh-pr` or `gh-actions`, if installed").
+- `github.com`, or a host that `gh auth status --hostname <host>` knows: this is GitHub. Stop and name the GitHub skill (`gh-issues`, `gh-pr` or `gh-release`).
 - `codeberg.org`, a host where `curl -fsS https://<host>/api/forgejo/v1/version` answers, or a repo with `.forgejo/workflows` or `.gitea/workflows`: Forgejo. Continue.
 - Unclear: ask for the host.
 
@@ -45,13 +45,13 @@ Check any other command with `fj <noun> [-R x] <sub> --help`.
 
 ## 4. Issues, releases and the rest
 
-Issues: read [issues](references/issues.md) (search, create, edit, labels, close, dependencies). `forgejo-release` for releases. Commands for everything else are in [commands](references/commands.md). Confirm any flag with `fj <cmd> --help`: fj is 0.x and this map was checked against v0.7.0.
+Issues, issue labels and milestones: `forgejo-issues`. Pull requests: `forgejo-pr`. Actions: `forgejo-actions`. Releases: `forgejo-release`. Commands for everything else are in [commands](references/commands.md). Confirm any flag with `fj <cmd> --help`: fj is 0.x and this map was checked against v0.7.0.
 
 ## Gaps and fallbacks
 
 - No JSON output and no `api` command: output is text (`--style minimal` strips colors). Parse it carefully.
 - `pr create` has no `--draft` (a `WIP: ` title prefix marks a draft) and does not push. `issue create` has no label flag (`fj issue edit N labels -a <label>`). No Actions run logs.
-- When fj cannot do it, use the forgejo-mcp tools if present (`mcp__plugin_forgejo-mcp_forgejo__*`). Otherwise use the web UI (`fj <cmd> browse`) or ask the user to paste the output.
+- When fj cannot do it, use the forgejo-mcp tools if present (names start with `mcp__forgejo` in pi, `mcp__plugin_forgejo-mcp_forgejo__` in Claude Code). Otherwise use the web UI (`fj <cmd> browse`) or ask the user to paste the output.
 
 ## Safety
 

@@ -1,13 +1,13 @@
 ---
 name: game-publish
-description: "Ships a game build to a store and plans the release: itch.io uploads with butler channels and versions, Steam with SteamPipe depots, app_build.vdf, steamcmd and branches, and Steam release timing (app fee wait, Coming Soon, reviews, Next Fest, discounts). Use for butler push, steamcmd or a Steam launch date."
+description: "Ships a game build to a store and plans the release: itch.io uploads with butler channels and versions, Steam with SteamPipe depots, app_build.vdf, steamcmd and branches, and Steam release timing (app fee wait, Coming Soon, reviews, Next Fest, discounts). Use for butler push, steamcmd, a Steam launch date, or when an uploaded build does not reach players: Mac or Linux installs are empty, an update is not showing, an upload fails."
 ---
 
 # Game publish
 
 Get an exported build onto itch.io or Steam, keep it updated, and plan a Steam launch date backwards from Valve's fixed waits. The engine export itself (presets, templates, signing) comes first and is not covered here.
 
-Not for building the export (`godot-export` for Godot), jam scoping (`game-craft`), CI pipeline design in general (`gh-actions`), or in-game Steamworks API work such as achievements and overlay (use the engine's Steamworks binding docs). Pricing, tax and legal questions go to Steamworks docs and the user's own advisers. Use each plugin if installed.
+Not for building the export (`godot-export` for Godot), jam scoping (`game-craft`), CI pipeline design in general (`forgejo-actions` for Forgejo runners), or in-game Steamworks API work such as achievements and overlay (use the engine's Steamworks binding docs). Pricing, tax and legal questions go to Steamworks docs and the user's own advisers.
 
 ## Credentials: the rule that comes first
 
@@ -32,7 +32,7 @@ Both stores at once is common; do itch.io first (minutes) and Steam in parallel 
 1. Create the page at `itch.io/game/new`. Kind of project: **Downloadable** for native builds, **HTML** for a browser game. Keep it Draft until ready.
 2. Install butler (`itchio.itch.io/butler`, or the permanent broth URL in CI), then `butler version` and `butler login`.
 3. Push the exact folder a player runs, not an installer and not an archive of archives: `butler push <dir> <user>/<game>:<channel>`.
-4. Name channels in lowercase kebab-case containing the platform (`windows`, `linux`, `mac`, `android`, `windows-beta`); the name sets the initial platform tag. Reuse the same names forever.
+4. Name channels in lowercase kebab-case containing the platform (`windows`, `linux`, `mac`, `android`, `windows-beta`); the name sets the initial platform tags, and a name containing several platforms (`win-linux-mac-stable`) is tagged for all of them. Reuse the same names forever.
 5. Pass `--userversion <v>` (or `--userversion-file <f>`) so players and the update API see your version, not an auto integer.
 6. For HTML5, after the first push set the page Kind to HTML **and** tick "playable in browser" on the upload in Edit game. Neither follows from the channel name.
 7. Check with `butler status <user>/<game>`; preview changes with `butler push-preview <dir> <user>/<game>:<channel>`.

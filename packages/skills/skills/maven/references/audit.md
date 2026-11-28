@@ -38,7 +38,7 @@ Pre-release versions (`-rc`, `-M`, `-alpha`) appear in the output; do not adopt 
 Use at least one of these; say which one ran.
 
 - **OSV-Scanner** against the repository (`osv-scanner scan source -r .`) reads `pom.xml` and reports advisories by package.
-- **OWASP dependency-check** (`mvn org.owasp:dependency-check-maven:check`) needs the plugin declared with its current release from Maven Central and produces an HTML report in `target/`.
+- **OWASP dependency-check** (`mvn org.owasp:dependency-check-maven:check`) runs without a pom change when invoked by full coordinates; declare and pin it in `pluginManagement` only if the project wants it in the build. Produces an HTML report in `target/`.
 - **Dependabot or Renovate** alerts, if the repository host has them enabled.
 
 Severity follows the CVSS score:

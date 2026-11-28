@@ -1,6 +1,6 @@
 ---
 name: godot-csharp
-description: 'Writes and fixes C# in Godot 4 .NET projects: partial node classes, the PascalCase lifecycle, [Export], [Signal] events, GDScript interop, the .csproj and the build. Use for .cs or .csproj files beside project.godot, "port this GDScript to C#", GD0201 errors, or ObjectDisposedException after a signal.'
+description: 'Writes and fixes C# in Godot 4 .NET projects: partial node classes, the PascalCase lifecycle, [Export], [Signal] events and which connections need a manual disconnect, GDScript interop, the .csproj, the .NET version each export target needs, and C# breaks between Godot 4 minors. Read it before answering any Godot C# question, even one that looks answerable from memory, because these rules changed in 4.5 and 4.7. Use for .cs or .csproj files beside project.godot, "port this GDScript to C#", a C# node whose [Export] or _Ready does not work, GD0201 errors, signal += versus Connect, or ObjectDisposedException after a signal.'
 license: Apache-2.0 AND MIT
 ---
 
@@ -15,14 +15,10 @@ Related plugins, if installed: `csharp` for general C# design, nullable and asyn
 1. Read `config/features` in `project.godot`. The first entry is the engine version (`"4.7"`), and a .NET project also lists `"C#"`. Follow that version, not the newest one.
 2. Read the root `.csproj`:
    - `Sdk="Godot.NET.Sdk/<version>"` must match the editor version (a 4.7.x editor wants a 4.7.x SDK). Never copy a pin such as `4.3.0` from an example.
-   - `TargetFramework` sets the .NET version: `net8.0` is the minimum, and Android exports need `net9.0` or later (since 4.5). It also fixes the C# language version (net8.0 is C# 12). Don't raise the TFM, the SDK or `LangVersion` unless asked.
+   - `TargetFramework` sets the .NET version: `net8.0` is the minimum for 4.5 to 4.7, and Android exports need `net9.0` or later (since 4.5). It also fixes the C# language version (net8.0 is C# 12). Don't raise the TFM, the SDK or `LangVersion` unless asked.
 3. C# needs the .NET build of the Godot editor plus a .NET SDK (`dotnet --version`). The standard editor can't build or run C#.
-4. **If the `godot-editor` MCP tools are available**, follow the project's `godot-mcp` skill for editor work:
-   - `get_project_info` reports `dotnet`.
-   - `create_dotnet_project` writes the root `.csproj` and `.sln` when there are none.
-   - `build_dotnet` is the only check for C# errors. `create_script` returns no diagnostics for `.cs`, and `validate_script` handles `.gd` only. Give `extends` in its C# spelling (see the rules below).
-   - After a build, wait a second before attaching the script with `update_property`.
-5. Without the MCP, run `dotnet build` in the project root. The editor loads the Debug output from `.godot/mono/temp/bin/Debug`. For definitions and references use codebase-memory if the repo is indexed (`search_graph`, `get_code_snippet`), then the C# language server, then Grep.
+4. **If the `godot-editor` MCP tools are available**, `build_dotnet` is the only check for C# errors: `create_script` returns no diagnostics for `.cs`, and `validate_script` handles `.gd` only. `create_dotnet_project` writes the root `.csproj` and `.sln` when there are none. Give `extends` in its C# spelling (see the rules below), and after a build wait a second before attaching the script with `update_property`. If the project ships a `godot-mcp` skill, follow it for other editor work.
+5. Without the MCP, run `dotnet build` in the project root. The editor loads the Debug output from `.godot/mono/temp/bin/Debug`. For definitions and references use the `codebase-memory` tools (`search_graph`, `get_code_snippet`) if installed and the repo is indexed, then the C# language server, then Grep.
 
 ## Rules that break the build or fail silently
 

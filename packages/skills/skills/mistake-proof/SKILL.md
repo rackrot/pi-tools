@@ -1,11 +1,11 @@
 ---
 name: mistake-proof
-description: Designs or audits code so a mistake cannot be expressed instead of documenting it, ranking each hazard on a control, warning, detection or docs-only ladder. Use when designing an interface, schema or state machine to be hard to misuse, auditing for footguns, or closing a recurring bug class after an incident. Also known as poka-yoke. Not for module and interface shape (codebase-design).
+description: 'Makes a mistake impossible to write instead of documented, by redesigning an API, schema, script or state machine so the wrong call does not compile or run, and rates each fix as control, warning, detection or docs-only. Use when the user says "so this can''t happen again", "impossible to misuse", "hard to get wrong", "footgun" or "poka-yoke", when the same kind of bug keeps coming back after one-off fixes, when closing the code hazard behind a recurring bug class after an incident, or when a deploy or delete script must be safe by default. Not for module and interface shape (codebase-design), finding bugs already in the code, or writing or reviewing the incident write-up (postmortem).'
 ---
 
 # Mistake-proof
 
-Not for finding bugs already on the page (`second-opinion` or `/code-review`), language idiom (`typescript`, `python`, if installed), or schema constraints alone (`db-schema-design`, if installed).
+Not for finding bugs already on the page (that is a code review), language idiom (the language's own skill, if installed), or schema constraints alone (a database schema skill, if installed).
 
 A mistake is not the problem worth solving. The problem is letting a mistake become a defect. The remedy is a device that makes the wrong action impossible or immediately visible, not a reminder to be careful.
 
@@ -21,6 +21,8 @@ A comment, docstring, wiki page, review checklist, or "don't do X" line in an in
 | 2 | Warning | It is possible but announces itself as it happens: a lint error, a runtime assertion, a confirmation that cannot be skipped |
 | 3 | Detection | It happens and you find out afterward: tests, logs, monitoring, review |
 | 0 | Docs only | Telling people to be careful |
+
+A check that blocks the merge (a lint rule, a required CI check) is Warning: the mistake can still be written and is announced. Control means the mistake cannot be expressed at all.
 
 Detection is sometimes all that exists. A plan that stops there should say it limits cost, not likelihood, so the likelihood gets its own item.
 
@@ -56,7 +58,7 @@ Apply these moves in roughly this order.
 
 Close by naming what the design now makes impossible, and what you left possible on purpose and why. A design with unstated limits gets trusted past them.
 
-Language mechanics (branded types, typestate, exhaustiveness helpers) belong to the language skills, if installed: `typescript`, `python`, `golang`, `rust`, and `db-schema-design` for constraints.
+Language mechanics (branded types, typestate, exhaustiveness helpers) belong to the language's own skill when one is installed.
 
 ## Auditing existing code
 
@@ -70,6 +72,8 @@ You are not hunting bugs, which are mistakes that already happened. You are hunt
 Report three findings that matter in preference to eleven padded ones. Make no edits until the user picks items.
 
 ## After an incident
+
+The incident document (timeline, impact, action owners) belongs to `postmortem`. This section covers only the defect/mistake/hazard split, the device, and the sweep.
 
 Keep three things apart, because the fix belongs to the third.
 

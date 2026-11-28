@@ -2,11 +2,11 @@
 
 ## 1. Parse the URL
 
-`https://<host>/<owner>/<repo>/actions/runs/<n>[/jobs/<j>]`. Keep host, owner/repo and `<n>`. The `<n>` in the web URL is the run number shown in the UI, which is not the database run ID that the API and forgejo-mcp use. The trailing job number is, as far as we know, a job index within the run (hedge: confirm against the job list). Without a URL, use the current repo's Forgejo remote (see the gate in SKILL.md).
+`https://<host>/<owner>/<repo>/actions/runs/<n>[/jobs/<j>]`. Keep host, owner/repo and `<n>`. The `<n>` in the web URL is the run number shown in the UI, which is not the database run ID that the API and forgejo-mcp use. Ignore the trailing job number for lookup; list the run's jobs and pick the failed one. Without a URL, use the current repo's Forgejo remote (see the gate in SKILL.md).
 
 ## 2. Read the failure
 
-Preferred, when `mcp__plugin_forgejo-mcp_forgejo__*` tools are present (check each tool's schema before calling):
+Preferred, when the forgejo-mcp tools are present (`list_workflow_runs`, `list_action_run_jobs`, `get_action_job_logs`; the prefix is `mcp__forgejo__` in pi and `mcp__plugin_forgejo-mcp_forgejo__` in Claude Code). Check each tool's schema before calling:
 
 1. `list_workflow_runs`: find the entry whose `run_number` equals `<n>` and use its ID for later calls. `get_workflow_run` gives event, commit and conclusion.
 2. `list_action_run_jobs` for that run; pick the failed job.

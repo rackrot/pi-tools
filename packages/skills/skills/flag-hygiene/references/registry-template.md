@@ -5,10 +5,10 @@ Keep the registry in version control next to the flag definitions (for example `
 | Field | Meaning |
 | --- | --- |
 | key | Exact flag key as evaluated |
-| type | release, experiment, ops (kill switch), permission |
+| type | release, experiment, ops (kill switch), permission/entitlement; `?` when no document states it, never inferred from the default value |
 | owner | Person or team that decides when it goes; `?` if unknown; resolve before the audit closes |
 | created | Date added (from `git log -S`) |
-| expiry | Removal date; required for release and experiment; `none` only for ops and permission |
+| expiry | Removal date; required for release and experiment; `none` only for ops and permission/entitlement |
 | purpose | One sentence: what it guards and the condition to remove it |
 | default | Value when the flag is missing or the provider fails |
 | location | Definition file or platform project, plus main call sites |

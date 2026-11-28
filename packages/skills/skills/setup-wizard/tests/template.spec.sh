@@ -31,8 +31,8 @@ out=$(run 'write_env TOKEN "a'"'"'b\$c\\d \"e\"" >/dev/null; printf "[%s]" "$(_e
 [[ "$out" == *"[a'b\$c\\d \"e\"]"* ]] && pass "round-trip special characters" || fail "round-trip: $out"
 
 # 2. First write adds .env to .gitignore after a yes, and the file is 0600.
-out=$(run 'write_env A 1 >/dev/null; git check-ignore -q .env && echo IGNORED; stat -c %a .env' $'y\n')
-[[ "$out" == *IGNORED* && "$out" == *600* ]] && pass "gitignore added, mode 0600" || fail "gitignore/mode: $out"
+out=$(run 'write_env A 1 >/dev/null; git check-ignore -q .env && echo IGNORED; [[ -n "$(find .env -prune -perm 600)" ]] && echo MODE600' $'y\n')
+[[ "$out" == *IGNORED* && "$out" == *MODE600* ]] && pass "gitignore added, mode 0600" || fail "gitignore/mode: $out"
 
 # 3. Declining the gitignore prompt stops before anything is written.
 out=$(run 'write_env A 1; echo SHOULD-NOT-REACH' $'n\n') || true

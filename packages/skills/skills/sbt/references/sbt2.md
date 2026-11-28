@@ -52,20 +52,21 @@ Official form: `[query /] [Config /] [task /] key`.
 - The server keeps the environment it started with. Later `SBT_OPTS`, `JAVA_OPTS` or `-D` flags do not reach it. Run `shutdown` first (**observed**).
 - Auto-reload is on: after a `build.sbt` or `project/` change the next command reloads. Official.
 - `run` and `console` fork a fresh JVM from the client (**observed**).
-- `-Dsbt.ci=true` turns off supershell and colour (**observed**).
+- `-Dsbt.ci=true` turns off supershell and colour. Official.
 - JDK 17 or later runs sbt 2 (**observed**; the official pages checked do not state it).
 
 ## Caching
 
 - sbt 2 has a machine-wide disk cache shared by all builds on the machine. Official. An optional remote cache exists.
 - **Observed** on 2.0.3: after `sbt "clean ; compile"` the output can show `elapsed time: 0 s` with no `compiling` lines, because the result was restored from the cache. Check with `find target/out -name '*.class'`, not with the log.
-- **Observed**: test success is keyed by content hashes, so `sbt "clean ; test"` still skips suites that passed. Use `testFull` to force a rerun.
+- **Observed** on 2.0.x: test success is keyed by content hashes, so `sbt "clean ; test"` still skips suites that passed. Use `testFull` to force a rerun.
+- Official: from sbt 2.1.0 `clean` invalidates the cache for the next command. `sbt test --cache_test_result=false` runs tests without the result cache, and `Test / test / cacheStores := Nil` turns test caching off in the build.
 - The official caching page checked here does not describe these test-level details.
 
 ## Layout and CI
 
-- One `target/` per build: `target/out/jvm/scala-<ver>/<subproject>/classes`, `.../test-classes`, `.../test-reports/TEST-*.xml` (**observed**). Use `target/out/**/test-reports/*.xml` in CI artifact paths.
-- Global settings move to `<global-base>/2`, typically `~/.config/sbt/2` (**observed**; official path resolution differs by OS).
+- One `target/` per build: `target/out/jvm/scala-<ver>/<subproject>/classes`, `.../test-classes`, `.../test-reports/TEST-*.xml`. Official. Use `target/out/**/test-reports/*.xml` in CI artifact paths.
+- Global settings move to `$XDG_CONFIG_HOME/sbt/2` or `$HOME/.config/sbt/2` (`%LOCALAPPDATA%/sbt/2` on Windows). Official.
 
 Example CI step (one step, then free the server):
 

@@ -1,13 +1,13 @@
 ---
 name: java-testing
-description: 'Writes, runs, debugs and fixes Java tests with JUnit Jupiter 5/6, Mockito, AssertJ and Testcontainers. Use when editing or debugging JUnit code (*Test.java, *IT.java): @ParameterizedTest, @Nested, Mockito UnnecessaryStubbingException or strict stubs, "No tests found for given includes", -Dtest or --tests filtering, Surefire versus Failsafe, flaky tests that sleep or depend on the clock, a slow suite starting a container per class, Mockito agent warnings on Java 21+.'
+description: 'Java test work with JUnit Jupiter 5/6, Mockito, AssertJ, Testcontainers, Surefire/Failsafe and Gradle: writing, running and fixing *Test.java and *IT.java. Read this first, before searching the workspace, whenever a question involves a Java test: a test that fails intermittently, overnight or only on CI (wall clock, time zone, Thread.sleep), "No tests found for given includes" or a test class not picked up, -Dtest or --tests filtering, @ParameterizedTest, @Nested, Mockito UnnecessaryStubbingException or agent warnings on Java 21+, a suite starting a container per class. Not for tests needing a Spring context (spring-boot-testing), Kotlin (kotlin-testing) or Android (android-testing).'
 ---
 
 # Java testing
 
 Test behavior through the public API with the framework the project already uses. Read the build file first: JUnit 4 vs Jupiter, AssertJ vs Hamcrest, Mockito version, and the Java release.
 
-Not for: general test strategy and what to test (`unit-testing`); anything that needs a Spring context, such as `@WebMvcTest`, `@DataJpaTest`, `@SpringBootTest`, `@MockitoBean` (`spring-boot-testing`); Kotlin tests (`kotlin-testing`); tests that need Android, such as Robolectric and instrumented tests (`android-testing`); build wiring (`maven`, `gradle`); production code design (`java`).
+Not for: finding which tests are missing (`test-gap-audit`); anything that needs a Spring context, such as `@WebMvcTest`, `@DataJpaTest`, `@SpringBootTest`, `@MockitoBean` (`spring-boot-testing`); Kotlin tests (`kotlin-testing`); tests that need Android, such as Robolectric and instrumented tests (`android-testing`); build wiring (`maven`, `gradle`); production code design (`java`).
 
 Verified on 2026-10-20: JUnit 6 requires Java 17 at runtime (code compiled for older releases can still be tested), and Platform, Jupiter and Vintage share one version (6.1.3); Vintage, the JUnit 3/4 engine, is deprecated. Mockito 5 uses the inline mock maker by default. On Java 21+ Mockito self-attaching prints a JVM warning and may fail later; configure `-javaagent` (see [references/mockito.md](references/mockito.md)).
 
@@ -65,10 +65,3 @@ Use JaCoCo to find untested branches in code you changed, not to hit a number. D
 2. Run the whole class, then the module. In a multi-module build use `-pl <module> -am`.
 3. Confirm the test actually ran: look for "Tests run: N" with N above zero, not "No tests found".
 4. Run it three times for anything with threads, time or a container; an intermittent failure is a defect to fix, not a retry to add.
-
-## References
-
-- [references/run-and-filter.md](references/run-and-filter.md) when running one test, filtering by tag, or when the build reports no tests found.
-- [references/mockito.md](references/mockito.md) when stubbing gets complicated, on a Mockito warning, or when mocking statics, constructors or finals.
-- [references/testcontainers.md](references/testcontainers.md) when a suite starts containers or is slow.
-- [references/coverage.md](references/coverage.md) when configuring JaCoCo or asked about coverage targets.

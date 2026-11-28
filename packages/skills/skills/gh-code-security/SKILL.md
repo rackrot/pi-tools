@@ -1,17 +1,17 @@
 ---
 name: gh-code-security
-description: Configures and triages GitHub security features with gh. Covers secret scanning, push protection and blocked-push recovery, secret_scanning.yml exclusions, private vulnerability reporting, and triage of secret scanning, code scanning and Dependabot alerts. Use when enabling these, a push is blocked for a secret, or an alert needs a decision. GitHub only, not for Forgejo, Codeberg or Gitea.
+description: "Handles leaked secrets and security alerts on GitHub with gh. Use when a push is rejected with GH013 or \"Push cannot contain secrets\", when a key or token was committed or pushed, when the Security tab has secret scanning, code scanning (CodeQL) or Dependabot alerts to prioritize or close, or when enabling secret scanning, push protection, secret_scanning.yml exclusions or private vulnerability reporting. Read it before giving rotation, bypass or history-rewrite steps. GitHub only, not for Forgejo, Codeberg or Gitea, and not for writing dependabot.yml."
 ---
 
 # GitHub Code Security
 
-Not for Dependabot config files (`dependabot`), CodeQL workflow setup (`gh-actions`), or local scans before commit (`security-scan`, if installed), or a Forgejo, Codeberg or Gitea repo.
+Not for writing Dependabot config files (dependabot.yml), setting up CodeQL workflows, local scans before commit (`security-scan`, if installed), or a Forgejo, Codeberg or Gitea repo.
+
+Turn security features on, recover from a blocked push, and decide what to do with alerts. Reading alerts is safe. Changing settings, dismissing alerts, rewriting history, and force-pushing are shared-state writes, so state the exact command and get approval first.
 
 ## Forge gate
 
 Run `git remote -v` first, and name the remote the work concerns rather than assuming `origin`. If it is `codeberg.org`, a host where `curl -fsS https://<host>/api/forgejo/v1/version` answers, or the repo has a `.forgejo/` directory or `.gitea/workflows`, stop and tell the user this skill is GitHub-only. No Forgejo skill covers secret scanning or alert triage. Still treat a leaked credential as compromised and tell the user to rotate it. Continue only on github.com or a host `gh auth status --hostname <host>` knows.
-
-Turn security features on, recover from a blocked push, and decide what to do with alerts. Reading alerts is safe. Changing settings, dismissing alerts, rewriting history, and force-pushing are shared-state writes, so state the exact command and get approval first.
 
 ## A leaked credential is compromised
 
@@ -84,7 +84,7 @@ Custom patterns are regex definitions at repo, org, or enterprise scope. Build t
 
 ## Triage alerts
 
-Read first, then propose a decision per alert and wait for approval before changing state. Never print an alert's `secret` field, and pass `hide_secret=true` when listing secret scanning alerts. Read [alert triage](references/alert-triage.md) for the list commands, the priority order per alert type, and the exact dismissal values for each API. Use `revoked` only after the credential was actually revoked, and write a dismissal comment that states the evidence. Dependabot alert fixes go through the `dependabot` skill; patching code that CodeQL flags is a normal code change.
+Read first, then propose a decision per alert and wait for approval before changing state. Never print an alert's `secret` field, and pass `hide_secret=true` when listing secret scanning alerts. Read [alert triage](references/alert-triage.md) for the list commands, the priority order per alert type, and the exact dismissal values for each API. Use `revoked` only after the credential was actually revoked, and write a dismissal comment that states the evidence. Fixing a Dependabot alert is a normal dependency bump; patching code that CodeQL flags is a normal code change.
 
 ## Rewrite history (last resort)
 

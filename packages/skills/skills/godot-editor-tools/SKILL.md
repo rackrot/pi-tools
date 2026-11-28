@@ -1,13 +1,13 @@
 ---
 name: godot-editor-tools
-description: Godot 4 editor plugins and addons. Use when writing or fixing an EditorPlugin, plugin.cfg, @tool script, inspector plugin, EditorDock, 3D gizmo, tool menu, undoable scene edits or an addon that runs a server inside the editor, or when a project has addons/*/plugin.cfg.
+description: "Godot 4 editor plugins and addons. Use when writing or fixing an EditorPlugin, plugin.cfg, @tool scripts used by a plugin or that edit the open scene (undo/redo, owner), an inspector plugin or Inspector button, EditorDock, 3D gizmo, tool menu, or an addon that runs a server inside the editor; when nodes that editor-time code adds to the open scene are gone after saving or Ctrl+Z does not undo them; or when the project's own addon under addons/ is being written or fixed. Not for a `@tool` script on a game node for editor preview or configuration warnings, or a one-off EditorScript (use `godot`). Not for using Beehave, LimboAI, Phantom Camera or Dialogue Manager (godot-addons)."
 ---
 
 # Godot editor tools
 
 An editor plugin is an addon folder `addons/<name>/` with a `plugin.cfg` and a `@tool` script extending `EditorPlugin`. It runs inside the editor process, so a bug in it can freeze or crash the editor; build it in small steps and keep every registration reversible. Examples are GDScript; C#-specific rules are marked.
 
-Start by reading the project's Godot version from `config/features` in `project.godot` and follow that version, not the newest; per-version changes are in the `godot` plugin's `references/version-notes.md`, if installed.
+Start by reading the project's Godot version from `config/features` in `project.godot` and follow that version, not the newest; per-version changes are in the `godot` skill's `references/version-notes.md`.
 
 ## Layout and plugin.cfg
 
@@ -34,11 +34,11 @@ Those five keys are the whole format. `script` is relative to the plugin folder.
 
 ## Rules
 
-1. **Every script the editor runs must be `@tool`.** That includes helpers the plugin preloads; a non-tool GDScript used from the editor acts like an empty file. A script that extends a `@tool` script needs `@tool` itself. Static variables of non-tool scripts read as `null` from tool code (static methods, constants and enums work).
+1. **Every script the editor runs must be `@tool`.** That includes helpers the plugin preloads; instances of a non-tool GDScript are placeholders in the editor (no methods run, properties read as defaults). A script that extends a `@tool` script needs `@tool` itself. Its static variables read as `null` from tool code; its static methods, constants and enums still work.
 2. **`@tool` scripts ship in exports and run in the game too.** Only editor classes (`EditorPlugin`, `EditorInterface`, `EditorInspectorPlugin`, ...) are absent from exports. Guard editor-only logic in runtime node scripts with `Engine.is_editor_hint()`, and keep the plugin's own scripts out of runtime scenes.
 3. **C#:** wrap only editor-only classes (the `EditorPlugin`, inspector and gizmo plugins) in `#if TOOLS ... #endif`. Never wrap a runtime `[Tool]` node class; that strips it from exports and breaks every scene that uses it.
 4. **`_enter_tree` and `_exit_tree` are mirror images.** Everything added (custom types, docks, inspector, gizmo, import and export plugins, tool menu items, `Engine.register_singleton` entries, loggers, servers, threads) is removed and freed in `_exit_tree`, in reverse order. A plugin that leaks registrations duplicates them on the next enable.
-5. **One-time project changes go in `_enable_plugin` / `_disable_plugin`.** These run only when the user toggles the plugin: add or remove autoloads with `add_autoload_singleton`/`remove_autoload_singleton`, or default project settings.
+5. **One-time project changes go in `_enable_plugin` / `_disable_plugin`.** These run only when the user toggles the plugin: add or remove autoloads with `add_autoload_singleton`/`remove_autoload_singleton`, or default project settings. `add_autoload_singleton` writes the entry to `project.godot`, so it persists across editor restarts; calling it in `_enter_tree` is redundant, and removing it in `_exit_tree` deletes the autoload every time the editor closes.
 6. **Edit the open scene through undo/redo.** Use `EditorInterface.get_editor_undo_redo()` (`EditorUndoRedoManager`), one action per user-visible change, and set `owner` to `EditorInterface.get_edited_scene_root()` on new nodes or they won't be saved. Direct property writes from tool code can't be undone. Recipes: [references/scene-editing-and-services.md](references/scene-editing-and-services.md).
 7. **Never block the main thread.** Poll sockets and processes from `_process`, or run work on `WorkerThreadPool`/`Thread` and hand results back with `call_deferred`. Join threads in `_exit_tree`.
 8. **Stay relocatable.** Preload sibling files by relative path (`preload("http_server.gd")`) and find the plugin folder with `(get_script() as Script).resource_path.get_base_dir()`, so the addon works if someone moves or renames its folder.

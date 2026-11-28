@@ -1,6 +1,6 @@
 ---
 name: ts-module-boundaries
-description: Sets up dependency-cruiser in a TypeScript repo so each package is reachable only through its root entry-point files, with no deep imports and no cycles, then proves the rules fail on a violation. Use when the user asks to enforce package boundaries, stop deep imports or add dependency-cruiser.
+description: Manual command that sets up dependency-cruiser in a TypeScript repo so each package is reachable only through its root entry-point files, with no deep imports and no cycles, then proves the rules fail on a violation.
 disable-model-invocation: true
 ---
 
@@ -31,9 +31,9 @@ Several small entry points beat one barrel that re-exports a whole subtree. Laye
 
 ## Steps
 
-1. **Detect the environment.** Package manager from the lockfile (`pnpm-lock.yaml`, `yarn.lock`, `bun.lock`/`bun.lockb`, else npm). Packages root from `the arguments given with the command`, else `src/packages` if `src/` exists, else `packages`; confirm with the user when the repo has another convention. Check for an existing `.dependency-cruiser.*`, and the installed TypeScript version (`npx tsc -v`).
+1. **Detect the environment.** Package manager from the lockfile (`pnpm-lock.yaml`, `yarn.lock`, `bun.lock`/`bun.lockb`, else npm). Packages root: the path the user gave when invoking the skill, else `src/packages` if `src/` exists, else `packages`; confirm with the user when the repo has another convention. Check for an existing `.dependency-cruiser.*`, and the installed TypeScript version (`npx tsc -v`).
    Done when the package manager, packages root, existing-config status and TypeScript version are known.
-2. **Install** `dependency-cruiser` as a devDependency with that package manager. Run `npx depcruise --info` and check that `typescript` shows a check mark with a found version. dependency-cruiser supports a bounded TypeScript range (18.6 supports `>=2 <7`, and TypeScript 7 support waits on a stable compiler API). Outside the range it cruises zero `.ts` modules, prints a `missing-typescript-transpiler` warning and exits 0, so every check passes while checking nothing. If the repo's TypeScript is outside the range, stop and tell the user; don't wire up a check that cannot fail.
+2. **Install** `dependency-cruiser` as a devDependency with that package manager. Run `npx depcruise --info` and check that `typescript` shows a check mark with a found version. dependency-cruiser supports a bounded TypeScript range, shown in the `versions supported` column of `--info` (18.9 excludes 7.0.x). Outside the range it cruises zero `.ts` modules, prints a `missing-typescript-transpiler` warning and exits 0, so every check passes while checking nothing. If the repo's TypeScript is outside the range, stop and tell the user; don't wire up a check that cannot fail.
    Done when `dependency-cruiser` is in `devDependencies` and `--info` shows TypeScript as found and supported.
 3. **Write the config.** Copy [assets/dependency-cruiser.config.cjs](assets/dependency-cruiser.config.cjs) to the repo root as `.dependency-cruiser.cjs` and set `PACKAGES_ROOT` (no trailing slash). Use `.cjs` so `module.exports` works in `"type": "module"` repos. If a config already exists, merge the rules and options into it instead of overwriting, and say what you added.
    Done when the config holds the five rules with the right `PACKAGES_ROOT`.
@@ -44,9 +44,9 @@ Several small entry points beat one barrel that re-exports a whole subtree. Laye
    2. Add a temporary deep import, for example from an app file or a package's `tests/` file into `<pkg>/lib/...`. Run again. It must fail, naming the matching rule.
    3. Revert the import and run once more. It must pass.
 
-   `depcruise` exits with the number of `error`-severity violations, so a non-zero exit is the CI signal. If step 2 does not fail, the rules or the cruised root are wrong; fix that before finishing.
+   `depcruise` exits with the number of `error`-severity violations, so a non-zero exit is the CI signal. If the run with the temporary deep import does not fail, the rules or the cruised root are wrong; fix that before finishing.
    Done when you have observed pass, fail on the deep import, pass.
-6. **Document the convention.** Write a short `README.md` in the packages folder: the layout above, "import only through a package's root files", how to run `lint:boundaries`, and that barrels are discouraged. Add a one-line pointer to it from the repo's `CLAUDE.md` (or `AGENTS.md`, creating it if neither exists), such as `Packages are deep modules: read src/packages/README.md before adding or importing one.` That pointer is how later agents learn the rule before they break it.
+6. **Document the convention.** Write a short `README.md` in the packages folder: the layout above, "import only through a package's root files", how to run `lint:boundaries`, and that barrels are discouraged. Add a one-line pointer to it from the repo's agent-instructions file (`AGENTS.md` or `CLAUDE.md`, whichever exists; create `AGENTS.md` if neither does), such as `Packages are deep modules: read src/packages/README.md before adding or importing one.` That pointer is how later agents learn the rule before they break it.
    Done when the README exists and the agent-instructions file links to it.
 
 Don't scaffold an example package unless the user asks; existing packages show the layout. If the repo has no packages yet, ask whether to create a copy-me `example/` package (an `index.ts` that delegates to `lib/impl.ts`, and a test that imports only `../index`), and use it for step 5.

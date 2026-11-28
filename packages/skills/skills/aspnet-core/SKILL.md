@@ -1,25 +1,25 @@
 ---
 name: aspnet-core
-description: 'Builds and reviews ASP.NET Core HTTP apps: minimal APIs and controllers, DTOs, validation, ProblemDetails, OpenAPI, middleware order, auth wiring, .http files, CRUD endpoints written without scaffolders. Use for Program.cs endpoint or middleware work, "add an endpoint", OpenAPI setup, or global error handling in a .NET web project.'
+description: 'Builds, reviews and answers questions about ASP.NET Core HTTP apps: minimal APIs and controllers, DTOs, validation, ProblemDetails, OpenAPI, auth wiring, CORS, rate limiting, .http files, CRUD endpoints written without scaffolders. Use for Program.cs work: "add an endpoint", OpenAPI setup, global error handling, the order of app.UseCors/UseAuthorization/UseRateLimiter calls, or any question about how ASP.NET Core behaves. Defaults changed in .NET 9 and 10 (validation, OpenAPI, cookie auth on API endpoints, exception logging), so read this before answering from memory, even when there are no project files to look at.'
 ---
 
 # ASP.NET Core
 
 Match the project's existing style and target framework first; most mistakes here are mixing styles or using an API the TFM doesn't have.
 
-Not for: Blazor components (`blazor`), EF Core queries and migrations (`ef-core`), API contract policy such as versioning and pagination conventions (`api-rest-design`), choosing an auth design (`app-auth`), gRPC contract design (`api-grpc`), general C# (`csharp`), tests (`dotnet-testing`, which covers `WebApplicationFactory`).
+Not for: Blazor components (`blazor`), EF Core queries and migrations (`ef-core`), API contract policy such as versioning and pagination conventions (`api-rest-design`), choosing an auth design (out of scope; `api-oauth-provider` covers running your own OAuth/OIDC issuer), gRPC contract design (`api-grpc`), general C# (`csharp`), tests (`dotnet-testing`, which covers `WebApplicationFactory`).
 
 ## Orient
 
 - Read `Program.cs`, the `.csproj` (`TargetFramework`, `Microsoft.NET.Sdk.Web`, package refs), `appsettings*.json`, `Properties/launchSettings.json`, and two or three existing endpoints.
 - Find the style: classes deriving `ControllerBase` or marked `[ApiController]` mean controllers; `app.MapGet/MapPost/MapGroup` means minimal APIs. Continue in that style; never mix. A new project defaults to minimal APIs unless the user asks for controllers.
-- Find callers and registrations with the codebase-memory tools when the repo is indexed (`search_graph`, `trace_path`), else the C# language server (csharp-ls) or Grep.
+- Find callers and registrations with whatever code-navigation tools are available (C# language server, code graph), else Grep.
 - Check APIs against the TFM: built-in OpenAPI needs .NET 9+, minimal API `AddValidation()` and XML-comment OpenAPI need .NET 10+. For library APIs use Context7 (`resolve-library-id`, `query-docs`) or Microsoft Learn.
 
 ## Endpoints
 
-1. **DTOs.** Separate request and response types; never expose EF entities. `sealed record`: positional for responses, `required` + `init` properties with data annotations for requests. Names `Create{Entity}Request`, `Update{Entity}Request`, `{Entity}Response`. `DateTimeOffset` for timestamps. `<summary>` comments on API-facing types (they flow into OpenAPI on .NET 10 with `<GenerateDocumentationFile>true</GenerateDocumentationFile>`).
-2. **Validation.** Controllers with `[ApiController]` validate automatically. Minimal APIs on .NET 10+: `builder.Services.AddValidation();` (returns a 400 validation problem; per-endpoint opt-out `.DisableValidation()`). It discovers types only in the assembly that calls it. Before .NET 10, validate explicitly in a filter or handler.
+1. **DTOs.** Separate request and response types; never expose EF entities. `sealed record`: positional for responses, `required` + `init` properties with data annotations for requests (`public sealed record CreateProductRequest { [Required, MaxLength(200)] public required string Name { get; init; } }`, a record, not a class). Names `Create{Entity}Request`, `Update{Entity}Request`, `{Entity}Response`. `DateTimeOffset` for timestamps. `<summary>` comments on API-facing types (they flow into OpenAPI on .NET 10 with `<GenerateDocumentationFile>true</GenerateDocumentationFile>`).
+2. **Validation.** Controllers with `[ApiController]` validate automatically. Minimal APIs on .NET 10+: `builder.Services.AddValidation();` (returns a 400 validation problem; per-endpoint opt-out `.DisableValidation()`). It discovers types only in the assembly that calls it. The 400 is a validation problem whose `errors` object is keyed by property name, so on .NET 10 do not also validate by hand or return `TypedResults.ValidationProblem` yourself. Before .NET 10, validate explicitly in a filter or handler.
 3. **Handlers.** Minimal APIs: one static class per resource with a `Map{Resource}(this IEndpointRouteBuilder app)` extension that uses `app.MapGroup("/api/products").WithTags("Products")`. Return `TypedResults`, and declare `Results<Ok<T>, NotFound>` when a handler has several outcomes. A bare ternary between `TypedResults.Ok(x)` and `TypedResults.NotFound()` without that declared return type fails to compile (CS1593).
 4. **Status codes.** GET 200 (404 if missing); POST 201 with `Location` (`TypedResults.Created($"/api/products/{id}", body)` or `CreatedAtAction`); PUT/PATCH 200 or 204; DELETE 204; 400 validation, 409 conflict. Contract-level conventions belong to `api-rest-design`.
 5. **Cancellation.** Every handler takes a `CancellationToken` and passes it to every async call (services, EF Core, `HttpClient`).
@@ -54,7 +54,7 @@ Middleware order decides behavior. The usual order is exception handler, HSTS, H
 
 ## Gotchas
 
-- `AddValidation()` silently validates nothing for endpoint types declared in another assembly; call it from that assembly too.
+- `AddValidation()` silently validates nothing for endpoint types declared in another assembly; expose an extension method in that assembly that calls `services.AddValidation()` and call it from the host. A plain class library also needs a package reference to `Microsoft.Extensions.Validation`.
 - XML doc comments on lambdas never reach OpenAPI; move the handler to a named method to document it.
 - On .NET 10, cookie-authenticated API endpoints (`[ApiController]`, JSON minimal APIs, `TypedResults`) return 401/403 instead of redirecting to the login page.
 - `UseCors` must sit after `UseRouting` and before `UseAuthorization` (and before response caching) or endpoint CORS policies don't apply.

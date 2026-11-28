@@ -117,9 +117,9 @@ Verdict: PASS | PASS WITH CAVEATS | FAIL
 
 Verdicts:
 
-- **FAIL**: the server can't start, can't complete a valid session, corrupts its transport stream, or accepts invalid input without a safe rejection.
+- **FAIL**: the server can't start, can't complete a valid session, corrupts its transport stream, accepts invalid input without a safe rejection, or its documentation, metadata or annotations misrepresent a dangerous capability (an undocumented mutation tool, a destructive tool annotated read-only).
 - **PASS WITH CAVEATS**: bounded documentation or metadata drift that doesn't misrepresent a dangerous capability.
-- **PASS**: everything else.
+- **PASS**: no findings.
 
 ## Sources
 

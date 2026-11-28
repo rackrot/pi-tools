@@ -23,13 +23,13 @@ Verified 2026-11-01 as practice; confirm flags against developer.android.com/top
 
 - Ship only the ABIs you support: `ndk { abiFilters += listOf("arm64-v8a") }` in a `defaultConfig` for APK builds. For an AAB, Play splits by ABI itself, so filtering mostly shrinks the universal or sideloaded artifact.
 - `splits { abi { ... } }` produces per-ABI APKs and is for APK distribution only; do not combine with a bundle upload.
-- Native libraries stored uncompressed (`packaging { jniLibs { useLegacyPackaging = false } }`, the default at a high enough `minSdk`) enlarge the APK but shrink the download and avoid extraction at install. Compare install size and download size before changing this.
+- Keep native libraries uncompressed (`packaging { jniLibs { useLegacyPackaging = false } }`, the default from minSdk 23). The APK or AAB you upload is larger, but the Play download is smaller, because Play compresses the download itself and does that better on uncompressed .so files, and the install is smaller because nothing is extracted. Do not switch to compressed libraries to save size.
 - Strip debug symbols from release `.so` files and upload them to Play as native debug symbols separately (`play-publishing`).
 - Check each prebuilt `.so` against the dependencies that supply it; a transitive ML or media library often dominates `lib/`.
 
 ## Code
 
-DEX size is R8's job: minification, keep-rule bloat and unused libraries go to `android-skills:r8-analyzer`. This skill records the size before and after.
+DEX size is R8's job. A release build that R8 breaks (release-only crash, missing keep rule) goes to `android-build`. Minification, keep-rule bloat and unused libraries can go to `android-skills:r8-analyzer`, if installed. This skill records whether R8 ran and the size before and after.
 
 ## Report
 

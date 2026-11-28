@@ -1,6 +1,6 @@
 ---
 name: goff-sdk
-description: Integrates GO Feature Flag (GOFF) into application code through OpenFeature providers (server remote and in-process, client web and mobile), the Go module `ffclient` without a relay proxy, and OFREP. Covers evaluation context and targetingKey, bucketing, tracking events and data export from SDKs, provider options, and tests with defaults and provider errors. Use for "go-feature-flag provider", "@openfeature/go-feature-flag-provider", "go-feature-flag-web-provider", "gofeatureflag-python-provider", "OpenFeature.Providers.GOFeatureFlag", "ffclient", "GoFeatureFlagProvider", "targetingKey missing", "OFREP", or when code or manifests mention go-feature-flag with openfeature. Not for flag files, targeting queries and rollout YAML (goff-flags), running or configuring the relay proxy, retrievers, exporters and notifiers (goff-relay-proxy), or choosing a flag platform and generic flag hygiene (feature-flags).
+description: "Integrates GO Feature Flag (GOFF) into app code via OpenFeature providers (server, React/web, mobile), the Go `ffclient` module and OFREP, and debugs it: a user stuck on the default or wrong variation, flags stale after login or until refresh, targetingKey missing, provider not ready, tracking events not exported. Use when an app (backend, React, iOS, Android) reads flags from GOFF, or code mentions \"@openfeature/go-feature-flag-provider\", \"go-feature-flag-web-provider\", \"ffclient\", \"GoFeatureFlagProvider\" or \"OFREP\". Not for flag files and rollout YAML (goff-flags or goff), the relay proxy, retrievers and exporters (goff-relay-proxy or goff), or picking a flag platform (feature-flags)."
 ---
 
 # GO Feature Flag SDK integration
@@ -48,7 +48,7 @@ Server SDKs evaluate with a dynamic context per call. Client SDKs set one static
 ## Tracking and data export
 
 - Every evaluation emits a feature event when the flag's `trackEvents` is not `false` and the proxy has an exporter. Providers buffer and flush them; tune with the provider's flush interval, max pending events and disable-data-collection options (names per language in the references).
-- `client.track("event-name", context, details)` (Go: `client.Track(ctx, name, evalCtx, of.NewTrackingEventDetails(value))`) sends a tracking event. Works only with GOFF providers (Go, Java, Python, .NET, JS/TS); the proxy needs an exporter with `eventType: "tracking"`.
+- `client.track("event-name", context, details)` (Go: `client.Track(ctx, name, evalCtx, of.NewTrackingEventDetails(value))`) sends a tracking event. Works only with GOFF providers (Go, Java, Python, .NET, JS/TS, Kotlin/Android); the proxy needs an exporter with `eventType: "tracking"`.
 - Exporter metadata (provider option `ExporterMetadata` or context key `gofeatureflag.exporterMetadata`; string, bool, int, float) lands in each event's `metadata`. Needs proxy >= v1.41.1.
 - Exporters themselves are configured on the proxy (goff-relay-proxy); the Go module has its own `DataExporter` config.
 

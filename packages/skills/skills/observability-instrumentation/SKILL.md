@@ -1,6 +1,6 @@
 ---
 name: observability-instrumentation
-description: Adds and reviews production telemetry in application code (structured logs, metrics, OpenTelemetry traces, profiles, alerts) plus SLIs, SLOs and burn-rate alerts. Use when instrumenting a service or feature, adding spans or metrics, correlating logs with traces, choosing metric labels, or defining alerts or SLOs.
+description: Rules for telemetry in application code (structured logs, metrics, OpenTelemetry spans, profiles, alert rules, SLOs and burn-rate alerts). Read before adding or reviewing logging, metrics, tracing or alerting in a service, before answering how to make a feature debuggable for on-call or what to page on, and before judging someone's telemetry code, even when no code is checked out and the answer seems familiar, because it corrects common habits (handled errors on spans, user identifiers in log context, label cardinality, units). Not for writing PromQL (promql) or Grafana dashboards (grafana-dashboards).
 ---
 
 # Observability instrumentation
@@ -59,5 +59,3 @@ Pick the cheapest signal that answers the question. Metrics detect, traces local
 - `references/alerting.md`. Read when writing alert rules or choosing what to page on.
 - `references/slo.md`. Read when defining SLIs, SLOs, error budgets, or burn-rate alerts.
 - `references/profiling.md`. Read when enabling pprof or continuous profiling.
-
-For Sentry error tracking setup, use the `sentry-sdk` skill if it is installed. This skill covers the OpenTelemetry and Prometheus path.

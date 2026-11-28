@@ -1,6 +1,6 @@
 ---
 name: better-auth
-description: 'Adds, configures and debugs the Better Auth TypeScript library using docs for the installed version. Use when a project imports better-auth or has a betterAuth() config, or the user names Better Auth: setup, adapters, the auth CLI, route handlers, sessions, rate limits, trusted origins, email/password, two-factor or organizations.'
+description: 'Adds, configures and debugs the Better Auth TypeScript library (better-auth package, betterAuth() config, createAuthClient) from docs for the installed version. Read it before answering anything about such a config, including a pasted auth.ts with a symptom such as missing session rows, a failing sign-in, cookie or redirect, a rate-limit or schema error: defaults and package names changed in 1.7 and answers from memory are often stale. Covers setup, adapters, the auth CLI, route handlers, sessions and secondary storage, rate limits, trusted origins, email/password, two-factor and organizations. Not for Auth.js/next-auth, Clerk or other auth libraries.'
 ---
 
 # Better Auth
@@ -55,7 +55,7 @@ Read [references/setup.md](references/setup.md) for install, environment variabl
 
 Import paths differ by plugin family, and both forms below are valid for the in-package plugins. Use the form the project's existing code and the docs for its version use.
 
-- **In-package server plugins** (two-factor, organization, admin, bearer, magic link, email OTP, username, phone number, JWT, multi-session, OpenAPI, and others) import from `better-auth/plugins`. The package also exports a per-plugin subpath for most of them (for example `better-auth/plugins/two-factor`, present in 1.7.10). Check the installed package's `exports` before using one. The organization docs use `better-auth/plugins/access` for `createAccessControl` to keep bundles small.
+- **In-package server plugins** (two-factor, organization, admin, bearer, magic link, email OTP, username, phone number, JWT, multi-session, OpenAPI, and others) import from `better-auth/plugins`. The package also exports a per-plugin subpath for most of them (for example `better-auth/plugins/two-factor`, present in the 1.7 line). Check the installed package's `exports` before using one. The organization docs use `better-auth/plugins/access` for `createAccessControl` to keep bundles small.
 - **Client plugins** import from `better-auth/client/plugins`.
 - **Separate packages** need their own install and import: `@better-auth/passkey`, `@better-auth/sso`, `@better-auth/api-key`, `@better-auth/oauth-provider` (to build an authorization server, also see `api-oauth-provider`, if installed), plus `@better-auth/stripe`, `@better-auth/scim`, and `@better-auth/expo` where the docs list them. Their client plugins come from the package's `/client` path.
 - **Framework glue** has its own paths, such as `better-auth/next-js`, `better-auth/node`, `better-auth/svelte-kit`, and `better-auth/tanstack-start`.
@@ -64,7 +64,7 @@ Each plugin needs the server plugin, the matching client plugin, and a schema re
 
 ## 6. Security settings
 
-Express the `app-auth` policy with these options, and confirm each against the docs for the installed version.
+Express the authorization policy (from `app-auth`, if installed) with these options, and confirm each against the docs for the installed version.
 
 - **Secret.** Set it from the environment. Production throws when no secret is configured. `secrets` supports versioned rotation.
 - **Trusted origins.** `trustedOrigins` gates origin checks and callback URLs. List exact origins, and remove localhost from production. Wildcards must be deliberate.
@@ -86,7 +86,7 @@ Read these only for the feature at hand.
 
 ## 8. Verify
 
-Run a real flow against a disposable database: sign up, verify, sign in, read the session on the server (`auth.api.getSession({ headers })`), and sign out. Exercise each plugin's failure path (bad code, expired token, wrong origin). Then check logs and responses for leaked tokens, and use `app-auth` section 7 (if installed) for the cross-user denial check.
+Run a real flow against a disposable database: sign up, verify, sign in, read the session on the server (`auth.api.getSession({ headers })`), and sign out. Exercise each plugin's failure path (bad code, expired token, wrong origin). Then check logs and responses for leaked tokens, and confirm that one user's session is denied when it reads or changes another user's or another organization's records (see `app-auth`, if installed).
 
 ## Provenance
 

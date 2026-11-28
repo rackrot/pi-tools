@@ -1,13 +1,13 @@
 ---
 name: level-design
-description: Designs and builds game levels in any engine. Covers player metrics, blockout to playable, critical path and gating, pacing and tension curves, encounters and readability, plus seeded procedural generation (noise, rooms and corridors, BSP, cellular caves, WFC). Use for "level design", "blockout", "pacing", "encounter" or "procedural dungeon".
+description: "Level layout, pacing, encounters and procedural map generation for games in any engine: sizing jump gaps and corridors from player metrics, blockout, critical path and lock-and-key gating, tension curves, arena fights and enemy waves, seeded generators (noise, rooms and corridors, BSP, cellular caves, WFC). Read it before answering whenever someone designs, sizes, reviews or fixes a level, encounter plan or map generator, even on paper: how wide a gap may be, a level that drags, when the next wave spawns, players lost or soft-locked, disconnected caves, a seed giving a different map. Not for loot and drop rates (game-design), enemy AI (game-ai) or jump tuning (game-feel)."
 ---
 
 # Level design
 
 A level is a sequence of intended experiences delivered through space. Build it in this order: metrics, blockout, play, fix, and only then dress. Authored and procedural levels follow the same rules. A generator still needs metrics, a critical path, pacing and a validation pass.
 
-Not for: tile, grid-map or terrain API (for Godot, use the `godot` skill if installed); movement and jump tuning (`game-feel`); enemy behaviour (`game-ai`); loot tables, economy and difficulty balance (`game-design`); genre conventions.
+Not for: tile, grid-map or terrain API (for Godot, use the `godot` skill if installed); movement and jump tuning (`game-feel`); enemy behaviour (`game-ai`); loot tables, economy and difficulty balance (`game-design`); running playtests (`game-playtest`); genre conventions (`game-genres`). `game-craft` covers these other game topics engine-neutrally.
 
 ## Workflow
 
@@ -49,6 +49,13 @@ HARD_GAP      = MAX_JUMP_DIST * 0.95   # optional skill checks only
 - Put a clear rest (a save point, a vista, a resource cache) right before the hardest beat.
 - Read `references/pacing-encounters.md` for tension curves, encounter building blocks, arena layout, readability techniques and the blockout review checklist.
 
+## Encounters
+
+- Trigger the next wave on a count left (about two enemies alive), not at zero, so tension holds.
+- Cap the number of enemies alive at once.
+- Change one difficulty knob (count, mix, arena size, cover, time pressure, resource drops) per step of escalation.
+- Read `references/pacing-encounters.md` before answering any encounter, wave or arena question.
+
 ## Procedural generation
 
 - One seeded RNG per generator, passed explicitly. Never use the global random function in generation code.
@@ -79,3 +86,5 @@ HARD_GAP      = MAX_JUMP_DIST * 0.95   # optional skill checks only
 - `game-ai`: enemies and navigation in the spaces built here.
 - `game-design`: loot tables, economy and difficulty balance.
 - `game-playtest`: running the playtests that drive iteration.
+- `game-genres`: genre conventions that shape layouts.
+- `game-craft`: the engine-neutral umbrella for the other game topics.

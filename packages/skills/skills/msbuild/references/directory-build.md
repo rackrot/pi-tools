@@ -106,7 +106,7 @@ An rsp `-restore` affects CI steps that pass `--no-restore`; see [redundant-rest
 3. Hand package versions to the `nuget` skill's CPM workflow.
 4. Add inner `.props` for `src/` and `test/` with the parent import.
 5. Strip the centralized settings from each project file.
-6. Validate against a real entry point you found (`.sln`, `.slnx`, `.proj` or each project): `dotnet restore <entry> && dotnet build <entry>`, and inspect the merged view with `dotnet msbuild <project> -pp:merged.xml`.
+6. Validate against a real entry point you found (`.sln`, `.slnx`, `.proj` or each project): `dotnet restore <entry> && dotnet build <entry>`, and check where each setting is imported from with `dotnet msbuild <project> -pp:merged.xml` (imports inlined, not evaluated).
 
 ## Troubleshooting
 

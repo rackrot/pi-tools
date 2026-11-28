@@ -1,6 +1,6 @@
 ---
 name: mysql
-description: "Diagnoses and changes MySQL and MariaDB by measurement: EXPLAIN risk signals, composite indexes, upsert syntax differences, keyset pagination, InnoDB lock waits and deadlocks, SKIP LOCKED queues, online DDL, replica lag, pools and grants. Use for slow queries, deadlocks, lock stalls, or MySQL-specific SQL and schema defaults."
+description: "MySQL and MariaDB facts and procedures that are easy to get wrong from memory. Read before answering any MySQL, MariaDB or InnoDB question: a slow query or EXPLAIN output, a deadlock (error 1213) or lock wait timeout (error 1205), ALTER TABLE or an index build on a large table, upsert syntax, deep pagination, SKIP LOCKED job queues, replica lag, connection pools, grants, column type defaults, and which versions are still supported (8.0 is end of life; current LTS lines). Not for PostgreSQL or ORM-level questions."
 ---
 
 # MySQL
@@ -9,11 +9,12 @@ Not for PostgreSQL (`postgres`), portable schema modeling or migration staging (
 
 Make a measured MySQL or MariaDB change or investigation. Establish the workload and failure mode before changing SQL, indexes, schema, or config. Prefer the smallest reversible change that improves an observed outcome.
 
-For portable tables, keys, constraints, and migration staging, use `db-schema-design`. MySQL and MariaDB have diverged in syntax and features, so never assume which engine or version runs, or that you have production access. Verify on the target, and check that version's manual. The sources for this skill are the MySQL 8.4 manual and the MariaDB documentation. MySQL 8.4 and 9.7 are the LTS lines, and 8.0 reached end of life in April 2026 (Oracle Sustaining Support only), so flag an 8.0 target for upgrade; check Oracle's MySQL support notices for current status. It was not run against a live MySQL server.
+MySQL and MariaDB have diverged in syntax and features, so never assume which engine or version runs, or that you have production access. Verify on the target, and check that version's manual. The sources for this skill are the MySQL 8.4 manual and the MariaDB documentation. Only the required-column behavior in [references/online-ddl.md](references/online-ddl.md) was run against a live server (MySQL 8.4.11); the rest comes from the manuals.
 
 ## 1. Set the boundary
 
 - Identify the engine and version with `SELECT VERSION();` and `SHOW VARIABLES LIKE 'version_comment';`. Note managed-service limits, replicas, a proxy or pooler, and whether the target is production.
+- MySQL 8.4 and 9.7 are the LTS lines, and 8.0 reached end of life in April 2026 (Oracle Sustaining Support only), so flag an 8.0 target for upgrade. Check Oracle's MySQL support notices for current status.
 - State the symptom and a measurable completion condition, such as a query's latency at its row count, a lock wait, or a deadlock rate.
 - Run writes, DDL, `KILL`, and load-generating probes against production only with authorization and a recovery plan.
 
@@ -96,7 +97,7 @@ Soft deletes (`deleted_at`) need an index that includes the column, or every que
 
 ## 7. Operational changes
 
-- Check how each `ALTER TABLE` runs before running it on a large table, and read [references/online-ddl.md](references/online-ddl.md) for the algorithm, lock, and metadata-lock rules.
+- Check how each `ALTER TABLE` runs before running it on a large table, and read [references/online-ddl.md](references/online-ddl.md) for the algorithm, lock, and metadata-lock rules, and for adding a required (NOT NULL) column to a populated table.
 - Hold changes that need long locks, table copies, or restarts until the owner accepts the impact.
 
 ## 8. Replicas, pools, and access
@@ -108,5 +109,5 @@ Soft deletes (`deleted_at`) need an index that includes the column, or every que
 ## 9. Verify
 
 - Rerun the same query or workload after the single change and compare plan shape, estimated and actual rows, time, lock waits, and write overhead.
-- Confirm results are semantically unchanged with focused tests (`unit-testing`).
+- Confirm results are semantically unchanged with focused tests.
 - Stop when the completion condition is met or missing evidence blocks a safe conclusion. Don't add indexes, config changes, or maintenance for hypothetical scale. Treat configuration values you find in examples as prompts for review, not presets, and size memory, connections, and durability settings from workload, hardware, and recovery objectives.

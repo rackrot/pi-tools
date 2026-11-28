@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # V0 restart
 
-Start over from what the previous attempt proved, not from what it happened to build. A restart is not amnesia: contracts, schemas, vocabulary, real-surface tests, quality gates and the negative corpus (failing cases and their inputs) survive when they earned it. Scaffold, explanatory UI, debug panels, shallow generated content and code whose only value was learning what not to do do not.
+Start over from what the previous attempt proved, not from what it happened to build. A restart is not amnesia: what earned its place survives, and the rest is dropped.
 
 ## Not for
 
@@ -15,12 +15,12 @@ Start over from what the previous attempt proved, not from what it happened to b
 
 ## Workflow
 
-1. Read the current plan, any retro or `session-retro` notes, local domain notes, QA evidence and the complaint that triggered the restart.
+1. Read the current plan, any retro notes, local domain notes, QA evidence and the complaint that triggered the restart.
 2. Decide what to keep: contracts, schemas that survived QA, quality gates, vocabulary, reusable services, real-surface tests and the negative corpus. Give evidence for each item.
 3. Decide what to drop: explanatory UI, debug panels, scaffold, shallow generated content, accidental abstractions and code that only taught what not to do. Give the reason for each.
 4. Name the first quality gate before planning any code.
-5. Write a v0 plan with one complete vertical loop. For multi-slice work, put the plan in `.claude/plans/` through the `planning` skill.
-6. Build only that loop until it clears the gate.
+5. Write a v0 plan with one complete vertical loop. For multi-slice work, write the plan to a file in the project's plan directory (ask if there is none), through the `planning` skill if installed, so `implement-plan` can execute it.
+6. Stop at the plan. The build covers only that loop, until it clears the gate.
 
 ## Rules
 

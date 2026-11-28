@@ -1,13 +1,13 @@
 ---
 name: rollout-plan
-description: 'Plans and verifies a production rollout (rolling, blue-green or canary choice, preflight go/no-go, phased verification signals, numeric rollback criteria, post-deploy follow-up). Use when preparing a release, infrastructure change or migration that needs a written plan, judging whether a deploy is healthy, or deciding whether to roll back. Not for a ship-or-block review of a repo (production-readiness).'
+description: 'Writes the rollout plan or cutover runbook for a production change (deploy, infrastructure change, database upgrade, migration) and judges a deploy that is already out: strategy choice (rolling, blue-green, canary), preflight go/no-go, canary alert tiers and promotion gates, numeric rollback criteria. Use for "write the deploy plan", "runbook for the change window", "what do we check after each step and when do we back out", "the release looks off, roll back or leave it", "can the canary go to the next step", also when there is no repo to read. Not for a ship-or-block review of a repo (production-readiness), an outage write-up (postmortem) or putting code behind a flag (feature-flags).'
 ---
 
 # Production rollout planning
 
-Plans only; it does not run deploys. Not for CI/CD pipeline YAML (`gh-actions`, if installed), schema migration design (`db-schema-design`, if installed), or a ship-or-block readiness review (`production-readiness`).
+Plans only; it does not run deploys. Not for CI/CD pipeline YAML, schema migration design (`deprecation-migration`), or a ship-or-block readiness review (`production-readiness`).
 
-Produce a rollout plan the operator can execute and a verifier can check. Gather the inputs first, choose a strategy, then write the plan with the sections below. Scale it to risk: a low-risk config change needs sections 1, 3, 4, and 6 in a few lines each, and a data migration or multi-service change needs all of them.
+Produce a rollout plan the operator can execute and a verifier can check. Gather the inputs first, choose a strategy, then write the plan with the sections below, sized to risk.
 
 ## Inputs to collect
 
@@ -26,9 +26,18 @@ Ask the user for anything you cannot read from the repo.
 | Blue-green | Needs an atomic cutover, or old and new cannot overlap | Double capacity during the switch | Flip traffic back |
 | Canary | High risk, with traffic splitting and metrics to judge by | Needs routing and observability | Route canary weight to zero |
 
-Pick the simplest strategy the platform supports. A canary without a metric that can fail is a slow rolling deploy. For a homelab or single host, a rolling replace with a health check and a pinned previous image is usually enough.
+Pick the simplest strategy the platform supports. Without a metric that can fail, do not call it a canary: add the metric first, or use rolling (or blue-green when a fast flip back matters) and say in the plan that verification is manual. For a homelab or single host, a rolling replace with a health check and a pinned previous image is usually enough.
 
 ## Plan sections
+
+Size the plan before writing it. Write only the sections in the row that fits, and do not add the others as "not applicable" stubs.
+
+| Risk | Sections | Length |
+| --- | --- | --- |
+| Low risk: a config value or flag flip on one service, no data or schema change, one owner | 1, 3, 4 and 6 only | A few lines each, the whole plan under about 40 lines |
+| Anything with a data migration, several services, or more than one team | All ten | As long as the steps need |
+
+For a low-risk change, put the verification check inside the Procedure steps and leave out the separate Verification signals and Post-deploy sections.
 
 1. **Summary.** What, why, when, expected duration, risk level, rollback time, user impact, expected downtime.
 2. **Prerequisites and approvals.** Named approvers, backups taken, capacity checked, monitoring and rollback automation in place. The previous artifact is tagged and still available.
@@ -56,7 +65,7 @@ Watch metrics, not only logs. A log that stays quiet can mean the service stoppe
 
 ## Rules that prevent common failures
 
-- Keep migrations additive for one release. Rollback restores old code but leaves the migration applied, so the old code must run against the new schema. Drop or tighten columns in a later release (expand-contract, see `db-schema-design`, if installed).
+- Keep migrations additive for one release. Rollback restores old code but leaves the migration applied, so the old code must run against the new schema. Drop or tighten columns in a later release (expand-contract, see `deprecation-migration`).
 - Set rollback triggers before the deploy, as thresholds (for example error rate above the baseline by a stated margin for five minutes). Deciding mid-incident invites hesitation.
 - Give every feature flag an owner, an expiry, and a rollback trigger, and remove the flag and its dead code after the rollout completes.
 - Make the readiness check test real dependencies, and the liveness check shallow. A pipeline that only calls a shallow `/ping` will pass while the database is unreachable.

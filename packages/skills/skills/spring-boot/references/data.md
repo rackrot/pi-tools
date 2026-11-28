@@ -16,15 +16,21 @@
 - `spring.jpa.open-in-view=false`. Otherwise the session stays open through view rendering and hides lazy loading in controllers. After turning it off, `LazyInitializationException` points at code that must fetch inside the service.
 - Fetch for the use case: DTO or interface projections in the repository, `@EntityGraph(attributePaths = "lines")`, or `join fetch`. N+1 shows as one query per row in a loop; confirm with `spring.jpa.show-sql` or `logging.level.org.hibernate.SQL=DEBUG` in a dev profile only.
 - Do not use `FetchType.EAGER` on collections. Never expose entities in responses (cycles, lazy proxies, leaking columns).
-- Entities: `equals`/`hashCode` on a business key or id-with-null-guard, not Lombok `@Data`; no setters for the id; a no-arg constructor (can be protected).
+- Entities: `equals`/`hashCode` on a business key or id-with-null-guard, not Lombok `@Data`; no setters for the id; a no-arg constructor (can be protected). For Kotlin entities (plugin.jpa/plugin.spring, no data class entities), see `kotlin`.
+- Maintain both sides of a bidirectional association in domain methods (for example `order.addLine(line)` sets `line.order` too).
+- `orphanRemoval = true` and `CascadeType.REMOVE` are different: orphan removal deletes a child once it is removed from the collection; cascade remove deletes children only when the parent is deleted.
+- `toString`, logging, JSON serialization and IDE debugger inspection can trigger lazy loads; keep lazy associations out of `toString`.
+- Use a `@Version` field for optimistic locking.
+- Enforce uniqueness with a database unique constraint, because an application-side check races. Add a lookup only to give a clean error instead of a raw `DataIntegrityViolationException`.
 - Pagination: `Page<T>` runs a count query, `Slice<T>` does not. Sort on indexed columns, and whitelist client-supplied sort fields.
+- A collection fetch join (`join fetch` or `@EntityGraph` on a collection) combined with pagination loads every row into memory and pages there; fetching several bags (`List` collections) at once multiplies rows. Page the parent ids first, then fetch the collections for those ids.
 - Native queries use `:name` binds with `@Param`, never string concatenation.
 - Bulk `@Modifying` queries bypass the persistence context; add `clearAutomatically = true`.
 
 ## Schema management
 
 - Production schemas come from Flyway or Liquibase (Boot 4: add `spring-boot-starter-flyway` or `-liquibase`; the plain library no longer auto-configures). `spring.jpa.hibernate.ddl-auto` should be `validate` or `none` outside local development.
-- Schema design itself belongs to `db-schema-design`.
+- Database schema design itself is out of scope here.
 
 ## Boot 4 notes
 

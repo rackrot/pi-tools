@@ -33,7 +33,7 @@ app.Run();
 
 ## Authentication
 
-Choosing the design (sessions vs tokens, IdP, passkeys) belongs to `app-auth`; this is wiring.
+Choosing the design (sessions vs tokens, IdP, passkeys) is out of scope here (`api-oauth-provider` covers running your own OAuth/OIDC issuer); this is wiring.
 
 ```csharp
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

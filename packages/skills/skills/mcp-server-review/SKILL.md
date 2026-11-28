@@ -1,11 +1,11 @@
 ---
 name: mcp-server-review
-description: Reviews an MCP server or client before release in two passes, a static security review of the source (exposure, auth, sessions, rate limits, schemas, code-execution vectors, OWASP MCP Top 10) and a release QA pass over one real local protocol session. Use when asked to review, audit or release-check MCP server or client code you own.
+description: "Reviews an MCP server or client you own before release, in two passes, a static security review of the source (exposure, auth, sessions, rate limits, schemas, code-execution vectors, OWASP MCP Top 10) and a release QA pass over one real local protocol session. Holds the expected protocol answers for revision 2026-07-28 (HTTP status and JSON-RPC error codes, required headers, no initialize handshake, Inspector CLI exit codes), which differ from earlier revisions, and the release verdict rules. Use when asked to review, audit, release-check or QA MCP server or client code, or what a conforming server should answer to a protocol check, even when no code is at hand."
 ---
 
 # Review an MCP server
 
-Not for designing or building the server (`mcp-server`, if installed), vetting a third-party server before installing it (`mcp-server-audit`, if installed), or generic code security review (`security-review`). Security tests are described for the owner to run in a test environment, never run against live servers.
+Not for designing or building the server (`mcp-server`, if installed), vetting a third-party server before installing it (`mcp-server-audit`, if installed), or generic code security review of non-MCP code (`security-scan`, a manual command). Security tests are described for the owner to run in a test environment, never run against live servers.
 
 A review has two independent passes. Run the one the request names, or both before a release.
 

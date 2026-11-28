@@ -43,9 +43,9 @@ Each candidate gets a card with:
 - **Files**: the modules involved.
 - **Problem**: why the current shape causes friction.
 - **Solution**: what would change, in plain English.
-- **Benefits**: in terms of locality and leverage, and how tests improve.
+- **Wins**: in terms of locality and leverage, and how tests improve.
 - **Before / after diagram**.
-- **Recommendation strength**: `Strong`, `Worth exploring` or `Speculative`.
+- **Recommendation strength**: `Strong`, `Worth exploring` or `Speculative`, plus the dependency category tag (see `html-report.md`).
 
 End with a **Top recommendation**: which candidate to tackle first and why. Name things with the glossary's domain words ("the Order intake module", not "the FooBarHandler" or "the Order service").
 
@@ -55,11 +55,11 @@ Don't propose interfaces yet. After writing the file, ask: "Which of these would
 
 ## 4. Work through the chosen candidate
 
-Once the user picks one, stress-test it with them question by question (the `planning` skill's stress-test, if installed): constraints, dependencies and their category (`deepening.md`), the shape of the deepened module, what sits behind the seam, which tests survive.
+Once the user picks one, stress-test it with them question by question: constraints, dependencies and their category (`deepening.md`), the shape of the deepened module, what sits behind the seam, which tests survive.
 
 Keep the domain model current as decisions settle (the `domain-modeling` skill, if installed):
 
 - **Naming the deepened module after a concept missing from `GLOSSARY.md`?** Add the term; create the file if needed.
 - **Sharpening a fuzzy term?** Update `GLOSSARY.md` right there.
-- **User rejects the candidate for a load-bearing reason?** Offer an ADR (`adr-writing`): "Want me to record this as an ADR so future reviews don't suggest it again?" Skip ephemeral reasons ("not now") and self-evident ones.
+- **User rejects the candidate for a load-bearing reason?** Offer an ADR (`adr-writing`, if installed): "Want me to record this as an ADR so future reviews don't suggest it again?" Skip ephemeral reasons ("not now") and self-evident ones.
 - **Want alternative interfaces?** Use `design-it-twice.md`.

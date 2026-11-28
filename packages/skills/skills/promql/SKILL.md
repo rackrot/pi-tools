@@ -1,6 +1,6 @@
 ---
 name: promql
-description: Queries and debugs Prometheus-compatible backends (Prometheus, Thanos, Mimir, VictoriaMetrics) and edits Prometheus and Alertmanager config. Use when writing or tuning PromQL, investigating latency, errors or saturation from metrics, chasing data gaps, or changing scrape configs, recording or alerting rules, or promtool tests.
+description: Writes, fixes and explains PromQL queries and edits Prometheus and Alertmanager config, for any Prometheus-compatible backend (Prometheus, Thanos, Mimir, VictoriaMetrics). Use for every PromQL question, even a single query (rates, error ratios, histogram quantiles on classic or native histograms, holes or gaps in a graph) and for scrape configs, recording and alerting rules, Alertmanager routes and receivers, and promtool rule tests. Read it before answering from memory; it holds easy-to-miss rules on histogram types, rule naming and keeping credentials out of config. Not for adding metrics to application code (observability-instrumentation) or Grafana dashboards (grafana-dashboards).
 ---
 
 # PromQL and Prometheus
@@ -13,7 +13,7 @@ Not for application instrumentation or SLO design (the `observability-instrument
 
 A credential must never pass through the prompt, a command line, or a file you write. Command arguments land in shell history and process listings.
 
-- Read the token or password from an environment variable or a file the user created (`chmod 600`). Reference it by name or path.
+- Read the token or password from a file the user created (`chmod 600`), or from an environment variable that holds that path or is read by the tool itself (for example `PROMQL_AUTH_CREDENTIALS`). Reference it by name or path; never expand a token into a command argument such as `curl -H "Authorization: Bearer $TOKEN"`; use `curl -H @file` (see `references/access.md`).
 - If a query fails with 401 or 403, or no host is configured, tell the user what to set and wait. Do not create or edit their credential file.
 - Ask for the base URL only. Treat a URL with embedded `user:pass@` as a secret.
 
@@ -23,7 +23,7 @@ See `references/access.md` for the HTTP API and the optional `promql` CLI.
 
 1. Apply `rate()` or `increase()` to counters. A raw counter only climbs, so its absolute value says nothing.
 2. Filter in the innermost selector (`rate(http_requests_total{job="api"}[5m])`). Selectors are evaluated first, so late filtering scans every series.
-3. Check the histogram type first (a `_bucket` series is classic, a bare metric name is native). For a classic histogram keep `le` in the grouping: `histogram_quantile(0.99, sum by (le, route) (rate(x_bucket[5m])))`; without `le` the result is wrong or NaN. A native histogram has no `le`: `histogram_quantile(0.99, sum by (route) (rate(x[5m])))`, and `histogram_fraction` gives the share under a bound.
+3. Check the histogram type first: `/api/v1/metadata?metric=<name>` says histogram, and a `_bucket` series means classic; a histogram with only the bare name is native (needs `scrape_native_histograms: true`, stable from Prometheus 3.8). A bare name with type gauge or summary is neither. For a classic histogram keep `le` in the grouping: `histogram_quantile(0.99, sum by (le, route) (rate(x_bucket[5m])))`; without `le` the result is wrong or NaN. A native histogram has no `le`: `histogram_quantile(0.99, sum by (route) (rate(x[5m])))`, and `histogram_fraction` gives the share under a bound.
 4. Isolate one instance before aggregating when debugging. An average across replicas hides the one overloaded pod.
 5. Aggregate in PromQL (`sum by`, `topk`), never by pulling raw series into a script.
 6. Size the range window to at least a few scrape intervals. Use `rate()` for alerts and graphs; `irate()` only for fast-moving dashboards.
@@ -47,7 +47,7 @@ Pick the method from the question, then read `references/investigations.md` for 
 
 ## Config work
 
-Read `references/server-config.md` before editing scrape configs, rules, or Alertmanager. Validate every change with `promtool check config` or `promtool check rules` and test alert logic with `promtool test rules` before reporting done.
+Read `references/server-config.md` before writing or editing any scrape config, recording or alerting rule, promtool test, or Alertmanager route or receiver, including when you are writing the block from scratch. In short: aggregate rules with `without (...)`, name recording rules `level:metric:operations`, and put secrets in `*_file` fields. Validate every change with `promtool check config` or `promtool check rules` and test alert logic with `promtool test rules` before reporting done.
 
 ## References
 

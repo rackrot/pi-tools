@@ -20,7 +20,7 @@ Establish the flash size, whether OTA and rollback are needed, NVS size (Wi-Fi c
 
 1. Read the current `sdkconfig` and the component defaults.
 2. Change only the keys the task needs, in `sdkconfig.defaults` (or the target-specific `sdkconfig.defaults.<target>`), so a fresh checkout reproduces the result.
-3. An existing `sdkconfig` keeps old values when defaults change. Do not delete it blindly: run `idf.py save-defconfig` and diff the result against `sdkconfig.defaults`, and confirm with the user when they differ or when `sdkconfig` is untracked, since it may hold settings that exist nowhere else. Regenerate only after that.
+3. An existing `sdkconfig` keeps old values when defaults change. Do not delete it blindly. `idf.py save-defconfig` rewrites `sdkconfig.defaults` from the current `sdkconfig`, so commit or copy `sdkconfig.defaults` first, run it, then `git diff sdkconfig.defaults` to see what the existing `sdkconfig` holds that the defaults do not. Restore your edit afterwards. Confirm with the user when they differ or when `sdkconfig` is untracked, since it may hold settings that exist nowhere else. Regenerate only after that.
 4. Keep related settings in step: target, flash size, PSRAM, log levels, partition table.
 5. Explain each change and show the key and value.
 

@@ -42,20 +42,7 @@ Flag a row where one control stands between the attacker and the impact. Suggest
 
 ## Attack tree
 
-The full method (attributes, roll-up, choke points, Mermaid layout) is in [attack-trees.md](attack-trees.md). Minimal layout:
-
-Pick the attacker's goal as the root. Children are OR (any one works) or AND (all required). Leaves are atomic steps.
-
-```
-Read another tenant's data                         [goal]
-├─ OR  Abuse an object-id endpoint (IDOR)          cost: low, skill: low, detectable: low
-├─ OR  Steal a session
-│   ├─ AND  Find XSS in the profile page           cost: low, skill: med
-│   └─ AND  Lure a tenant admin to the page        cost: low, skill: low
-└─ OR  Reach the database directly                 cost: high, skill: high, detectable: high
-```
-
-Defend the cheap, low-detection branches first.
+The full method (attributes, roll-up, choke points, text and Mermaid layouts) is in [attack-trees.md](attack-trees.md). Use its text layout and attribute labels.
 
 ## Sources
 

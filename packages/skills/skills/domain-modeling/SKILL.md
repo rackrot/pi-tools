@@ -1,6 +1,6 @@
 ---
 name: domain-modeling
-description: Builds and sharpens a project's domain model in conversation by challenging terms, resolving fuzzy language and testing edge cases, writing GLOSSARY.md as terms settle. Use when discussing codebase terminology, naming a concept, resolving overloaded words like "account" or "order", or creating or editing a GLOSSARY.md.
+description: 'Use when a word in the project means different things to different people, teams or modules ("account", "order", "cancelled") and it has to be settled which is which and what each is called, when naming a new concept, when deciding whether a settled term also needs an ADR, or when creating or editing a GLOSSARY.md. Read it before asking the person clarifying questions about a term. Runs the conversation by challenging each term, proposing one canonical word, testing it on edge cases and against the code, and writing settled terms to GLOSSARY.md. Not for module interfaces (codebase-design) or button and error wording (ux-copy).'
 ---
 
 # Domain Modeling
@@ -11,11 +11,10 @@ Not for recording an architecture decision (`adr-writing`, if installed) or for 
 
 ## Where the files live
 
-- Infer which applies: a `GLOSSARY-MAP.md` means several contexts; a root `GLOSSARY.md` alone means one; neither means create a root `GLOSSARY.md` lazily.
 - A single-context repo keeps one `GLOSSARY.md` at the root.
 - A multi-context repo keeps a `GLOSSARY-MAP.md` at the root that lists each context, where its glossary lives, and how the contexts relate, plus one `GLOSSARY.md` per context. Read the map first, and ask which context a topic belongs to when it is unclear.
 - Create a glossary when the first term is resolved, not before. Read `references/glossary-format.md` before writing or editing one.
-- ADRs follow the `adr-writing` skill, including its location rules for `docs/adr/`. Without it, write a short record at `docs/adr/NNNN-slug.md` (next number after the highest existing one): a title and one to three sentences on the context, the decision and why. Add Status, Considered Options or Consequences only when they add something.
+- Write an ADR as a short record at `docs/adr/NNNN-slug.md` (next number after the highest existing one): a title and one to three sentences on the context, the decision and why. Add Status, Considered Options or Consequences only when they add something. If an `adr-writing` skill is installed, follow it instead, including its location rules.
 
 ## During the session
 
@@ -24,7 +23,7 @@ Not for recording an architecture decision (`adr-writing`, if installed) or for 
 3. **Stress-test with scenarios.** Invent concrete edge cases that probe the boundary between two concepts (a partial refund, a customer who changes organizations) and ask the person to settle each.
 4. **Cross-reference the code.** When the person states how something works, check the code (with the codebase-memory MCP server, `search_graph` and `get_code_snippet` find the types and functions behind a term). Surface any contradiction: "The code cancels whole Orders, but you described partial cancellation. Which is right?"
 5. **Update the glossary inline.** Write each resolved term immediately, so the glossary never lags the conversation. A term is done when the person has confirmed the definition and its `_Avoid_` words.
-6. **Offer an ADR sparingly.** Propose one only when the choice is hard to reverse, would surprise a future reader, and was a real trade-off. If any of the three is missing, record nothing beyond the glossary.
+6. **Offer an ADR sparingly.** Propose one only when the choice is hard to reverse, would surprise a future reader, and was a real trade-off. If any of the three is missing, record nothing beyond the glossary. A costly, debated choice that follows the field's standard practice (money stored as integer minor units) gets no ADR: it surprises nobody.
 
 ## What stays out of the glossary
 

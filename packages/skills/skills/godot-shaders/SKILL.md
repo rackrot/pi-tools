@@ -1,6 +1,6 @@
 ---
 name: godot-shaders
-description: Godot 4 shaders and VFX. .gdshader code (canvas_item, spatial, particles), uniforms and hints, screen and depth reading, visual shaders, materials, GPUParticles2D/3D and ParticleProcessMaterial, stencil and CompositorEffect. Use for "write a shader", a dissolve, outline, rim or water effect, a ShaderMaterial, or particles in a Godot project.
+description: "Godot 4 shaders, materials and particle VFX. .gdshader code (canvas_item, spatial, particles), ShaderMaterial, uniforms and hints, screen, depth and stencil reading, visual shaders, GPUParticles2D/3D, CPUParticles and ParticleProcessMaterial, CompositorEffect. Read before answering any Godot question about a shader, a visual effect (dissolve, outline, rim, water, hit flash, post-processing) or particles, including bugs such as \"particles render white\", \"color ramp ignored\", \"emitting = true does nothing\" or \"trails missing\", and for 4.5 to 4.7 additions newer than model memory (stencil_mode, particle transform_align, request_particles_process)."
 license: Apache-2.0 AND MIT
 ---
 
@@ -103,7 +103,7 @@ Global uniforms must exist in Project Settings before the shader saves; set them
 
 ## Particles
 
-`GPUParticles2D/3D` with a `ParticleProcessMaterial` covers most VFX; write a `particles` shader only for behavior the material lacks. Read [references/particles.md](references/particles.md) for setup, one-shot bursts, trails, subemitters, attractors, collision, turbulence, flipbooks and the pitfall table. The top two traps: one-shot emitters should be restarted with `restart()` and freed on the `finished` signal, and in 3D the draw-pass material ignores particle color unless `vertex_color_use_as_albedo` is on (or a shader does `ALBEDO *= COLOR.rgb`).
+`GPUParticles2D/3D` with a `ParticleProcessMaterial` covers most VFX; write a `particles` shader only for behavior the material lacks. Read [references/particles.md](references/particles.md) for setup, one-shot bursts, trails, subemitters, attractors, collision, turbulence, flipbooks and the pitfall table. The top three traps: one-shot emitters should be restarted with `restart()` and freed on the `finished` signal; in 3D the draw-pass material ignores particle color unless `vertex_color_use_as_albedo` is on (or a shader does `ALBEDO *= COLOR.rgb`); and for a quality setting, lower `amount` when the effect loads (that restarts the system), because `amount_ratio` still allocates and processes every particle and saves no GPU work.
 
 ## Gotchas
 
@@ -124,5 +124,5 @@ Global uniforms must exist in Project Settings before the shader saves; set them
 
 - [references/fundamentals.md](references/fundamentals.md): read for built-ins per shader type, render modes, varyings, `light()`, the preprocessor and `#include`, coordinate spaces, UV math, and porting GLSL or HLSL code to Godot.
 - [references/recipes.md](references/recipes.md): read for ready-made 2D and 3D effects and full-screen post-processing.
-- [references/particles.md](references/particles.md): read for any `GPUParticles*`, `CPUParticles*` or `ParticleProcessMaterial` work, or a custom `particles` shader.
+- [references/particles.md](references/particles.md): read for any `GPUParticles*`, `CPUParticles*` or `ParticleProcessMaterial` work, a custom `particles` shader, and the 4.7 additions (axis-locked billboard via `transform_align`, per-axis scale and rotation, `request_particles_process` for seeking).
 - [references/advanced.md](references/advanced.md): read for stencil effects (4.5+), `Compositor` and `CompositorEffect`, the Shader Baker and pipeline precompilation, and screen-space AA choices.

@@ -1,11 +1,11 @@
 ---
 name: vite
-description: "Configures and debugs Vite 7 and 8 (Rolldown/Oxc): env variables and client-bundle exposure, dev vs build vs preview, chunking, library mode, SSR externals, pre-bundling, proxy and container access. Use when editing vite.config.*, when a build differs from dev, an env value is missing or leaked, chunks go stale after a deploy, or the dev server is slow."
+description: "Configures and debugs Vite 7 and 8 (Rolldown/Oxc) builds and dev servers: env variables and client-bundle exposure, dev vs build vs preview, chunking, library mode, SSR externals, pre-bundling, proxy and container access. Use when editing vite.config.*, and also when there are no project files to read: a build that differs from dev, an env value missing or leaked, `Failed to fetch dynamically imported module` or 404s on hashed `dist/assets` files after a deploy, a blocked or unreachable dev server on port 5173, a slow dev server, or a Vite 7 to 8 upgrade."
 ---
 
 # Vite
 
-This skill owns build and dev-server configuration. Framework code belongs to the framework skill: `react` or `vue` (if installed). Module-format semantics are out of scope.
+This skill owns build and dev-server configuration. Framework code belongs to the framework skill (`vue` here, or whichever React skill is installed). Module-format semantics are out of scope.
 
 ## 1. Establish the version and the setup
 

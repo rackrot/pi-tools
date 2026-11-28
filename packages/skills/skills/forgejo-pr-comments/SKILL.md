@@ -1,7 +1,6 @@
 ---
 name: forgejo-pr-comments
-description: "Pulls a Forgejo or Codeberg PR's review comments and review summaries into context, triages them, then fixes the ones the user picks. Read-only on the forge. Invoke as /forgejo-pr-comments [PR number|URL]. Not for github.com PRs (`pr-comments`)."
-disable-model-invocation: true
+description: "Triages the review feedback on a Forgejo or Codeberg pull request (inline review comments, review summaries, a Request changes review) and fixes only the rows the user picks, with draft replies for the rest. Read-only on the forge: never posts, resolves or pushes. Use when a PR on codeberg.org or a self-hosted Forgejo (a URL ending /pulls/<n>) has reviewer comments to go through, address or push back on. Not for opening or writing a PR (`forgejo-pr`) or for github.com PRs (`pr-comments`)."
 ---
 
 # Forgejo PR Comments
@@ -14,15 +13,15 @@ Stay read-only on the forge. Never post, reply, resolve, approve, request review
 
 ## 0. Forge gate and PR
 
-Run `git remote -v` and `git remote get-url <remote>`. github.com, or a host `gh auth status --hostname <host>` knows, is GitHub: stop and point to `/pr-comments` if installed. codeberg.org, a host where `curl -fsS https://<host>/api/forgejo/v1/version` answers, or a repo with `.forgejo/workflows` or `.gitea/workflows` is Forgejo: continue. With several remotes, pass `-R <remote>` after `pr` (`fj pr -R <remote> view 5 comments`) and never assume `origin`.
+Run `git remote -v` and `git remote get-url <remote>`. github.com, or a host `gh auth status --hostname <host>` knows, is GitHub: stop and point to `/pr-comments` if installed. codeberg.org, a host where `curl -fsS https://<host>/api/forgejo/v1/version` answers, or a repo with `.forgejo/workflows` or `.gitea/workflows` is Forgejo: continue. A Gitea host is treated as Forgejo, but these commands were written against Forgejo only. With several remotes, pass `-R <remote>` after `pr` (`fj pr -R <remote> view 5 comments`) and never assume `origin`. fj rejects a top-level `fj -R`.
 
-Resolve the PR from `the arguments given with the command`: a number, or a URL ending `/pulls/<n>` (take the host and repo from the URL, and use `-H <host>` or `-r`, checking `--help`). With no argument, find the open PR for the current branch with `fj pr search` or the forgejo-mcp tool `list_repo_pull_requests` (`mcp__plugin_forgejo-mcp_forgejo__list_repo_pull_requests`); ask the user if there is more than one.
+Resolve the PR from the argument the user gave. A number is the PR on the remote you picked. A URL ending `/pulls/<n>` gives the host and the number. `fj pr view` and `fj pr review` take `-H <host>` but no `-r`, so run them from a checkout whose remote is on that host, and ask the user if no checkout matches. With no argument, find the open PR for the current branch (`git branch --show-current`) with `fj pr search` or the forgejo MCP tool `list_repo_pull_requests`, under whatever prefix the host gives it. Ask the user if more than one matches.
 
 ## 1. Fetch
 
-Use forgejo-mcp review tools first when they are present (`mcp__plugin_forgejo-mcp_forgejo__<tool>`): `list_pull_reviews`, `list_pull_review_comments`, and `list_issue_comments` for the general conversation. Check each tool's schema, since names may change between versions.
+Use the forgejo MCP review tools first when they are present, under whatever prefix the host gives them: `list_pull_reviews`, `list_pull_review_comments`, and `list_issue_comments` for the general conversation. Check each tool's schema, since names may change between versions.
 
-Otherwise use fj. Verify the argument order with `fj pr --help` and `fj pr review --help`, since fj is 0.x:
+Otherwise use fj. Verify the argument order with `fj pr --help` and `fj pr review --help`, since fj is 0.x. For install, login and host selection, use `/forgejo-cli` if installed:
 
 ```bash
 fj pr -R <remote> view <n> body          # title and description
@@ -51,6 +50,7 @@ Show one table, with one row per actionable request. Merge duplicate or overlapp
 - Keep **request** to one line.
 - Set **action** to `fix`, `push back`, or `clarify`, plus a one-line reason. Push back when the request is wrong, out of scope, or conflicts with another reviewer. Clarify when you can't tell what the reviewer wants.
 - Peek at code only when the right action depends on it.
+- A request to change the PR title or description is `clarify`, never `fix`: editing it is a write on the forge. Put the corrected text in the report for the user to paste.
 - Skip praise, FYIs, and bot chatter with no request. Note the skipped IDs in one line under the table.
 - Read the [triage rubric](references/triage.md) when the right action isn't obvious. It covers reviewer types, value against risk, repo-policy checks, and conflicting requests. Cite its rule in the action's reason.
 

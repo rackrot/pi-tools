@@ -1,6 +1,6 @@
 ---
 name: aws-well-architected
-description: 'Reviews an AWS workload against the six Well-Architected pillars and finds cost savings, from its IaC (Terraform, CloudFormation, SAM, CDK) and read-only CLI calls. Rates findings High, Medium or Low. Use when asked for a Well-Architected review, an architecture or cost audit, or right-sizing candidates. Not for what a service costs or how to use it (aws), or listing resources (aws-resource-query).'
+description: 'Judges how sound and how wasteful an AWS setup is: reviews a workload against the six Well-Architected pillars and finds cost savings, from Terraform, CloudFormation, SAM or CDK, read-only CLI calls, or a description or utilization numbers pasted into the chat. Rates findings High, Medium or Low by a fixed table and says which evidence each saving needs. Use when the user asks what to flag or fix first in AWS infrastructure, how solid an AWS setup is, where an AWS bill can be cut, or which instances, databases, tables or volumes to shrink, drop or right-size, also when no files exist. Not for what was spent or what a service costs (aws), or listing resources (aws-resource-query).'
 ---
 
 # AWS Well-Architected review
@@ -17,6 +17,7 @@ This skill reads and reports. It changes infrastructure only when the user asks 
    - **IaC only** when the user has no access to the account.
    - **Live only** when the repo has no IaC, or the user wants the deployed state. Say so in the report instead of stopping.
    - **Both** by default when both exist. IaC shows intent and live state shows reality, and the difference is itself a finding (manual changes, drift).
+   - **Described only** when the user pastes the design or numbers and there is no repo or account access. Review what is given, do not search for files, and list what could not be verified.
 
 2. **Read the IaC.** Look for `**/*.tf`, CloudFormation and SAM templates (YAML or JSON with `AWSTemplateFormatVersion` or `Transform: AWS::Serverless`), and `cdk.json` with its stack sources. Read CDK sources and an existing `cdk.out` directory. Do not run `cdk synth`, `terraform plan`, or `sam build`, because they can execute project code and call AWS. Treat IaC as the source of truth for design, and read application code only to settle what a resource is for.
 

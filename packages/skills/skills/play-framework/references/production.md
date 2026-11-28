@@ -14,7 +14,7 @@
 
 ## Filters
 
-Defaults come from `play.filters.enabled`. Prefer changing the settings (`play.filters.csrf`, `play.filters.headers`) over replacing the list. If you replace the list, append to the existing defaults with `+=` so CSRF, headers and hosts stay.
+Defaults come from `play.filters.enabled`. Prefer changing the settings (`play.filters.csrf`, `play.filters.headers`) over replacing the list. To add a filter, append with `play.filters.enabled += "..."` so the default CSRF, headers and hosts filters stay. Do not assign a new list with `=`.
 
 ## Thread pools
 

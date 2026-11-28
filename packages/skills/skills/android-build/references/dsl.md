@@ -7,7 +7,7 @@ Verified 2026-11-01 against developer.android.com (AGP 9.5 release notes, shrink
 - `debug` and `release` exist by default. Add types such as `staging` with `initWith(getByName("debug"))` and `matchingFallbacks += "debug"` so libraries without that type still resolve.
 - Flavors need at least one dimension: `flavorDimensions += "tier"`, then `productFlavors { create("free") { dimension = "tier" } }`. With two dimensions, list them in priority order; the first wins on resource conflicts.
 - Variant names are flavors in dimension order plus the build type: `freeDebug`. Source sets are `src/free`, `src/freeDebug`, `src/debug`.
-- A library consumed by a flavored app needs `missingDimensionStrategy("tier", "free")` when it lacks that dimension.
+- When a library dependency has a flavor dimension the app lacks, set `missingDimensionStrategy("tier", "free")` in the app (consumer) `defaultConfig`. Nothing is needed when the app has a dimension the library lacks.
 
 ## androidComponents
 
@@ -56,7 +56,7 @@ The config must stay unset when the variables are absent so debug builds and CI 
 - Prefer KSP for every processor that supports it (Room, Hilt, Moshi codegen); kapt is slower and in maintenance mode. Plugin id `com.google.devtools.ksp`, version in the catalog and matched to the Kotlin version it names.
 - Switch one processor at a time: replace `kapt(...)` with `ksp(...)`, remove the `kotlin-kapt` plugin only when no `kapt(` lines remain.
 - Generated sources appear under `build/generated/ksp/<variant>/`; add them to nothing by hand.
-- Under AGP 9 built-in Kotlin, `org.jetbrains.kotlin.kapt` is incompatible and `com.android.legacy-kapt` is the stopgap. That is the migration; hand off to `android-skills:agp-9-upgrade`.
+- Under AGP 9 built-in Kotlin, `org.jetbrains.kotlin.kapt` is incompatible and `com.android.legacy-kapt` is the stopgap. That is the migration; hand off to `android-skills:agp-9-upgrade` if installed.
 
 ## Lint
 

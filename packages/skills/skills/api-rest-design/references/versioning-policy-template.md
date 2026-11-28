@@ -1,6 +1,6 @@
 # Versioning policy document template
 
-Read this when drafting the policy in versioning.md, step 8. The deliverable is one document that integrators and internal teams can both read. Every bracket is a decision from the inputs and steps in versioning.md, not a default to copy. Confirm sections in this order, since each depends on the ones before: scope, scheme, breaking-change definition, windows, process, enforcement, governance, measurement.
+Read this when drafting the policy in versioning.md, step 7. The deliverable is one document that integrators and internal teams can both read. Every bracket is a decision from the inputs and steps in versioning.md, not a default to copy. Confirm sections in this order, since each depends on the ones before: scope, scheme, breaking-change definition, windows, process, enforcement, governance, measurement.
 
 ```markdown
 # [Product] API versioning and deprecation policy

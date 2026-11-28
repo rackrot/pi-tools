@@ -1,6 +1,6 @@
 ---
 name: msbuild
-description: Diagnoses MSBuild failures and slow builds and reviews .NET build XML. Use for a failing dotnet build, restore, pack or publish, .csproj/.props/.targets conditions and custom targets, binlog capture and replay, "it rebuilds when nothing changed", slow evaluation or builds, bin/obj clashes, or Directory.Build.* layering.
+description: "Diagnoses MSBuild failures and slow builds and reviews .NET build XML. Use for a failing or slow dotnet build, restore, pack or publish, \"it rebuilds or re-copies when nothing changed\", whether a .csproj/.props/.targets property, item or condition takes effect (Directory.Build.props vs .targets, TargetFramework conditions), custom targets and generated files, CopyToOutputDirectory modes, binlog capture and replay, bin/obj clashes, or --no-restore in CI. Read it before answering even when there is no repo and only a pasted snippet, error or question; evaluation order, incremental and copy rules are often wrong from memory."
 license: MIT
 ---
 
@@ -15,7 +15,7 @@ Not for: C# compile errors in source (`csharp`), package versions, Central Packa
 - Find the project or solution, `global.json`, `Directory.Build.*`, `Directory.Build.rsp`, and the repo's documented build command (script, CI file). Keep the original command, working directory, configuration, TFM, RID, global properties and target.
 - An existing `.binlog` may be the only artifact. Analyze it before asking for a new build; paths inside it don't prove a checkout exists locally. Never read a `.binlog` as text: replay it with `dotnet msbuild x.binlog` (see [binlog-failure-analysis](references/binlog-failure-analysis.md#replay-a-binary-log)).
 - For a pasted snippet or an advisory question, answer from the XML and the references; no checkout, restore or build is needed.
-- Inspect evaluated values instead of guessing: `dotnet msbuild <proj> -getProperty:X -getItem:Y`, or `-pp:merged.xml` for the fully imported project.
+- Inspect evaluated values instead of guessing: `dotnet msbuild <proj> -getProperty:X -getItem:Y` (MSBuild 17.8+). Use `-pp:merged.xml` to see where a definition comes from; it inlines imports but does not evaluate them.
 
 ## 1. Troubleshoot a failure
 
@@ -27,6 +27,7 @@ Goal: find the independent root causes and make the smallest repair.
 | No matching log | [binlog-generation](references/binlog-generation.md), then failure analysis |
 | "file already exists" / "used by another process", intermittent failures, overwritten outputs | [bin-obj-clash](references/bin-obj-clash.md) |
 | Wrong conditions, items, properties or output paths | [msbuild-antipatterns](references/msbuild-antipatterns.md), [items-and-properties](references/items-and-properties.md) |
+| A `Directory.Build.props`/`.targets` setting or a `$(TargetFramework)` condition has no effect, or you must say whether it will | [directory-build](references/directory-build.md): property conditions and item conditions behave differently |
 | Imports or hooks missing, overwritten or out of order | [extension-points](references/extension-points.md) |
 | Generated file not compiled, copied or cleaned | [targets](references/targets.md) |
 | Stale outputs or skipped work | [incremental-build](references/incremental-build.md) |

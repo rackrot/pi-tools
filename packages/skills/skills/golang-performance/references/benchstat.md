@@ -46,15 +46,7 @@ benchstat old.txt new.txt
 
 Compiling first also keeps build time out of the measurement.
 
-## How many runs
-
-| Goal | `-count` |
-| --- | --- |
-| Quick local look | 6 (the fewest samples benchstat will give a 95% interval for) |
-| Pre-merge comparison | 10 |
-| Change under 5%, or a noisy runner | 20 or more |
-
-Raise the count once if the result is `~` and you still need an answer. Don't loop until it flips.
+For how many runs to use, see the count rule in SKILL.md step 3. Raise the count once if the result is `~` and you still need an answer. Don't loop until it flips.
 
 ## Useful benchstat forms
 

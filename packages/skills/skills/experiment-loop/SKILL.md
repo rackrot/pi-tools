@@ -1,13 +1,13 @@
 ---
 name: experiment-loop
-description: Runs a bounded, unattended optimize-and-measure loop on a dedicated git branch, one hypothesis per commit, with a fixed metric command, keep-or-revert decisions and a results log. Use when the user wants many experiments against a measurable goal such as benchmark time, bundle size, memory or test pass rate.
+description: Runs many optimization attempts unattended against a number that a command prints (benchmark time, startup time, bundle size, memory, test pass rate). Tries one idea at a time on a dedicated git branch, measures, keeps only what improves the number, reverts the rest and logs every attempt. Use when the user wants the agent to keep trying ideas on its own (overnight, without babysitting, 'go through these ideas and keep what helps') toward a target or 'as low as it will go'. Not for one targeted optimization or a single benchmark run.
 ---
 
 # Experiment Loop
 
 Iterate on a measurable goal without supervision: change one thing, measure, keep the change only if the metric improves, and log everything. The loop runs autonomously inside a scope, a budget, and a boundary that the user confirmed up front. The user keeps the last switch, so the loop ends with a branch and a report and never merges or ships.
 
-Not for a single optimization (`coding`, `problem-solving`), planning the surrounding work (`planning`), pure polling or scheduling (the `/loop` and `/schedule` built-ins), or goals with no command that measures them.
+Not for a single optimization, planning the surrounding work, pure polling or scheduling, or goals with no command that measures them.
 
 ## When a loop is worth it
 
@@ -39,7 +39,7 @@ Keep the judge outside the loop's reach. The metric command, benchmark inputs, a
 
 1. Confirm this is a git repository with a clean working tree. If there are uncommitted changes, stop and ask whether to commit or stash them, or to run in a separate worktree (`git worktree add ../<repo>-experiment -b experiment/<tag>`, then work there). The loop's commits and reverts must never mix with the user's work.
 2. Create a dedicated branch (`git switch -c experiment/<tag>`, for example with today's date), unless the worktree above already made one. All experiments happen there.
-3. Create `results.tsv` and `run.log` in the repo root and add both names to the file at `"$(git rev-parse --git-path info/exclude)"` (in a linked worktree `.git` is a file, so don't hardcode the path), which keeps them untracked without touching a tracked file. Header for the log: `experiment`, `commit`, `metric`, `status`, `description`, separated by tabs.
+3. Create `results.tsv` and `run.log` in the repo root and add both names to the file at `"$(git rev-parse --git-path info/exclude)"` (in a linked worktree `.git` is a file, so don't hardcode the path), which keeps them untracked without touching a tracked file. Header for `results.tsv`: `experiment`, `commit`, `metric`, `status`, `description`, separated by tabs. Status is one of `baseline`, `keep`, `discard`, `crash`.
 4. Run the metric command on the unmodified code and log it as experiment 0, status `baseline`. For a noisy metric, run it several times and note the spread. A later gain only counts when it exceeds that noise.
 5. Report the baseline to the user and start.
 
@@ -53,8 +53,9 @@ For each experiment:
 4. **Run** the metric command with output redirected to `run.log`, which keeps long output out of the context. Kill a run that exceeds twice its expected time and treat it as a crash.
 5. **Measure.** Extract the number. If extraction fails, read the end of `run.log` for the error.
 6. **Decide.**
-   - Improved beyond noise, boundary intact: keep the commit and make it the new best.
-   - Same, worse, or boundary broken: undo it with `git revert --no-edit "$pre"..HEAD`, which reverts only this experiment's commits. A revert adds a commit instead of discarding history, so it can't destroy anything the loop didn't create.
+   - Improved beyond noise, boundary intact: keep the commit and make it the new best, unless the gain is small, the change adds complexity, and Simplicity is at its default (then revert).
+   - Same metric with less code, boundary intact: keep it, because the simpler version wins.
+   - Otherwise (same, worse, or boundary broken): undo it with `git revert --no-edit "$pre"..HEAD`, which reverts only this experiment's commits. A revert adds a commit instead of discarding history, so it can't destroy anything the loop didn't create.
    - Crash: if the cause is trivial (a typo, a missing import), fix it in a new commit and rerun. After the retry cap, revert the experiment as above and log it as a crash.
 7. **Log** a row in `results.tsv`, then go back to step 1.
 

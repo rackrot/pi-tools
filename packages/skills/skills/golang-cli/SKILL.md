@@ -1,11 +1,11 @@
 ---
 name: golang-cli
-description: 'Builds and reviews Go command-line tools with cobra and viper: command tree and hooks, flag/env/config precedence, stdout/stderr, exit codes, signal shutdown, version embedding and tests. Use when adding or changing a cobra or viper CLI, or when a flag, env var or config file is ignored.'
+description: "Go command-line tools (cobra, viper, flag package). Use for every Go CLI question or change, including design questions with no code to inspect: flag, env var or config file ignored or in the wrong precedence, non-zero exit status on failure, progress text polluting piped stdout, Ctrl-C and signal shutdown, subcommands and hooks, version embedding, testing commands in-process. Not for benchmarks or profiling (golang-performance)."
 ---
 
 # Go CLIs with cobra and viper
 
-Not for general Go idiom or error design (`golang`), benchmarks and profiling (`golang-performance`), or service config that no CLI reads.
+Not for general Go idiom or error design, benchmarks and profiling (`golang-performance`), or service config that no CLI reads.
 
 Cobra owns the command tree, flags, and argument validation. Viper owns config resolution across flags, environment, files, and defaults. They are independent. Use cobra alone for a flag-only tool, viper alone for a daemon with no subcommands, and both when flags, env vars, and a config file all feed the same settings. Use the standard `flag` package for a one-command tool with a few flags, since it needs no dependency.
 
@@ -75,7 +75,7 @@ Commands read `cmd.Context()` and stop when it is cancelled, which is how Ctrl-C
 
 - Exit 0 on success and 1 on failure. Add other codes only when callers script against them, for example a typed error with an `ExitCode()` method that `run` maps with `errors.As`. By Unix convention 2 means a usage error. Cobra reports usage errors and runtime errors alike, so mapping them takes your own check.
 - Offer `--output json` (or similar) when scripts consume the result, and keep progress text off stdout.
-- Set the version at build time with `go build -ldflags "-X main.version=1.2.3"` on a `var version string`. When it is empty, fall back to `debug.ReadBuildInfo()`'s `Main.Version`, which holds the module version for `go install pkg@vX.Y.Z` builds and `(devel)` for local builds. Cobra's `Version` field adds `--version`.
+- Set the version at build time with `go build -ldflags "-X main.version=1.2.3"` on a `var version string`. When it is empty, fall back to `debug.ReadBuildInfo()`'s `Main.Version`, which holds the module version for `go install pkg@vX.Y.Z` builds. For a local `go build` in a VCS checkout, Go 1.24+ stamps a pseudo-version (with a `+dirty` suffix when the tree is modified). `(devel)` appears only when there is no VCS info (`go run`, `-buildvcs=false`), so don't test for it to detect a dev build. Cobra's `Version` field adds `--version`.
 
 ## Common mistakes
 

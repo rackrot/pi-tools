@@ -15,7 +15,7 @@ Other slices exist for JDBC, jOOQ, Mongo, Redis, GraphQL and more (`@DataJdbcTes
 ## Contents of each slice
 
 - `@WebMvcTest`: `@Controller`, `@ControllerAdvice`, `@JacksonComponent`/Jackson modules (Boot 3.x: `@JsonComponent`), `Converter`, `Filter`, `WebMvcConfigurer`, the security filter chain, `MockMvc` and `MockMvcTester`. Not loaded: `@Service`, `@Component`, `@Repository`. Mock them.
-- `@DataJpaTest`: entities, repositories, `EntityManager`, `TestEntityManager`, a transaction that rolls back per test, and an embedded database replacing your `DataSource`. Add `@AutoConfigureTestDatabase(replace = NONE)` when using Testcontainers, otherwise `@ServiceConnection` is overridden. Flush and clear (`em.flush(); em.clear()`) before asserting a query, so you read from the database and not the first-level cache.
+- `@DataJpaTest`: entities, repositories, `EntityManager`, `TestEntityManager`, a transaction that rolls back per test, and an embedded database replacing your `DataSource`. Boot 3.4+ detects a `@ServiceConnection` or `@DynamicPropertySource` container and does not replace it; add `@AutoConfigureTestDatabase(replace = NONE)` only on Boot 3.3 and older or for a non-container external database. Flush and clear (`em.flush(); em.clear()`) before asserting a query, so you read from the database and not the first-level cache.
 - `@RestClientTest(MyClient.class)`: the named client, Jackson, and a `MockRestServiceServer`.
 - `@JsonTest`: `JacksonTester<T>` (`.write(obj)`, `.parse(json)`). Boot 4 defaults to Jackson 3 (`tools.jackson`), so custom serializer imports changed.
 - `@WebFluxTest`: WebFlux controllers, `RouterFunction` beans, a `WebTestClient`.

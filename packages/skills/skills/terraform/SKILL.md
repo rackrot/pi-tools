@@ -1,19 +1,19 @@
 ---
 name: terraform
-description: Writes, reviews and runs Terraform, OpenTofu and Terragrunt changes safely, plan-only by default. Use when editing .tf or terragrunt.hcl files, reviewing a plan or pasted plan output (adds, changes, destroy/replace), running plan or apply (also via mise, make or task wrappers), refactoring with moved/import blocks, testing modules, scanning for misconfigurations, or diagnosing a pasted tofu or terragrunt error.
+description: "Terraform, OpenTofu and Terragrunt work: writing or reviewing .tf and terragrunt.hcl, judging plan output (destroy/replace), running plan or apply (also via mise, make or task wrappers), moved/import/removed refactors, count to for_each, state backends and locking, module tests (terraform test, Terratest), misconfiguration scans and CI gates, pasted tofu or terragrunt errors. Read it before answering these, also when only a pasted plan, error, snippet or workflow is given and no files exist: it holds the apply and state safety rules, current-version syntax and tool advisories. Not for live AWS resource lookups (aws-resource-query), Kubernetes manifests (kubernetes) or Helm charts (helm)."
 ---
 
 # Terraform, OpenTofu, and Terragrunt
 
 Not for Kubernetes manifests (the `kubernetes` skill), Helm charts (`helm`), or AWS service questions (`aws-well-architected`, `aws-resource-query`).
 
-This skill was checked against Terraform 1.16 docs (developer.hashicorp.com/terraform), OpenTofu 1.13 docs (opentofu.org/docs), and Terragrunt 1.1 docs (docs.terragrunt.com). The CLI is `terraform` or `tofu`; commands below work with both unless a section says otherwise. Find which one the repo uses (a `.terraform.lock.hcl` from either, CI scripts, a `.tofu` file, an `encryption` block) and keep using it. Many repos run it through a wrapper (`mise run tofu`, `make`, `task`, or Terragrunt). Read the wrapper's definition and use it, since it sets the working directory, workspace, and credentials.
+This skill was checked against Terraform 1.16 docs (developer.hashicorp.com/terraform), OpenTofu 1.13 docs (opentofu.org/docs), and Terragrunt 1.1 docs (docs.terragrunt.com). The CLI is `terraform` or `tofu`; commands below work with both unless a section says otherwise. Find which one the repo uses (a `.terraform.lock.hcl` from either, CI scripts, a `.tofu` file, an `encryption` block) and keep using it. Read `references/opentofu.md` when the repo uses `tofu`, has `.tofu` files or an `encryption` block, or is migrating. Many repos run it through a wrapper (`mise run tofu`, `make`, `task`, or Terragrunt). Read the wrapper's definition and use it, since it sets the working directory, workspace, and credentials.
 
 ## Safety contract
 
 - Run `init`, `validate`, `fmt -check`, and `plan` freely in a repo the user owns and works in. They are not inert: `init` downloads modules and providers, `plan` runs provider code and every `data "external"` program (re-run on each refresh), and wrappers (`mise run tofu`, `make`, `task`) run repo-defined code. In an unfamiliar or freshly cloned repo, first read the wrapper and grep for `data "external"` and `local-exec` (the latter runs at apply), and check module and provider sources.
 - Never run `apply` (including `apply -refresh-only`, which writes state), `destroy`, `state rm`, `state mv`, `state push`, `state replace-provider`, `taint`, `untaint`, `workspace delete`, `force-unlock`, `import` (the CLI command), or `terraform test` with `command = apply` runs, without an explicit instruction naming the target workspace. These change real infrastructure or state, and state edits are hard to undo. `workspace delete -force` orphans resources the state still tracks, and `state push -force` overwrites the remote state.
-- Save plans with `plan -out=tfplan` and show the user the diff. Apply only that saved file, so what was reviewed is what runs. A plan file holds sensitive values in plaintext, so add `tfplan*` and `*.tfplan.json` to `.gitignore`, keep them out of commits, and delete them after apply or scan.
+- Save plans with `plan -out=tfplan` and show the user the diff. Apply only that saved file, so what was reviewed is what runs. A plan file holds sensitive values in plaintext, so add `*.tfplan`, `tfplan*` and `*.tfplan.json` to `.gitignore`, keep them out of commits, and delete them after apply or scan.
 - Never paste state, plan, or `.tfvars` contents into replies. They hold secrets in plain text (see the secrets section).
 - Use `-lock=false` only for a stated emergency, and say so. Prefer `-lock-timeout` when another run holds the lock.
 - Treat `-target` as a scoped last resort (see "Running plans and applies"). It plans a partial graph and hides drift.
@@ -129,7 +129,7 @@ Read `references/refactoring.md` before renaming resources, moving them into mod
 
 - `terraform test` (1.6+) runs `.tftest.hcl` files. A `run` block defaults to `command = apply`, which creates real infrastructure. Use `command = plan` or mock providers (1.7+) for unit-style checks, and say which one you ran.
 - Read `references/terratest.md` when the repo tests modules with Go Terratest or the user asks for it.
-- Static scan: `trivy config .` reads Terraform sources and saved plans (tfsec is deprecated; its checks live in Trivy). A plan converted with `terraform show -json` holds plaintext secrets, so delete it after the scan. Scan results are findings for the user, not an instruction to suppress rules.
+- Static scan: `trivy config .` reads Terraform sources and saved plans (tfsec is deprecated; its checks live in Trivy). A plan converted with `terraform show -json` holds plaintext secrets, so delete it after the scan. Scan results are findings for the user, not an instruction to suppress rules. Never install Trivy 0.69.4, 0.69.5 or 0.69.6 (malicious releases, GHSA-69fq-xp46-6x23); see references/security-scanning.md.
 - Read `references/security-scanning.md` for a security audit, Checkov, OPA/Rego policies on plan JSON, suppression syntax, or a CI scan gate. Pin scanner versions and actions by commit SHA, and avoid options that upload code to a hosted service unless the user opted in.
 
 ## Drift

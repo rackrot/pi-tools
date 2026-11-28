@@ -1,6 +1,6 @@
 ---
 name: android-testing
-description: 'Writes and fixes Android tests where the test setup already exists. Use for "No compose hierarchies found", "Method d in android.util.Log not mocked", a Compose UI test that sleeps or flakes, onNodeWithText not finding a node, Hilt test rules, Robolectric versus instrumented tests, and connectedDebugAndroidTest failures. Covers createComposeRule, waitUntil, idling, useUnmergedTree, Gradle Managed Devices and Orchestrator.'
+description: 'Rules for writing, fixing and reviewing Android tests: Robolectric, Compose UI tests, Espresso, Hilt, anything in src/androidTest or needing android.* in src/test. Read it before answering such a question, even without project files: its rules differ from common defaults on what a UI test may assert, which runtime a test belongs in, the fix order for "Method d in android.util.Log not mocked", waiting instead of sleeping in a flaky Compose test, and pressed or focused state. Also for "No compose hierarchies found", onNodeWithText not finding a node, connectedDebugAndroidTest failures, Gradle Managed Devices. Not for plain JVM ViewModel tests with runTest or Turbine (kotlin-testing).'
 ---
 
 # Android testing
@@ -8,11 +8,11 @@ description: 'Writes and fixes Android tests where the test setup already exists
 Write and fix tests that need Android, in a project whose test setup exists. Read `app/build.gradle(.kts)` and any existing tests first: JUnit 4 versus Jupiter, Truth or AssertJ, Robolectric present or not, the `testInstrumentationRunner`, and whether Hilt is in use. Match what is there.
 
 Not for:
-- choosing a test strategy, installing test libraries, building harnesses or setting up screenshot tooling (`android-skills:testing-setup`);
+- choosing a test strategy, building harnesses or setting up screenshot tooling (adding Robolectric, Hilt testing or Orchestrator to an existing module is in scope; see the references);
 - tests that run on the plain JVM with no Android runtime, including ViewModel tests with fakes, `runTest` and Turbine (`kotlin-testing`);
-- general strategy and what to test (`unit-testing`);
+- what to test in general;
 - crash logs and device state (`android-device`);
-- browser end-to-end tests (`e2e-testing`);
+- browser end-to-end tests;
 - Compose authoring (`jetpack-compose`).
 
 ## Rules that outrank any default

@@ -1,8 +1,8 @@
 # Metals language server
 
-Contents: what the plugin configures, prerequisites, first start, settings, troubleshooting, security.
+Contents: prerequisites, first start, troubleshooting, security.
 
-The plugin's `.lsp.json` registers one server, `metals`, over stdio for `.scala` and `.sc` (language `scala`) and `.sbt` (language `sbt`). There is no installer, launcher or SessionStart hook: the `metals` binary must already be on the PATH that Claude Code inherits. Java files stay with a Java server (`jdtls-lsp`); the Metals docs recommend a separate one. `.mill` build files are not mapped.
+This applies only when the host provides a Metals or LSP tool, or the user asks to set Metals up. Without one, find symbols with Grep and compile with the build tool.
 
 ## Prerequisites
 
@@ -17,39 +17,28 @@ Checked against the Metals docs on 2026-10-20 (latest stable 1.6.9, released 202
    cs bootstrap org.scalameta:metals_2.13:1.6.9 -o metals -f   # alternative: pin a version
    ```
 
-   The coursier bin dir (`cs install` prints it; usually `~/.local/share/coursier/bin`) must be on the PATH of the shell that starts Claude Code. Check with `command -v metals`.
+   The coursier bin dir (`cs install` prints it; usually `~/.local/share/coursier/bin`) must be on the PATH of the process that starts the language server. Check with `command -v metals`.
 4. A buildable project: an sbt, Mill, Maven, Gradle or Bazel build, or Scala CLI files. Metals imports through Bloop (Mill: automatic via Bloop) or the build's own BSP support.
 
 ## First start
 
-Metals imports the build and indexes it before diagnostics and symbol search work, so the first start in a project can take minutes (the plugin allows 120 seconds for startup). `statusBarProvider: "log-message"` makes Metals send its status to the log instead of the editor status bar. `isHttpEnabled` stays at its default (off).
+Metals imports the build and indexes it before diagnostics and symbol search work, so the first start in a project can take minutes. Until the import and first compile finish, Metals reports parser-only `scalameta` diagnostics, which can be wrong for Scala 3 syntax.
 
-Claude Code's LSP client does not implement `window/showMessageRequest`. Metals asks "New sbt workspace detected, would you like to import the build?" through that request, and the resulting error made Metals 1.6.9 abort its startup (`Unexpected error initializing server: ... Unhandled method window/showMessageRequest`, then shutdown). The plugin therefore sets `"settings": {"metals": {"autoImportBuilds": "initial"}}` in `.lsp.json`; Claude Code pushes it with `workspace/didChangeConfiguration`. The values: `off` (default) always asks, which aborts startup here; `initial` imports without asking the first time Metals sees the workspace; `all` also re-imports without asking on every build-file change. `initial` was chosen because `all` would silently run new build code each time `build.sbt` or `project/*.sbt` is edited, including by a prompt-injected edit. Verified on 2026-10-21 with Metals 1.6.9, sbt 1.11.7 and Scala 3.3.6: the import ran (`sbt bloopInstall`), a session received the type error (`Found: ("text" : String) Required: Int`) and the syntax errors from Bloop, and a later edit of `build.sbt` caused no re-import, no prompt and no crash.
-
-With `initial`, build changes made after the first import are not picked up, so the imported build goes stale (new dependencies or modules are missing). Re-import by running the import by hand (see below) and restarting the session.
-
-Notes from that test:
-
-- Diagnostics from the compiler arrive only after the import and first compile finish (seconds to minutes). Until then Metals reports parser-only `scalameta` diagnostics, which can be wrong for Scala 3 syntax.
-- Metals still sends two harmless prompts (start the HTTP server for the Doctor, and a "mis-configuration" warning). Claude Code answers them with an error; Metals carries on. They did not stop startup or diagnostics.
-- The import needs `sbt` to run from the environment Claude Code inherits. A `mise` shim without an active version fails there; check `sbt --version` in the project directory first. A second sbt on the same machine can hold `~/.ivy2/.sbt.ivy.lock` and stall the import (`waiting for lock`).
-- To import by hand instead (for example for a build that needs special flags), run `sbt -Dbloop.export-jar-classifiers=sources bloopInstall` once (needs the sbt-bloop plugin; checked against scalameta.org/metals/docs/build-tools/sbt on 2026-10-20) and Metals connects to Bloop on its next start.
-- To change the setting (for example `all`), use a local copy of the plugin loaded with `claude --plugin-dir <path>`; edits to the installed copy are overwritten on the next plugin update.
+- The import needs `sbt` to run from the environment the server inherits. A `mise` shim without an active version fails there; check `sbt --version` in the project directory first. A second sbt on the same machine can hold `~/.ivy2/.sbt.ivy.lock` and stall the import (`waiting for lock`).
+- To import by hand (for example for a build that needs special flags), run `sbt -Dbloop.export-jar-classifiers=sources bloopInstall` once (needs the sbt-bloop plugin; checked against scalameta.org/metals/docs/build-tools/sbt on 2026-10-20) and Metals connects to Bloop on its next start.
 
 ## Troubleshooting
 
 | Symptom | Check |
 | --- | --- |
-| LSP tool reports no server for `.scala` | `command -v metals` in the shell that launched Claude Code; fix the PATH and restart the session |
-| `metals: command not found` in the plugin error | the coursier bin dir is missing from PATH |
+| No server for `.scala` files | `command -v metals` in the shell that started the client; fix the PATH and restart |
+| `metals: command not found` | the coursier bin dir is missing from PATH |
 | Starts, then no diagnostics | the build import has not finished or failed; run the build tool in the project and look at `.metals/metals.log` |
 | Wrong Scala or Java | `JAVA_HOME`, `scalaVersion`, the `javaHome` setting |
-| Crash loop | the plugin restarts Metals up to 3 times; delete `.metals/` and `.bloop/` in the project and retry |
+| Crash loop | delete `.metals/` and `.bloop/` in the project and retry |
 
 Metals writes `.metals/`, `.bloop/` and `project/metals.sbt` into the project. Make sure they are in `.gitignore` before committing.
 
 ## Security
 
-A build import runs sbt, Bloop or the project's other build tool, which executes the project's build definition (`build.sbt`, plugins, `build.mill`). Only open projects you trust, as with any IDE import. Claude Code also starts Metals itself as soon as it touches a `.scala` or `.sbt` file, so opening an untrusted repository with this plugin enabled can run its build definition or a `.bsp/*.json` build server command without any prompt. Enable the plugin only in projects you trust.
-
-The import is triggered by Claude Code reading or editing a `.scala` or `.sbt` file, not by a Bash call, so Claude Code's permission system (Bash deny rules, prompts, the sandbox) does not apply to the build it runs. Installing `scala` at user scope, rather than through `scala-meta` at project scope, applies this to every repository you open.
+A build import runs sbt, Bloop or the project's other build tool, which executes the project's build definition (`build.sbt`, plugins, `build.mill`) and any `.bsp/*.json` build server command. Only import projects you trust, as with any IDE import.

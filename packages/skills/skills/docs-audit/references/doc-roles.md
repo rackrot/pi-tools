@@ -8,8 +8,8 @@ Read this when documentation has rotted structurally. Adopt the repo's current d
 | --- | --- | --- | --- |
 | Constitution | Rules contributors and agents obey, with links to detail | `CLAUDE.md`, `AGENTS.md`, CONTRIBUTING | Live status or long explanation |
 | Map | What exists, where it lives, who owns it | Architecture doc, docs index | A health dashboard |
-| Status | Current health, blockers, and intentional removals | Roadmap, status page | Structural reference or history |
-| History | Durable decisions, removals, replacements, incidents | ADRs (the `adr-writing` skill), decision log, changelog | A copy of git history |
+| Status | Current health, blockers, and what is removed and must not be recreated | Roadmap, status page | Structural reference or history |
+| History | Durable decisions, why and when things were removed or replaced, incidents | ADRs (the `adr-writing` skill, if installed), decision log, changelog | A copy of git history |
 
 Every fact has one canonical owner, and other files link to it. "Where is auth?" belongs to the map, "is the auth migration blocked?" to status, and "why was the legacy path removed?" to history. A small repo may keep several roles in one file with clear sections.
 

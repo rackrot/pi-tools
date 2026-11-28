@@ -7,10 +7,11 @@ Read this file when adding, upgrading, excluding or resolving a library, or when
 ```scala
 libraryDependencies += "org.typelevel" %% "cats-core" % "2.13.0"   // appends the binary version: _2.13 or _3
 libraryDependencies += "com.google.guava" % "guava" % "33.4.0-jre"  // Java library: no suffix
-libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.0"    // Scala.js or Scala Native: %%% appends the platform too
+libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.0"    // sbt 1, Scala.js or Scala Native: %%% appends the platform too
 ```
 
 - Use `%%` for a Scala library and `%` for a Java-only one. A `%%` that resolves to a missing `_3` artifact usually means the library has no Scala 3 build for that line.
+- On sbt 2, `%%` also resolves the JS or Native platform through the `platform` setting; `%%%` is the sbt 1 plugin operator.
 - Put a test-only dependency in `% Test`: `libraryDependencies += "org.scalameta" %% "munit" % "1.0.0" % Test`.
 - Add exclusions on the dependency: `.exclude("commons-logging", "commons-logging")`.
 - Version numbers in examples are placeholders. Check the current release before pasting one.
@@ -20,6 +21,7 @@ libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.0"    // Scala.js
 - `evicted` lists the versions sbt dropped and why. Run it on the project that shows the wrong version: `sbt "core/evicted"`.
 - `dependencyTree` prints the resolved graph. On sbt 1.4+ it is a built-in but opt-in plugin: add `addDependencyTreePlugin` to `project/plugins.sbt`, or the task is missing (the old `sbt-dependency-graph` plugin line is deprecated). The sbt 2 change summary says the `dependencyTree` tasks are unified into one input task but does not say whether the plugin line is still needed; run `dependencyTree`, and if sbt reports no such task, add the same line.
 - Pin a version with `dependencyOverrides ++= Seq(...)` only when eviction cannot be fixed by upgrading the library that pulls in the old one.
+- sbt 2 also fails the build on an eviction error in `Test`. Fix it with the upgrade or a `libraryDependencySchemes` entry.
 - Declare the intended conflict policy with `libraryDependencySchemes`:
 
 ```scala

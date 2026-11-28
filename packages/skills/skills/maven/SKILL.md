@@ -1,6 +1,6 @@
 ---
 name: maven
-description: 'Edits and debugs Maven builds in pom.xml, .mvn and mvnw projects: dependency management and BOM imports, NoSuchMethodError or duplicate jars from conflicting versions, multi-module reactor failures such as an unresolved sibling SNAPSHOT, plugin phases, annotation processors, settings.xml mirrors, pre-release dependency audits. Use when a pom.xml is changed, a mvn or mvnw command fails, or the user asks which module pulls in a library or to check dependencies for updates or vulnerabilities.'
+description: 'Maven build work in pom.xml, mvnw and .mvn/wrapper/maven-wrapper.properties projects. Read it before answering any Maven question, also when no project files are present: which Maven version to pin in the wrapper (current 3.x release, Maven 4 status), dependencyManagement and BOM imports, NoSuchMethodError or NoClassDefFoundError from two versions of one library, "Could not find artifact" for a sibling SNAPSHOT with -pl, plugin phases, annotation processors, settings.xml mirrors, pre-release checks for outdated or vulnerable libraries. Use when a pom.xml is changed, a mvn or mvnw command fails, the wrapper version is bumped, or the user asks which module pulls in a library.'
 ---
 
 # Maven
@@ -14,7 +14,7 @@ Verified on 2026-10-20: Maven 3.9.16 is the latest 3.x release on Maven Central.
 ## Orient
 
 1. Read the root `pom.xml` (`<modules>`, `<parent>`, `<properties>` such as `maven.compiler.release`), the failing module's pom, and `.mvn/wrapper/maven-wrapper.properties` for the Maven version.
-2. Use `./mvnw` when it exists, otherwise `mvn`. Make claims about behaviour for the version the wrapper pins.
+2. Use `./mvnw` when it exists, otherwise `mvn`. Commands below are written as `mvn`; substitute `./mvnw` when the wrapper exists. Make claims about behaviour for the version the wrapper pins.
 3. Before changing a pom, get the resolved model with `mvn help:effective-pom -Doutput=target/effective-pom.xml` and read the part you are changing.
 4. Reproduce with the narrowest command, such as `mvn -pl <module> -am -Dtest=ClassName test`, and keep its output short by reading only the first `[ERROR]` block.
 5. Never open or paste `~/.m2/settings.xml` (see Credentials below).
@@ -64,11 +64,3 @@ When asked to check dependencies, before a release, or after a security advisory
 - After every pom change, run `mvn -pl <changed> -am validate`, then the narrowest `test` that proves the change.
 - Run `mvn verify` before calling the change done when it touches packaging, plugins, profiles or the reactor.
 - For a dependency change, compare `dependency:tree` before and after and state which versions moved.
-
-## References
-
-- [references/dependencies.md](references/dependencies.md) when managing versions, importing BOMs, or resolving a conflict.
-- [references/reactor.md](references/reactor.md) when a multi-module build fails to resolve a sibling or a parent.
-- [references/plugins.md](references/plugins.md) when changing plugins, phases, profiles, annotation processors or the compiler release.
-- [references/errors.md](references/errors.md) when a `mvn` command fails.
-- [references/audit.md](references/audit.md) when checking for outdated or vulnerable dependencies.

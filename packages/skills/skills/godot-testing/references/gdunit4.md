@@ -8,7 +8,7 @@ Contents: versions, a GDScript suite, assertions, mocks and spies, signals, scen
 
 | gdUnit4 | Godot |
 | --- | --- |
-| v6.2.x (v6.2.2, 2026-10-07) | 4.5 to 4.7.1 |
+| v6.2.x (v6.2.3, 2026-11-01) | 4.5 to 4.7.1 |
 | v6.1.x | 4.5 to 4.6.3 |
 | v6.0.x | 4.5 |
 | v5.x | 4.3, 4.4 |

@@ -7,8 +7,8 @@ Read this file when an sbt command fails, hangs, or behaves stale. Match the sym
 | `Expected whitespace character`, exit 1 | Several commands passed unquoted on sbt 2 | `sbt "clean ; compile ; test"` (one quoted string) |
 | `Expected ID character` or `Not a valid command: test` after `test:compile` | Colon syntax on sbt 2 | `Test/compile` |
 | `No such setting/task` for `Compile/update` or a scoped key on the shell | sbt 2 does not delegate scoped keys on the shell | Use the defined key (`update`); scope it in `build.sbt` |
-| A test passes after `clean` and does not run | sbt 2 test success is cached machine-wide | `testFull`, or `testOnly <suite>` to force one |
-| `compile` ends at `0 s` with no `compiling` lines | Cache restore (sbt 2) | `find target/out -name '*.class'`; this is not a failure |
+| A test passes after `clean` and does not run | sbt 2.0.x caches test success machine-wide (2.1.0+ invalidates the cache on `clean`) | `testFull`, or `testOnly <suite>` to force one; on 2.1+ also `test --cache_test_result=false` |
+| `compile` ends at `0 s` with no `compiling` lines | Cache restore (sbt 2.0.x) | `find target/out -name '*.class'`; this is not a failure |
 | A `build.sbt` edit is ignored | sbt 1 needs `reload`; sbt 2 reloads on the next command | `reload` on sbt 1; on sbt 2 check for the `Reloading sbt` line |
 | Old env var or `SBT_OPTS` still in effect | The running server keeps its start environment | `shutdown`, then rerun |
 | `unresolved dependency` on `update` | Coordinate typo, missing resolver, wrong `%%` suffix | Check the coordinate, then `resolvers` |

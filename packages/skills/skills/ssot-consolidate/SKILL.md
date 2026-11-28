@@ -1,6 +1,6 @@
 ---
 name: ssot-consolidate
-description: Finds every copy of one fact scattered across code, config, CI and docs, proposes a canonical home, and edits only after approval. Use when a value lives in several places or the copies disagree (a timeout in config, a constant and two docs). Not for duplication only in docs or docs-vs-code drift (docs-audit), or agent instructions.
+description: "Finds every copy of one fact scattered across code, config, CI and docs, proposes a canonical home, and edits only after approval. Use when a value is set in code or config and repeated elsewhere (CI, scripts, docs, other config), or those copies disagree (a timeout in config, a constant and two docs). Not for duplication only in docs or docs-vs-code drift (docs-audit)."
 ---
 
 # SSOT consolidate
@@ -9,19 +9,19 @@ One fact gets one home, and every other place references it. References do not d
 
 ## Scope
 
-A fact whose copies span mixed surfaces (code constants, config, CI, scripts and docs together), or only code and config. When every copy lives in docs, that is `docs-audit`'s job: it already finds duplication across docs and keeps one canonical owner.
+A fact whose copies span mixed surfaces (code constants, config, CI, scripts and docs together), or only code and config. When every copy lives in docs, that is `docs-audit`'s job: its doc-roles procedure (doc-roles.md) assigns one owner doc and links the rest to it.
 
 ## Not for
 
 - Duplication confined to docs, and checking docs against the code they describe: use `docs-audit`.
-- Agent instruction files: use `agent-instructions`.
+- Agent instruction files (AGENTS.md, CLAUDE.md): out of scope.
 - Ongoing upkeep. This is a one-time repair of a scattered state; once the fact has one home, leave it.
 
 ## Workflow
 
 1. Name the one fact in scope: the specific value, spec, decision or definition, not the whole document.
 2. Audit read-only. Enumerate every occurrence across the given files and platforms.
-3. Search again by a second method (a different term, a synonym, another tool) and confirm it finds nothing the first pass missed.
+3. Search again by a second method (a different term, a synonym, another tool) and confirm it finds nothing the first pass missed. When the repo is not available, say the second search was not run and list the terms to search before any edit.
 4. Classify each hit as exact copy, paraphrase, partial, stale or contradictory.
 5. Pick the canonical home: the most authoritative and most maintained location, closest to where the fact changes. Do not promote a weak copy for convenience; if none qualifies, propose extracting a new home. Justify the choice in one line.
 6. Choose an action per non-canonical hit: dedupe (redundant), reference (docs link to the home, code imports it, config reads it) or reconcile (it disagrees and needs a human call).

@@ -1,13 +1,13 @@
 ---
 name: goff-flags
-description: Writes and reviews GO Feature Flag flag files (YAML, JSON, TOML), covering variations, targeting rules and query syntax, percentage, progressive and scheduled rollouts, experimentation, metadata, bucketingKey, the evaluation context and the go-feature-flag-cli lint, evaluate and manifest commands. Use for a `*.goff.yaml` file, "GO Feature Flag", "GOFF flag", "flag file", "targeting rule", "defaultRule", "percentage rollout", "progressive rollout", "scheduled rollout", "bucketingKey", "targetingKey", "go-feature-flag-cli lint", or a flag that evaluates to the wrong variation. Not for running or configuring the relay proxy, retrievers, exporters or notifiers (goff-relay-proxy), OpenFeature SDK and provider code (goff-sdk), generic flag use in app code (feature-flags), or finding and removing stale flags (flag-hygiene).
+description: 'Writes, reviews and debugs GO Feature Flag (GOFF) flag files: YAML, JSON or TOML with `variations`, `targeting`, `defaultRule`, `percentage`, `progressiveRollout` or `bucketingKey`. Read it before saying how such a flag evaluates, even when the flag is pasted in the prompt: percentages are relative weights, a rule''s percentage overrides its variation, a missing bucketingKey attribute returns the SDK default. Use for a `*.goff.yaml` file, a flag serving the wrong variation or share of users, splitting by team or company, rule order, query syntax, and `go-feature-flag-cli` lint or evaluate. Not for relay proxy or SDK wiring (goff-relay-proxy, goff-sdk, goff) or app flag code (feature-flags).'
 ---
 
 # GO Feature Flag flag files
 
 Flags live in one file (YAML, JSON or TOML; use the extension `.goff.yaml`). The top-level key is the flag name and must be unique. The relay proxy reads the file; this skill covers only the file and how to test it.
 
-Not for: relay proxy config and retrievers (`goff-relay-proxy`), SDK and provider code (`goff-sdk`), generic flag practice (`feature-flags`), stale flag cleanup (`flag-hygiene`).
+Not for: relay proxy config and retrievers (`goff-relay-proxy`), SDK and provider code (`goff-sdk`), or both together (the umbrella `goff`, which sends flag-file work here), generic flag practice and removing one flag (`feature-flags`), repo-wide stale flag audits (`flag-hygiene`).
 
 ## Rules
 
@@ -35,7 +35,7 @@ Not for: relay proxy config and retrievers (`goff-relay-proxy`), SDK and provide
 ## Context and bucketing
 
 - `targetingKey` is mandatory in every evaluation context (a missing one gives `TARGETING_KEY_MISSING`) and should be a stable id.
-- Percentages hash `targetingKey + flag name`. With `bucketingKey` set, the hash uses that context attribute instead (a string, nested with dots such as `company.id`). If the context lacks that attribute, rules are not evaluated and the SDK default is returned.
+- Percentages hash `targetingKey + flag name`. With `bucketingKey` set, the hash uses that context attribute instead (a string, nested with dots such as `company.id`). If the context lacks that attribute, rules are not evaluated and the SDK default is returned (reason `ERROR`, error code `TARGETING_KEY_MISSING`, even when no rule uses a percentage).
 - With more than two variations, changing a percentage moves every bucket boundary and can reassign users.
 - Do not put your own data under a context key named `gofeatureflag`; it is reserved (`currentDateTime`, `flagList`, `exporterMetadata`). See [references/fields.md](references/fields.md).
 
@@ -61,7 +61,7 @@ go-feature-flag-cli evaluate --config=flags.goff.yaml --format=yaml \
 - `progressiveRollout` or `scheduledRollout` dates in the wrong order or without a date (a step with no `date` is skipped). Percentage handling in `progressiveRollout` is non-intuitive and its optionality is disputed between docs and schema: set it explicitly and lint.
 - Experimentation window missing `start` or `end`.
 - `bucketingKey` attribute that callers do not send.
-- A flag left at 100 percent after rollout: tell the user to remove it (`flag-hygiene`). Keep flags small and temporary.
+- A flag left at 100 percent after rollout: tell the user to remove it (`feature-flags`); a repo-wide stale-flag audit is `flag-hygiene`. Keep flags small and temporary.
 
 ## References
 
