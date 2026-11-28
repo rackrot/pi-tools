@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/rackrot/pi-tools/compare/pi-skill-index-v0.3.1...pi-skill-index-v0.3.2) (2026-11-28)
+
+
+### Bug Fixes
+
+* **skill-index:** own the transformers dependency and announce model downloads ([74d9cd0](https://github.com/rackrot/pi-tools/commit/74d9cd0fb47e5e6048dfb2283a9aa29d9e5e9a79))
+
 ## [0.3.1](https://github.com/rackrot/pi-tools/compare/pi-skill-index-v0.3.0...pi-skill-index-v0.3.1) (2026-11-28)
 
 
