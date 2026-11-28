@@ -1,6 +1,6 @@
 ---
 name: jj
-description: Works in Jujutsu (jj) repositories, covering the working-copy-as-commit model, describing, splitting and squashing changes, bookmarks, pushing, conflicts, and undo via the operation log. Use when a repository has a .jj directory, or the user mentions jj, Jujutsu, change IDs or bookmarks, instead of using git commands.
+description: Commands and rules for Jujutsu (jj) repositories, covering the working-copy-as-commit model, describing, splitting and squashing changes without an editor, bookmarks, pushing, conflicts, undo via the operation log, and which commands need the user's OK first. Use whenever a repository has a .jj directory or the user mentions jj, Jujutsu, change IDs, bookmarks or the operation log, including when only answering a jj question or writing a jj script and before running any jj command, because flags and subcommands changed between releases. In a jj repo use it instead of git commands.
 ---
 
 # Jujutsu (jj)
@@ -23,7 +23,7 @@ The bash tool has no terminal. Always give the message and the paths up front:
 - `jj describe -m "msg"`, `jj commit -m "msg"`, `jj new -m "msg"`, `jj squash -m "msg"` (or `jj squash --use-destination-message`).
 - Split by path with a message: `jj split -m "msg" path1 path2`. Without paths it opens a TUI.
 - Do not run `jj squash -i`, `jj split -i`, `jj diffedit` or `jj resolve` without a configured non-interactive tool; they need a terminal. Resolve conflicts by editing the files (see [conflicts](references/conflicts.md)).
-- The environment sets `JJ_EDITOR=false`, so a forgotten `-m` fails fast instead of hanging; add `-m` and rerun.
+- With the pi-jj extension loaded, `JJ_EDITOR=false` is set and a forgotten `-m` fails fast instead of hanging; add `-m` and rerun. Otherwise prefix the command with `JJ_EDITOR=false`.
 - Run jj commands one after another, not in parallel.
 
 ## Everyday workflow
@@ -32,14 +32,16 @@ The bash tool has no terminal. Always give the message and the paths up front:
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | See state                                 | `jj st`, `jj log` (default is a useful local view), `jj diff` (`-r <rev>`, `--git` for patch format) |
 | Name the current change                   | `jj describe -m "msg"`                                                                               |
-| Finish this change, start the next        | `jj new -m "msg"` (message optional)                                                                 |
+| Start the next change                     | `jj new` (`-m` describes the new change, not the one you leave)                                      |
 | Commit tracked work in one step           | `jj commit -m "msg"`                                                                                 |
 | Fold `@` into its parent                  | `jj squash` (`-m`, or paths to move only some files)                                                 |
 | Move hunks into the right earlier commits | `jj absorb`                                                                                          |
 | Split one change in two                   | `jj split -m "first part" path1 ...`                                                                 |
 | Drop a change                             | `jj abandon <rev>`                                                                                   |
+| Revert a change                           | `jj revert -r <rev> -o @` (destination is required)                                                 |
+| Copy a change (cherry-pick)               | `jj duplicate <rev> -o @`                                                                            |
 | Edit an earlier change                    | `jj new <rev>` then edit then `jj squash`, or `jj edit <rev>` (descendants rebase automatically)     |
-| Rebase                                    | `jj rebase -b @ -o main` (`-r` for one change, `-s` for a subtree)                                   |
+| Rebase                                    | `jj rebase -b @ -o main` (`-r` for one change, `-s` for a subtree; on older jj use `-d` instead of `-o`) |
 | Stop tracking a file                      | add it to `.gitignore`, then `jj file untrack <path>`                                                |
 
 New files are tracked automatically, so run `jj st` before `describe` or `commit` when build output or logs may have landed in `@`.
@@ -55,7 +57,7 @@ New files are tracked automatically, so run `jj st` before `describe` or `commit
 ## Mistakes and recovery
 
 1. Read the history first: `jj op log`. A failed rewrite is not always the latest operation.
-2. `jj undo` reverts the last operation. For anything older, `jj op restore <op-id>` returns the whole repo to that point. Both are recorded as new operations, so they can be undone too.
+2. `jj undo` reverts the last operation; running it again goes one operation further back, and `jj redo` steps forward again. For a specific older point use `jj op restore <op-id>` (ask first, see above), which returns the whole repo to that operation.
 3. `jj evolog -r <change>` shows how one change got to its current content.
 4. After any rewrite (rebase, squash, absorb, abandon), check for conflicts in your own stack: `jj log -r 'conflicts() & ::@'`.
 

@@ -1,4 +1,4 @@
 schema_version: "1.1"
-name: commit-without-git
+name: split-non-interactive
 context:
   scaffold_script: scaffold.sh

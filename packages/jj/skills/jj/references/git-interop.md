@@ -20,6 +20,6 @@
 | `git push origin x`                  | `jj git push -b x` (ask first)                                           |
 | `git reflog`                         | `jj op log`                                                              |
 
-Colocated repos keep `.git` in sync with jj on every jj command. The reverse also works, but git commands that write there are what the guard warns about. In a non-colocated jj repo `.git` is not at the repo root; a `git` command may find a different repository or none.
+Colocated repos keep `.git` in sync with jj on every jj command. The reverse also works, but git commands that write there are what muddles history (see SKILL.md, Git in a jj repo). In a non-colocated jj repo `.git` is not at the repo root; a `git` command may find a different repository or none.
 
 Verify a mapping you are unsure of with `jj help <command>` before running it.
