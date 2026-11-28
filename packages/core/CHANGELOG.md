@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/rackrot/pi-tools/compare/pi-core-v0.4.0...pi-core-v0.4.1) (2026-11-28)
+
+
+### Code Refactoring
+
+* lift embedding retrieval and one-shot model call into pi-core ([302bfae](https://github.com/rackrot/pi-tools/commit/302bfae846df703046be377445bc6e4199ee30a8))
+
 ## [0.4.0](https://github.com/rackrot/pi-tools/compare/pi-core-v0.3.1...pi-core-v0.4.0) (2026-11-27)
 
 
