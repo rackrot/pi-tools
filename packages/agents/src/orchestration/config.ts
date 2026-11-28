@@ -8,8 +8,12 @@ export const SETTINGS_KEY = "orchestration";
 /** Tools `strict` must never take from the main session: they are how it delegates and asks. */
 export const PROTECTED_TOOLS = ["Agent", "get_subagent_result", "steer_subagent", "ask_user"];
 
-/** Denied in `strict` unless configured otherwise: the tools that do the work itself. */
-export const DEFAULT_DENIED = ["read", "edit", "write", "bash", "grep", "find", "ls"];
+/**
+ * Denied in `strict` unless configured otherwise: the tools that do the work itself, and `codemode`,
+ * which can call them. This is a deny list: tools from other extensions and MCP servers stay
+ * available until they are added.
+ */
+export const DEFAULT_DENIED = ["read", "edit", "write", "bash", "grep", "find", "ls", "codemode"];
 
 export interface Orchestration {
 	level: Level;

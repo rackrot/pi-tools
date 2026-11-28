@@ -64,7 +64,7 @@ test("workflow args get configured agents, and explicit args win", () => {
 	);
 	assert.deepEqual(withConfiguredAgents(undefined, configured), { agents: configured });
 	assert.equal(withConfiguredAgents("not json", configured), "not json");
-	assert.equal(withConfiguredAgents({ a: 1 }, {}).constructor, Object);
+	assert.deepEqual(withConfiguredAgents({ a: 1 }, {}), { a: 1 });
 });
 
 test("applyTuning fills unset fields and keeps what the caller passed", () => {

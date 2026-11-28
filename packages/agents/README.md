@@ -168,3 +168,8 @@ config, or use `/rackrot-config orchestration` (Tab switches global/project):
 
 `deniedTools` applies to `strict` only; `Agent`, `get_subagent_result`, `steer_subagent` and
 `ask_user` are never denied. Subagent sessions and sessions without the `Agent` tool are left alone.
+
+`strict` is a deny list, not a sandbox. The default is `read`, `edit`, `write`, `bash`, `grep`, `find`,
+`ls` and `codemode` (which can call the others). Tools from other extensions and MCP servers that read
+files or run commands stay available until you add them to `deniedTools`; `second_opinion` and
+`council` can still embed files by path.
