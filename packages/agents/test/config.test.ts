@@ -3,6 +3,7 @@ import { test } from "node:test";
 import {
 	applyTuning,
 	configuredNames,
+	isLocked,
 	parseOverrides,
 	resolveTuning,
 	withConfiguredAgents,
@@ -68,6 +69,35 @@ test("workflow args get configured agents, and explicit args win", () => {
 
 test("applyTuning fills unset fields and keeps what the caller passed", () => {
 	const input: Record<string, unknown> = { model: "caller/model", thinking: "" };
-	applyTuning(input, { model: "cfg/model", thinking: "low", maxTurns: 9 });
+	applyTuning(input, { model: "cfg/model", thinking: "low", maxTurns: 9 }, false);
 	assert.deepEqual(input, { model: "caller/model", thinking: "low", max_turns: 9 });
+});
+
+test("applyTuning locked overwrites configured fields only", () => {
+	const input: Record<string, unknown> = { model: "caller/model", max_turns: 3 };
+	applyTuning(input, { model: "cfg/model", thinking: "low" }, true);
+	assert.deepEqual(input, { model: "cfg/model", thinking: "low", max_turns: 3 });
+});
+
+test("lock: only booleans parse, a later layer can unlock, config beats frontmatter", () => {
+	assert.deepEqual(parseOverrides({ a: { lock: "yes" }, b: { lock: false } }), {
+		b: { lock: false },
+	});
+	const layers = [parseOverrides({ r: { lock: true } }), parseOverrides({ r: { lock: false } })];
+	assert.equal(resolveTuning("r", layers).lock, false);
+	assert.equal(isLocked(resolveTuning("r", layers), true), false);
+	assert.equal(isLocked({}, true), true);
+	assert.equal(isLocked({}, undefined), false);
+});
+
+test("workflow args: locked agents' settings override the caller's entry", () => {
+	const configured = { reviewer: { model: "m", effort: "low" } };
+	assert.deepEqual(
+		withConfiguredAgents(
+			{ agents: { Reviewer: { model: "x", effort: "high", extra: 1 } } },
+			configured,
+			new Set(["reviewer"]),
+		),
+		{ agents: { Reviewer: { model: "m", effort: "low", extra: 1 } } },
+	);
 });
