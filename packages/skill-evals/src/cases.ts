@@ -63,7 +63,7 @@ export function loadCases(evalsDir: string): LoadResult {
 	for (const dir of findCaseDirs(evalsDir)) {
 		const id = relative(evalsDir, dir).split(sep).join("/");
 		try {
-			cases.push(loadCase(evalsDir, dir, id));
+			cases.push(loadCase(dir, id));
 		} catch (e) {
 			errors.push(`${id}: ${e instanceof Error ? e.message : String(e)}`);
 		}
@@ -71,7 +71,7 @@ export function loadCases(evalsDir: string): LoadResult {
 	return { cases, errors };
 }
 
-function loadCase(evalsDir: string, dir: string, id: string): Case {
+function loadCase(dir: string, id: string): Case {
 	const yamlPath = join(dir, "case.yaml");
 	const y: Json = existsSync(yamlPath)
 		? ((parseYaml(readFileSync(yamlPath, "utf8")) as Json) ?? {})

@@ -20,7 +20,15 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"preset": "none"
+			"preset": "recommended",
+			"style": {
+				"useTemplate": "off",
+				"noNonNullAssertion": "off"
+			},
+			"suspicious": {
+				"noAssignInExpressions": "off",
+				"noTemplateCurlyInString": "off"
+			}
 		}
 	}
 }
