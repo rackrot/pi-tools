@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.2.0](https://github.com/rackrot/pi-tools/compare/pi-skills-v0.1.2...pi-skills-v0.2.0) (2026-11-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* **skills:** the skills gh-readme, git-flow and trunk-based are removed. Use readme and branching-models.
+
+### Features
+
+* **skills:** retire gh-readme, git-flow and trunk-based ([5a2d19d](https://github.com/rackrot/pi-tools/commit/5a2d19d48963b51effdce40b06923bbf9ec4e9fc))
+
+
+### Bug Fixes
+
+* **skills:** descriptions a small model acts on, one owner per job, no dangling references ([70d1f2c](https://github.com/rackrot/pi-tools/commit/70d1f2c1df19c20e01fe5ddea0ae06229bc8a5cf))
+
+
+### Tests
+
+* **skills:** eval cases for every skill, checked against Haiku ([58222e9](https://github.com/rackrot/pi-tools/commit/58222e99680be26f2180e7b888766efda4dbc25f))
+
 ## [0.1.2](https://github.com/rackrot/pi-tools/compare/pi-skills-v0.1.1...pi-skills-v0.1.2) (2026-11-26)
 
 
