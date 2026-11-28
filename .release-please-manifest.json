@@ -9,5 +9,5 @@
 	"packages/gitignore": "1.0.1",
 	"packages/jj": "1.0.1",
 	"packages/memory": "1.0.0",
-	"packages/mcp-templates": "0.0.0"
+	"packages/mcp-templates": "1.0.0"
 }
