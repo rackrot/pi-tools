@@ -9,6 +9,8 @@ export interface Tuning {
 	model?: string;
 	thinking?: ThinkingLevel;
 	maxTurns?: number;
+	/** When true, the configured fields override the caller's instead of only filling unset ones. */
+	lock?: boolean;
 }
 
 export type Overrides = Record<string, Tuning>;
@@ -30,6 +32,7 @@ export function parseOverrides(raw: unknown): Overrides {
 		if (typeof v.maxTurns === "number" && Number.isInteger(v.maxTurns) && v.maxTurns >= 1) {
 			t.maxTurns = v.maxTurns;
 		}
+		if (typeof v.lock === "boolean") t.lock = v.lock;
 		if (Object.keys(t).length) out[key(name)] = t;
 	}
 	return out;
@@ -42,9 +45,16 @@ export function resolveTuning(name: string, layers: Overrides[]): Tuning {
 	return merged;
 }
 
-/** Fills `model`, `thinking` and `max_turns` of an `Agent` call from `tuning`; fields the caller set are kept. */
-export function applyTuning(input: Record<string, unknown>, tuning: Tuning): void {
-	const unset = (v: unknown) => v === undefined || v === null || v === "";
+/** Config `lock` wins, including `false`; the agent file's frontmatter `lock` is the fallback. */
+export const isLocked = (tuning: Tuning, frontmatter: boolean | undefined): boolean =>
+	tuning.lock ?? frontmatter ?? false;
+
+/**
+ * Sets `model`, `thinking` and `max_turns` of an `Agent` call from `tuning`. Unlocked, fields the
+ * caller set are kept; locked, the configured values overwrite them.
+ */
+export function applyTuning(input: Record<string, unknown>, tuning: Tuning, locked: boolean): void {
+	const unset = (v: unknown) => locked || v === undefined || v === null || v === "";
 	if (tuning.model && unset(input.model)) input.model = tuning.model;
 	if (tuning.thinking && unset(input.thinking)) input.thinking = tuning.thinking;
 	if (tuning.maxTurns && unset(input.max_turns)) input.max_turns = tuning.maxTurns;
@@ -83,10 +93,11 @@ export function workflowAgents(
 	return out;
 }
 
-/** Adds configured agents under `args.agents`; anything the caller passed for an agent wins. */
+/** Adds configured agents under `args.agents`; anything the caller passed wins, except for `locked` agents. */
 export function withConfiguredAgents(
 	args: unknown,
 	configured: Record<string, { model?: string; effort?: string }>,
+	locked: ReadonlySet<string> = new Set(),
 ): unknown {
 	if (!Object.keys(configured).length) return args;
 	let base: unknown = args;
@@ -101,9 +112,14 @@ export function withConfiguredAgents(
 	if (typeof base !== "object" || Array.isArray(base)) return args;
 	const given = (base as { agents?: unknown }).agents;
 	const agents = given && typeof given === "object" && !Array.isArray(given) ? given : {};
-	const lower = new Set(Object.keys(agents).map((k) => k.toLowerCase()));
-	const missing = Object.entries(configured).filter(([k]) => !lower.has(k));
-	return { ...base, agents: { ...agents, ...Object.fromEntries(missing) } };
+	const merged: Record<string, unknown> = { ...agents };
+	const lower = new Map(Object.keys(agents).map((k) => [k.toLowerCase(), k]));
+	for (const [k, entry] of Object.entries(configured)) {
+		const given = lower.get(k);
+		if (given === undefined) merged[k] = entry;
+		else if (locked.has(k)) merged[given] = { ...(merged[given] as object), ...entry };
+	}
+	return { ...base, agents: merged };
 }
 
 export const SETTINGS_KEY = "agentOverrides";
