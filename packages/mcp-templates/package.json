@@ -1,6 +1,6 @@
 {
 	"name": "@rackrot/pi-mcp-templates",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Catalog of MCP server templates for pi, installed into mcp.json with /mcp-add",
 	"type": "module",
 	"keywords": [
