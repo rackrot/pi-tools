@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { loadConfig } from "../src/config.ts";
 import { GitSync } from "../src/git.ts";
+import { findSecret } from "../src/note.ts";
 import { INDEX_END, INDEX_START } from "../src/overview.ts";
 import { summarizeProject } from "../src/summary.ts";
 import {
@@ -233,10 +234,10 @@ test("summary worker rewrites prose only, resets the counter, and rejects unsafe
 	assert.equal(m.sync.dirty.size, 0);
 
 	let prompt = "";
-	const result = await summarizeProject(
-		m,
-		async (_s, p) => ((prompt = p), "# Widget\n\nA widget service. See [[Fact 0]]."),
-	);
+	const result = await summarizeProject(m, async (_s, p) => {
+		prompt = p;
+		return "# Widget\n\nA widget service. See [[Fact 0]].";
+	});
 	assert.equal(result, "summary refreshed");
 	assert.match(prompt, /Distinct statement number 2/);
 	const after = readFileSync(abs, "utf8");
@@ -291,4 +292,81 @@ test("init commits only its own files, leaves user notes untracked, and is idemp
 	assert.equal(sh(root, "rev-list", "--count", "HEAD").trim(), "1");
 	sh(root, "remote", "add", "origin", join(tmp(), "none.git"));
 	assert.match((await nextSteps(cfg)).join("\n"), /push -u origin main/);
+});
+
+test("a project config cannot move the agent folder; `.` is not a folder", () => {
+	const base = tmp();
+	const agentDir = join(base, "agent");
+	mkdirSync(join(agentDir, "rackrot"), { recursive: true });
+	mkdirSync(join(base, ".pi"));
+	const global = (memory: object) =>
+		writeFileSync(join(agentDir, "rackrot", "config.json"), JSON.stringify({ memory }));
+	writeFileSync(
+		join(base, ".pi", "rackrot.json"),
+		JSON.stringify({ memory: { agentDir: "Personal", projects: "Journal", push: "never" } }),
+	);
+	global({ root: join(base, "vault"), agentDir: "Bot" });
+	const cfg = loadConfig(base, agentDir);
+	assert.deepEqual([cfg.agentDir, cfg.projects, cfg.push], ["Bot", "Projects", "never"]);
+	global({ root: join(base, "vault"), agentDir: "." });
+	assert.equal(loadConfig(base, agentDir).agentDir, "Agent");
+});
+
+test("notes a session wrote but never committed are committed by the next session", async () => {
+	const { m, root } = await setup();
+	memoryWrite(m, note());
+	// The first session dies here: no commit, no finalize.
+	const next = await GitSync.open(root, {
+		notify: () => {},
+		commitIntervalMinutes: 0,
+		push: false,
+	});
+	await next.start();
+	assert.equal(
+		sh(root, "log", "-1", "--format=%s").trim(),
+		"memory(global): add Deploy uses blue green",
+	);
+	await m.sync.commit();
+	assert.equal(sh(root, "rev-list", "--count", "HEAD").trim(), "2");
+});
+
+test("secret check lets env references and prose through", () => {
+	for (const body of [
+		"Set token: ${FORGEJO_TOKEN} in the config",
+		"const token = process.env.API_TOKEN",
+		"the secret: use-the-vault-entry-named-x",
+	])
+		assert.equal(findSecret(body), undefined, body);
+	assert.equal(findSecret("password = hunter2hunter2"), "credential assignment");
+});
+
+test("a pull that leaves conflict markers in uncommitted edits is reported and stops sync", async () => {
+	const base = tmp();
+	const bare = join(base, "remote.git");
+	mkdirSync(bare);
+	sh(bare, "init", "-q", "--bare", "-b", "main");
+	const a = join(base, "a");
+	repo(a, bare);
+	writeFileSync(join(a, "Note.md"), "base\n");
+	sh(a, "add", "Note.md");
+	sh(a, "commit", "-qm", "base");
+	sh(a, "push", "-q", "-u", "origin", "main");
+	const b = join(base, "b");
+	repo(b, bare);
+	sh(b, "pull", "-q", "origin", "main");
+	sh(b, "branch", "-q", "--set-upstream-to=origin/main", "main");
+	writeFileSync(join(a, "Note.md"), "from a\n");
+	sh(a, "commit", "-qam", "a");
+	sh(a, "push", "-q");
+	writeFileSync(join(b, "Note.md"), "human edit, not committed\n");
+
+	const notes: string[] = [];
+	const sync = await GitSync.open(b, {
+		notify: (m) => notes.push(m),
+		commitIntervalMinutes: 0,
+		push: true,
+	});
+	await sync.pull();
+	assert.match(sync.disabled ?? "", /conflict markers: Note\.md/);
+	assert.equal(notes.length, 1);
 });

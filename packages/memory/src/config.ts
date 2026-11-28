@@ -40,11 +40,12 @@ type Json = Record<string, unknown>;
 const obj = (v: unknown): Json =>
 	v && typeof v === "object" && !Array.isArray(v) ? (v as Json) : {};
 
-/** A relative folder path without `..`, trimmed of slashes; anything else is ignored. */
+/** A relative folder path without `.` or `..` segments, trimmed of slashes; anything else is ignored. */
 function folder(v: unknown): string | undefined {
 	if (typeof v !== "string") return;
 	const p = v.replace(/^[\\/]+|[\\/]+$/g, "");
-	return p && !isAbsolute(v) && !p.split(/[\\/]/).includes("..") ? p : undefined;
+	const plain = p.split(/[\\/]/).every((s) => s && s !== "." && s !== "..");
+	return p && !isAbsolute(v) && plain ? p : undefined;
 }
 
 /** Copies the valid fields of a provider block. */
@@ -66,8 +67,8 @@ const mergeProvider = (base: ModelProviderConfig | undefined, blocks: unknown[])
 };
 
 /**
- * Reads the `memory` key of the rackrot config. `root` comes from the global layer only, so a
- * checked-in project config can never redirect where the agent writes.
+ * Reads the `memory` key of the rackrot config. `root`, `agentDir` and `projects` come from the
+ * global layer only, so a checked-in project config can never redirect where the agent writes.
  */
 export function loadConfig(cwd: string, agentDir: string = getAgentDir()): MemoryConfig {
 	const [g, p] = readConfigLayers("memory", cwd, agentDir).map(obj);
@@ -92,8 +93,8 @@ export function loadConfig(cwd: string, agentDir: string = getAgentDir()): Memor
 		Number.isInteger(v) && (v as number) > 0 ? (v as number) : undefined;
 	return {
 		root: root && resolve(root.replace(/^~(?=$|[\\/])/, homedir())),
-		agentDir: pick((j) => folder(j.agentDir)) ?? "Agent",
-		projects: pick((j) => folder(j.projects)) ?? "Projects",
+		agentDir: folder(g.agentDir) ?? "Agent",
+		projects: folder(g.projects) ?? "Projects",
 		project: pick((j) => (typeof j.project === "string" && j.project ? j.project : undefined)),
 		autoInject: pick((j) => (typeof j.autoInject === "boolean" ? j.autoInject : undefined)) ?? true,
 		commitIntervalMinutes: interval ?? 5,

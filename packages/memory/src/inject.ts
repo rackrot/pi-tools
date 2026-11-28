@@ -1,6 +1,6 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import { join, posix } from "node:path";
-import { parseNote } from "./note.ts";
+import { type ParsedNote, parseNote } from "./note.ts";
 import { splitIndex } from "./overview.ts";
 import type { Memory } from "./tools.ts";
 import { agentRel, archiveRel, projectRel, walkMarkdown } from "./vault.ts";
@@ -11,6 +11,18 @@ const OVERVIEW_CHARS = 3000;
 const PINNED_CHARS = 1500;
 
 const title = (path: string) => posix.basename(path, ".md");
+
+/** Parsed notes by absolute path, reused while the file's mtime is unchanged: the injection is rebuilt every turn. */
+const parsed = new Map<string, { mtime: number; note: ParsedNote }>();
+
+function readNote(abs: string): ParsedNote {
+	const mtime = statSync(abs).mtimeMs;
+	const hit = parsed.get(abs);
+	if (hit?.mtime === mtime) return hit.note;
+	const note = parseNote(readFileSync(abs, "utf8"));
+	parsed.set(abs, { mtime, note });
+	return note;
+}
 
 /**
  * The text added to the system prompt: a tool hint, the project Overview, open handoffs and
@@ -32,7 +44,7 @@ export function buildInjection(m: Memory): string {
 		left -= t.length;
 	};
 
-	const read = (rel: string) => parseNote(readFileSync(join(cfg.root, rel), "utf8"));
+	const read = (rel: string) => readNote(join(cfg.root, rel));
 	const notes = walkMarkdown(cfg.root, agentRel(cfg))
 		.filter(
 			(p) =>

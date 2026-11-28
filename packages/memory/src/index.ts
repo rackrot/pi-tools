@@ -9,12 +9,16 @@ import {
 import { configPath } from "@rackrot/pi-core/config";
 import { registerConfigSection } from "@rackrot/pi-core/config-ui";
 import { callModel } from "@rackrot/pi-core/model-call";
+import { missingModels } from "@rackrot/pi-core/retrieval";
 import { loadConfig } from "./config.ts";
 import { isRepoRoot } from "./git.ts";
 import { buildInjection } from "./inject.ts";
 import { summarizeProject } from "./summary.ts";
 import { createMemory, kickEmbeddings, type Memory, registerTools } from "./tools.ts";
 import { type ConfiguredConfig, guardReason, inspectRoot, nextSteps, setupVault } from "./vault.ts";
+
+/** Longest the summary worker, final git sync and embeddings may hold up quitting pi. */
+const SHUTDOWN_MS = 30_000;
 
 /**
  * Long-term memory in a git-managed Obsidian vault. Without `memory.root` in the global config
@@ -39,13 +43,15 @@ export default function (pi: ExtensionAPI) {
 			{
 				path: ["memory", "agentDir"],
 				label: "Agent folder",
-				description: "Folder under the root where the agent writes (default Agent)",
+				description:
+					"Folder under the root where the agent writes (default Agent). Global config only.",
 				kind: "text",
 			},
 			{
 				path: ["memory", "projects"],
 				label: "Projects folder",
-				description: "Folder under the agent folder for project notes (default Projects)",
+				description:
+					"Folder under the agent folder for project notes (default Projects). Global config only.",
 				kind: "text",
 			},
 			{
@@ -211,11 +217,17 @@ export default function (pi: ExtensionAPI) {
 	let memory: Promise<Memory> | undefined;
 	let notify: (m: string, level: "info" | "warning" | "error") => void = () => {};
 	const get = (cwd: string) => {
-		memory ??= (async () => {
+		if (memory) return memory;
+		const opening = (async () => {
 			const cfg = configured(cwd);
 			if (!cfg) throw new Error("memory.root is not configured");
 			return createMemory(cfg, cwd, { agentDir: getAgentDir(), notify: (m, l) => notify(m, l) });
 		})();
+		// A failed setup is not kept, so the next call tries again instead of failing until restart.
+		opening.catch(() => {
+			if (memory === opening) memory = undefined;
+		});
+		memory = opening;
 		return memory;
 	};
 
@@ -226,6 +238,12 @@ export default function (pi: ExtensionAPI) {
 		void (async () => {
 			try {
 				const m = await get(ctx.cwd);
+				const missing = missingModels([m.cfg.embedding, m.cfg.reranker]);
+				if (missing.length)
+					notify(
+						`memory: ${missing.join(", ")} will be downloaded from Hugging Face on first use (once)`,
+						"info",
+					);
 				m.index.sync();
 				kickEmbeddings(m);
 				if (await m.sync.start()) {
@@ -284,12 +302,28 @@ export default function (pi: ExtensionAPI) {
 		const m = await memory?.catch(() => undefined);
 		memory = undefined;
 		if (!m) return;
-		if (m.cfg.summary.enabled && m.cfg.summary.model) {
-			const result = await summarize(m, ctx, false);
-			if (/^(summary failed|rejected)/.test(result)) notify(`memory: ${result}`, "warning");
-		}
-		await m.sync.finalize();
-		await m.embedding;
+		const work = (async () => {
+			if (m.cfg.summary.enabled && m.cfg.summary.model) {
+				const result = await summarize(m, ctx, false);
+				if (/^(summary failed|rejected)/.test(result)) notify(`memory: ${result}`, "warning");
+			}
+			await m.sync.finalize();
+			await m.embedding;
+		})().then(
+			() => true,
+			() => true,
+		);
+		// Quitting must not hang on a slow model or remote; what is left is committed by the next session.
+		let timer: NodeJS.Timeout | undefined;
+		const deadline = new Promise<boolean>((resolve) => {
+			timer = setTimeout(() => resolve(false), SHUTDOWN_MS);
+		});
+		if (!(await Promise.race([work, deadline])))
+			notify(
+				`memory: sync did not finish within ${SHUTDOWN_MS / 1000}s; the next session commits what is left`,
+				"warning",
+			);
+		clearTimeout(timer);
 		m.index.close();
 	});
 }

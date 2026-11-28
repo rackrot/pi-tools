@@ -67,7 +67,11 @@ const SECRETS: [string, RegExp][] = [
 	["GitHub token", /\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{22,})\b/],
 	["private key", /-----BEGIN [A-Z ]*PRIVATE KEY-----/],
 	["API key (sk-)", /\bsk-[A-Za-z0-9_-]{20,}/],
-	["credential assignment", /(?:password|secret|token)\s*[:=]\s*\S{12,}/i],
+	// A value with letters and a digit; env references (`${TOKEN}`, `process.env.TOKEN`) and prose are fine.
+	[
+		"credential assignment",
+		/(?:password|secret|token)\s*[:=]\s*["'`]?(?!\$|process\.env|os\.environ)(?=\S*\d)(?=\S*[A-Za-z])\S{12,}/i,
+	],
 ];
 
 /** Name of the first secret pattern the text matches, if any. */

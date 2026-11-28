@@ -9,7 +9,6 @@ import {
 	type Reranker,
 } from "@rackrot/pi-core/retrieval";
 import { Type } from "typebox";
-import type { MemoryConfig } from "./config.ts";
 import { GitSync, type SyncOptions } from "./git.ts";
 import { embedPending, searchNotes, VaultIndex } from "./index-db.ts";
 import {
@@ -51,6 +50,9 @@ export interface Memory {
 	embedding?: Promise<void>;
 }
 
+/** The ONNX runtime is this package's dependency, not pi-core's; it is imported on first use. */
+const loadTransformers = () => import("@huggingface/transformers");
+
 export async function createMemory(
 	cfg: ConfiguredConfig,
 	cwd: string,
@@ -66,8 +68,8 @@ export async function createMemory(
 			push: cfg.push === "session",
 		}),
 		hashes: new Map(),
-		embedder: createEmbedder(cfg.embedding),
-		reranker: cfg.reranker && createReranker(cfg.reranker),
+		embedder: createEmbedder(cfg.embedding, loadTransformers),
+		reranker: cfg.reranker && createReranker(cfg.reranker, loadTransformers),
 	};
 }
 

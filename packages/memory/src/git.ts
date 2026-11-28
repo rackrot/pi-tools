@@ -4,11 +4,14 @@ import {
 	existsSync,
 	mkdirSync,
 	openSync,
+	readdirSync,
 	readFileSync,
 	realpathSync,
 	rmSync,
 	statSync,
 	unlinkSync,
+	utimesSync,
+	writeFileSync,
 } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
@@ -90,7 +93,14 @@ function gitDir(root: string): string {
 const ACTIONS = ["add", "update", "archive"];
 const STALE_LOCK_MS = 2 * 60_000;
 
-/** Cross-process lock at `<git dir>/pi-memory.lock` (created with O_EXCL, stale after 2 minutes). */
+/** Dirty paths of one session, kept in the git directory so a later session can commit what a crashed one left. */
+const JOURNAL = /^pi-memory-dirty-.+\.json$/;
+let journals = 0;
+
+/**
+ * Cross-process lock at `<git dir>/pi-memory.lock` (created with O_EXCL). The holder touches it
+ * every 30 seconds; a lock untouched for 2 minutes belonged to a dead process and is taken over.
+ */
 async function withLock<T>(root: string, fn: () => Promise<T>): Promise<T> {
 	const path = join(gitDir(root), "pi-memory.lock");
 	const deadline = Date.now() + 30_000;
@@ -110,9 +120,15 @@ async function withLock<T>(root: string, fn: () => Promise<T>): Promise<T> {
 			await sleep(200);
 		}
 	}
+	const beat = setInterval(() => {
+		try {
+			utimesSync(path, new Date(), new Date());
+		} catch {}
+	}, 30_000);
 	try {
 		return await fn();
 	} finally {
+		clearInterval(beat);
 		rmSync(path, { force: true });
 	}
 }
@@ -138,10 +154,37 @@ export class GitSync {
 	readonly repo: boolean;
 	readonly opts: SyncOptions;
 
+	readonly #journal: string;
+
 	private constructor(root: string, repo: boolean, opts: SyncOptions) {
 		this.root = root;
 		this.repo = repo;
 		this.opts = opts;
+		this.#journal = join(gitDir(root), `pi-memory-dirty-${process.pid}-${journals++}.json`);
+	}
+
+	/** Mirrors `dirty` to this session's journal file; an empty set removes the file. */
+	#save() {
+		if (!this.repo) return;
+		try {
+			if (this.dirty.size) writeFileSync(this.#journal, JSON.stringify([...this.dirty]));
+			else rmSync(this.#journal, { force: true });
+		} catch {}
+	}
+
+	/** Takes over the paths other sessions wrote and never committed (a crash, or sync was disabled). */
+	#adopt() {
+		const dir = dirname(this.#journal);
+		for (const f of existsSync(dir) ? readdirSync(dir) : []) {
+			const file = join(dir, f);
+			if (!JOURNAL.test(f) || file === this.#journal) continue;
+			try {
+				for (const [path, label] of JSON.parse(readFileSync(file, "utf8")) as [string, string][])
+					if (!this.dirty.has(path)) this.dirty.set(path, label);
+			} catch {}
+			rmSync(file, { force: true });
+		}
+		this.#save();
 	}
 
 	static async open(root: string, opts: SyncOptions): Promise<GitSync> {
@@ -164,10 +207,16 @@ export class GitSync {
 		if (summary) this.#summaries.add(rel);
 		this.dirty.set(rel, label);
 		if (movedHere) this.#moved.add(rel);
+		this.#save();
 	}
 
-	/** Pulls once and starts the commit timer. Resolves true when the pull brought in changes. */
+	/**
+	 * Commits what earlier sessions left uncommitted, pulls once and starts the commit timer.
+	 * Resolves true when the pull brought in changes.
+	 */
 	async start(): Promise<boolean> {
+		if (this.repo) this.#adopt();
+		if (this.dirty.size) await this.commit();
 		const m = this.opts.commitIntervalMinutes;
 		if (this.repo && m > 0) {
 			this.#timer = setInterval(() => void this.commit(), m * 60_000);
@@ -264,6 +313,7 @@ export class GitSync {
 				this.#moved.delete(p);
 				this.#summaries.delete(p);
 			}
+			this.#save();
 		}
 	}
 
@@ -309,6 +359,14 @@ export class GitSync {
 			);
 			return false;
 		}
+		// Autostash re-applies uncommitted edits after the rebase; a conflict there still exits 0.
+		const unmerged = (await git(this.root, ["diff", "--name-only", "--diff-filter=U"])).trim();
+		if (unmerged)
+			this.#fail(
+				new Error(
+					`pull changed files you had uncommitted edits in; they now hold conflict markers: ${unmerged.split("\n").join(", ")}. Resolve them in the vault (your edits are also in \`git stash list\`).`,
+				),
+			);
 		return before !== (await git(this.root, ["rev-parse", "HEAD"]).catch(() => ""));
 	}
 

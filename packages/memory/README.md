@@ -28,14 +28,14 @@ pi install npm:@rackrot/pi-memory
 
 ### 3. Configure
 
-`memory.root` is read from the **global** config only (a project config can never redirect where the agent writes); `~` is expanded. The file is `<agentDir>/rackrot/config.json` (or `.jsonc`), where `<agentDir>` is pi's agent dir (`~/.pi/agent`). Create it with `/rackrot-init` or edit it with `/rackrot-config memory`. All other keys may also go in `<cwd>/.pi/rackrot.json(c)`; the project layer wins.
+`memory.root`, `agentDir` and `projects` are read from the **global** config only (a project config can never redirect where the agent writes); `~` is expanded. The file is `<agentDir>/rackrot/config.json` (or `.jsonc`), where `<agentDir>` is pi's agent dir (`~/.pi/agent`). Create it with `/rackrot-init` or edit it with `/rackrot-config memory`. All other keys may also go in `<cwd>/.pi/rackrot.json(c)`; the project layer wins.
 
 ```jsonc
 {
 	"memory": {
 		"root": "~/Documents/Obsidian/MyVault", // required, global config only
-		"agentDir": "Agent", // folder under root the agent writes to
-		"projects": "Projects", // folder under agentDir, one subfolder per project
+		"agentDir": "Agent", // folder under root the agent writes to; global config only
+		"projects": "Projects", // folder under agentDir, one subfolder per project; global config only
 		"project": "my-app", // optional: override the slug derived from the git remote
 		"autoInject": true, // add overview, open handoffs and pinned notes to the system prompt
 		"commitIntervalMinutes": 5, // 0 = commit only at session end
@@ -142,6 +142,12 @@ never `-A`), so your uncommitted work in the vault is never swept into agent com
 `pull --rebase --autostash`; at the end, push when `push` is `session`. Never force. A pull conflict aborts the
 rebase, notifies you and disables auto-commit and push for the session; a push failure does the same. Git work is
 serialised with `<root>/.git/pi-memory.lock`. A root that is not a git repo still works, without versioning.
+
+The paths a session wrote are also listed in `<root>/.git/pi-memory-dirty-*.json` until they are committed. If pi
+is killed, or sync was disabled, the next session commits them at start. When the pull re-applies your own
+uncommitted edits and they conflict with what came in, git leaves conflict markers in those files: you are told
+which files, sync stops for the session, and your edits are also kept in `git stash list`. At session end the
+summary worker, final sync and embeddings get 30 seconds in total; what is left is committed by the next session.
 
 ## Limits
 

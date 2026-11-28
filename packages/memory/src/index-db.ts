@@ -75,9 +75,17 @@ export class VaultIndex {
 	sync() {
 		const files = walkMarkdown(this.root);
 		const seen = new Set(files);
-		for (const f of files) this.indexFile(f);
-		for (const r of this.#db.prepare("SELECT path FROM notes").all() as { path: string }[])
-			if (!seen.has(r.path)) this.remove(r.path);
+		// One transaction: a first index of a large vault is one write instead of one per note.
+		this.#db.exec("BEGIN");
+		try {
+			for (const f of files) this.indexFile(f);
+			for (const r of this.#db.prepare("SELECT path FROM notes").all() as { path: string }[])
+				if (!seen.has(r.path)) this.remove(r.path);
+			this.#db.exec("COMMIT");
+		} catch (e) {
+			this.#db.exec("ROLLBACK");
+			throw e;
+		}
 	}
 
 	/** Indexes one file. An unchanged mtime or hash keeps the existing row and embedding. */
@@ -188,7 +196,7 @@ export async function embedPending(index: VaultIndex, embedder: Embedder): Promi
 		const batch = index.pending(embedder.id, BATCH);
 		if (!batch.length) return;
 		const vectors = await embedder.embed(batch.map(noteText));
-		batch.forEach((n, i) => index.setEmbedding(n.id, embedder.id, vectors[i]));
+		for (const [i, n] of batch.entries()) index.setEmbedding(n.id, embedder.id, vectors[i]);
 	}
 }
 
