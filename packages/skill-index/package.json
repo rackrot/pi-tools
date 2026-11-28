@@ -1,6 +1,6 @@
 {
 	"name": "@rackrot/pi-skill-index",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "Per-skill system-prompt exposure levels and a BM25 skill_search tool",
 	"type": "module",
 	"keywords": [
