@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { getAgentDir } from "@earendil-works/pi-coding-agent";
 
@@ -19,6 +20,14 @@ export const DEFAULT_RERANKER: ModelProviderConfig = {
 	provider: "onnx",
 	model: "Xenova/bge-reranker-base",
 };
+
+const modelCacheDir = () => join(getAgentDir(), "rackrot", "models");
+
+/** The `onnx` models among `cfgs` that are not in the local cache yet; first use downloads them from Hugging Face. */
+export const missingModels = (cfgs: (ModelProviderConfig | undefined)[]): string[] =>
+	cfgs.flatMap((c) =>
+		c?.provider === "onnx" && !existsSync(join(modelCacheDir(), c.model)) ? [c.model] : [],
+	);
 
 export interface Embedder {
 	/** Identifies provider and model; stored with each vector so a change re-embeds. */
@@ -50,17 +59,29 @@ async function post<T>(url: string, body: unknown, key?: string): Promise<T> {
 
 const join1 = (base: string, path: string) => `${base.replace(/\/+$/, "")}${path}`;
 
-let transformers: Promise<typeof import("@huggingface/transformers")> | undefined;
+type Transformers = typeof import("@huggingface/transformers");
+/**
+ * Imports `@huggingface/transformers`. The calling package passes `() => import("@huggingface/transformers")`
+ * and lists it as its own dependency: it brings several hundred MB of ONNX runtime, which packages
+ * that only use the rest of pi-core should not have to install.
+ */
+export type TransformersLoader = () => Promise<Transformers>;
+
+let transformers: Promise<Transformers> | undefined;
 /** Loads @huggingface/transformers once and points its model cache under the rackrot directory. */
-function hf() {
-	transformers ??= import("@huggingface/transformers").then((m) => {
-		m.env.cacheDir = join(getAgentDir(), "rackrot", "models");
+function hf(load: TransformersLoader) {
+	transformers ??= load().then((m) => {
+		m.env.cacheDir = modelCacheDir();
 		return m;
 	});
 	return transformers;
 }
 
-export function createEmbedder(cfg: ModelProviderConfig): Embedder | undefined {
+/** `load` is only called for the `onnx` provider, on first use. */
+export function createEmbedder(
+	cfg: ModelProviderConfig,
+	load: TransformersLoader,
+): Embedder | undefined {
 	if (cfg.provider === "none") return;
 	const id = `${cfg.provider}:${cfg.model}`;
 	if (cfg.provider === "http") {
@@ -82,7 +103,7 @@ export function createEmbedder(cfg: ModelProviderConfig): Embedder | undefined {
 	return {
 		id,
 		async embed(texts) {
-			extractor ??= hf().then(
+			extractor ??= hf(load).then(
 				(m) => m.pipeline("feature-extraction", cfg.model, { dtype: "q8" }) as never,
 			);
 			// CLS pooling suits the default bge models; it is not configurable yet.
@@ -97,7 +118,11 @@ const normalise = (v: number[]) => {
 	return v.map((x) => x / n);
 };
 
-export function createReranker(cfg: ModelProviderConfig): Reranker | undefined {
+/** `load` is only called for the `onnx` provider, on first use. */
+export function createReranker(
+	cfg: ModelProviderConfig,
+	load: TransformersLoader,
+): Reranker | undefined {
 	if (cfg.provider === "none") return;
 	if (cfg.provider === "http") {
 		if (!cfg.baseUrl) return;
@@ -123,7 +148,7 @@ export function createReranker(cfg: ModelProviderConfig): Reranker | undefined {
 		| undefined;
 	return {
 		async rerank(query, docs) {
-			loaded ??= hf().then(async (m) => ({
+			loaded ??= hf(load).then(async (m) => ({
 				tokenizer: (await m.AutoTokenizer.from_pretrained(cfg.model)) as never,
 				model: (await m.AutoModelForSequenceClassification.from_pretrained(cfg.model, {
 					dtype: "q8",

@@ -30,7 +30,6 @@
 		]
 	},
 	"dependencies": {
-		"@huggingface/transformers": "^4.3.2",
 		"jsonc-parser": "^3.3.1"
 	},
 	"peerDependencies": {
@@ -46,5 +45,8 @@
 		"type": "git",
 		"url": "git+https://github.com/rackrot/pi-tools.git",
 		"directory": "packages/core"
+	},
+	"devDependencies": {
+		"@huggingface/transformers": "^4.3.2"
 	}
 }
