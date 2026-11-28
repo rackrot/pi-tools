@@ -18,3 +18,11 @@ jobs:
       - run: pnpm -r --if-present test
       - name: Verify packages pack
         run: pnpm -r --filter "!@rackrot/pi-skill-evals" publish --dry-run --no-git-checks
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Scan history for secrets
+        run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --no-banner --redact
