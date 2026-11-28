@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/rackrot/pi-tools/compare/pi-core-v0.4.1...pi-core-v0.5.0) (2026-11-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* **core:** createEmbedder(cfg) and createReranker(cfg) require a second argument, () => import("@huggingface/transformers").
+
+### Features
+
+* **core:** callers of retrieval supply the transformers loader ([f5c2081](https://github.com/rackrot/pi-tools/commit/f5c208104900e3938b4e47c7046ad06539d79924))
+* **core:** config switch for codebase-memory indexing ([e925181](https://github.com/rackrot/pi-tools/commit/e925181c4582a18a23edc2ac9d7ddc38b4081370))
+
 ## [0.4.1](https://github.com/rackrot/pi-tools/compare/pi-core-v0.4.0...pi-core-v0.4.1) (2026-11-28)
 
 
