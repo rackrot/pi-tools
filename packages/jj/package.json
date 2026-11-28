@@ -1,6 +1,6 @@
 {
 	"name": "@rackrot/pi-jj",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "Native Jujutsu (jj) support for pi: a conditional skill, system-prompt hint, git nudge and bash env",
 	"type": "module",
 	"keywords": [
