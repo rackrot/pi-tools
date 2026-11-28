@@ -107,8 +107,8 @@ change a value, Esc to close.
 ### How it works, and limits
 
 pi-subagents treats an agent file's `model`, `thinking` and `max_turns` as authoritative over the
-caller. The shipped files therefore leave those fields out. A `tool_call` hook rewrites the `Agent`
-call's `model`, `thinking` and `max_turns` from settings, and settings win over what the orchestrator passed.
+caller. The shipped files therefore leave those fields out. A `tool_call` hook fills the `Agent`
+call's `model`, `thinking` and `max_turns` from settings when the orchestrator left them unset; a value the orchestrator passes wins.
 
 The hook only sees calls made through the `Agent` tool. Workflow `agent()` calls are covered separately, by
 filling `args.agents` (see Workflows). Not covered: scheduled spawns, cross-extension RPC, and possibly `@mention` starts in `direct` mode. Those run

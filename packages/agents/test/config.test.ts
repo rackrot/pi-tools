@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+	applyTuning,
 	configuredNames,
 	parseOverrides,
 	resolveTuning,
@@ -63,4 +64,10 @@ test("workflow args get configured agents, and explicit args win", () => {
 	assert.deepEqual(withConfiguredAgents(undefined, configured), { agents: configured });
 	assert.equal(withConfiguredAgents("not json", configured), "not json");
 	assert.equal(withConfiguredAgents({ a: 1 }, {}).constructor, Object);
+});
+
+test("applyTuning fills unset fields and keeps what the caller passed", () => {
+	const input: Record<string, unknown> = { model: "caller/model", thinking: "" };
+	applyTuning(input, { model: "cfg/model", thinking: "low", maxTurns: 9 });
+	assert.deepEqual(input, { model: "caller/model", thinking: "low", max_turns: 9 });
 });
