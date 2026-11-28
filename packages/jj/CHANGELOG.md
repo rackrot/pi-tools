@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/rackrot/pi-tools/compare/pi-jj-v1.0.1...pi-jj-v1.0.2) (2026-11-28)
+
+
+### Bug Fixes
+
+* **jj:** see git and jj calls on later lines and behind shell keywords ([a482d02](https://github.com/rackrot/pi-tools/commit/a482d02efe0829c89914070f510228526b2f9482))
+
 ## [1.0.1](https://github.com/rackrot/pi-tools/compare/pi-jj-v1.0.0...pi-jj-v1.0.1) (2026-11-26)
 
 
