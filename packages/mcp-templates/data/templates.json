@@ -1,0 +1,255 @@
+[
+	{
+		"id": "context7",
+		"description": "Up-to-date library docs and code examples (anonymous, rate limited)",
+		"tags": ["docs"],
+		"entry": {
+			"url": "https://mcp.context7.com/mcp"
+		},
+		"auth": "none",
+		"source": "https://github.com/upstash/context7"
+	},
+	{
+		"id": "context7-keyed",
+		"description": "Context7 with an API key for higher rate limits",
+		"tags": ["docs"],
+		"entry": {
+			"url": "https://mcp.context7.com/mcp",
+			"headers": {
+				"Authorization": "Bearer ${CONTEXT7_API_KEY}"
+			}
+		},
+		"auth": "env",
+		"secrets": ["CONTEXT7_API_KEY"],
+		"source": "https://github.com/upstash/context7"
+	},
+	{
+		"id": "playwright",
+		"description": "Browser automation through Playwright accessibility snapshots",
+		"tags": ["browser", "testing"],
+		"entry": {
+			"command": "npx",
+			"args": ["@playwright/mcp@latest"]
+		},
+		"auth": "none",
+		"requires": ["Node.js 20+"],
+		"source": "https://github.com/microsoft/playwright-mcp"
+	},
+	{
+		"id": "chrome-devtools",
+		"description": "Drive and debug a live Chrome: DevTools, performance traces, network, console",
+		"tags": ["browser", "debugging"],
+		"entry": {
+			"command": "npx",
+			"args": ["-y", "chrome-devtools-mcp@latest"]
+		},
+		"auth": "none",
+		"requires": ["Node.js LTS", "Chrome (stable)"],
+		"source": "https://github.com/ChromeDevTools/chrome-devtools-mcp"
+	},
+	{
+		"id": "github",
+		"description": "GitHub repos, issues, PRs and Actions through the hosted server (many tools, deferred)",
+		"tags": ["vcs", "issues"],
+		"entry": {
+			"url": "https://api.githubcopilot.com/mcp/",
+			"exposure": "deferred"
+		},
+		"auth": "oauth",
+		"source": "https://github.com/github/github-mcp-server"
+	},
+	{
+		"id": "github-pat",
+		"description": "GitHub hosted server authenticated with a personal access token (many tools, deferred)",
+		"tags": ["vcs", "issues"],
+		"entry": {
+			"url": "https://api.githubcopilot.com/mcp/",
+			"headers": {
+				"Authorization": "Bearer ${GITHUB_TOKEN}"
+			},
+			"exposure": "deferred"
+		},
+		"auth": "env",
+		"secrets": ["GITHUB_TOKEN"],
+		"source": "https://github.com/github/github-mcp-server"
+	},
+	{
+		"id": "sentry",
+		"description": "Sentry issues, events and Seer analysis through the hosted server",
+		"tags": ["errors", "observability"],
+		"entry": {
+			"url": "https://mcp.sentry.dev/mcp"
+		},
+		"auth": "oauth",
+		"source": "https://github.com/getsentry/sentry-mcp"
+	},
+	{
+		"id": "supabase",
+		"description": "Supabase projects, SQL, migrations and docs through the hosted server (many tools, deferred)",
+		"tags": ["db", "backend"],
+		"entry": {
+			"url": "https://mcp.supabase.com/mcp",
+			"exposure": "deferred"
+		},
+		"auth": "oauth",
+		"source": "https://github.com/supabase-community/supabase-mcp"
+	},
+	{
+		"id": "linear",
+		"description": "Linear issues, projects and documents through the hosted server",
+		"tags": ["issues"],
+		"entry": {
+			"url": "https://mcp.linear.app/mcp"
+		},
+		"auth": "oauth",
+		"source": "https://linear.app/docs/mcp"
+	},
+	{
+		"id": "serena",
+		"description": "Semantic code retrieval, symbol editing and refactoring backed by language servers",
+		"tags": ["code-intel"],
+		"entry": {
+			"command": "uvx",
+			"args": [
+				"-p",
+				"3.13",
+				"--from",
+				"git+https://github.com/oraios/serena",
+				"serena",
+				"start-mcp-server",
+				"--project-from-cwd"
+			]
+		},
+		"auth": "none",
+		"requires": ["uv"],
+		"source": "https://github.com/oraios/serena"
+	},
+	{
+		"id": "filesystem",
+		"description": "Sandboxed file read, write and search for the current directory",
+		"tags": ["fs"],
+		"entry": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-filesystem", "."]
+		},
+		"auth": "none",
+		"requires": ["Node.js"],
+		"source": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem"
+	},
+	{
+		"id": "memory",
+		"description": "Knowledge-graph persistent memory",
+		"tags": ["memory"],
+		"entry": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-memory"]
+		},
+		"auth": "none",
+		"requires": ["Node.js 24+"],
+		"source": "https://github.com/modelcontextprotocol/servers/tree/main/src/memory"
+	},
+	{
+		"id": "sequential-thinking",
+		"description": "Structured step-by-step reasoning scratchpad",
+		"tags": ["reasoning"],
+		"entry": {
+			"command": "npx",
+			"args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+		},
+		"auth": "none",
+		"requires": ["Node.js 24+"],
+		"source": "https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking"
+	},
+	{
+		"id": "fetch",
+		"description": "Fetch web pages and convert them to Markdown",
+		"tags": ["web", "docs"],
+		"entry": {
+			"command": "uvx",
+			"args": ["mcp-server-fetch"]
+		},
+		"auth": "none",
+		"requires": ["uv"],
+		"source": "https://github.com/modelcontextprotocol/servers/tree/main/src/fetch"
+	},
+	{
+		"id": "git",
+		"description": "Read, search and modify the current git repository",
+		"tags": ["vcs"],
+		"entry": {
+			"command": "uvx",
+			"args": ["mcp-server-git", "--repository", "."]
+		},
+		"auth": "none",
+		"requires": ["uv"],
+		"source": "https://github.com/modelcontextprotocol/servers/tree/main/src/git"
+	},
+	{
+		"id": "toolbox-postgres",
+		"description": "PostgreSQL schema inspection and SQL through MCP Toolbox for Databases",
+		"tags": ["db"],
+		"entry": {
+			"command": "npx",
+			"args": ["-y", "@toolbox-sdk/server", "--prebuilt=postgres", "--stdio"],
+			"env": {
+				"POSTGRES_HOST": "${POSTGRES_HOST}",
+				"POSTGRES_PORT": "${POSTGRES_PORT}",
+				"POSTGRES_DATABASE": "${POSTGRES_DATABASE}",
+				"POSTGRES_USER": "${POSTGRES_USER}",
+				"POSTGRES_PASSWORD": "${POSTGRES_PASSWORD}"
+			}
+		},
+		"auth": "env",
+		"requires": ["Node.js", "A reachable PostgreSQL database"],
+		"secrets": [
+			"POSTGRES_HOST",
+			"POSTGRES_PORT",
+			"POSTGRES_DATABASE",
+			"POSTGRES_USER",
+			"POSTGRES_PASSWORD"
+		],
+		"source": "https://github.com/googleapis/mcp-toolbox"
+	},
+	{
+		"id": "docker",
+		"description": "Docker MCP Toolkit gateway: the servers enabled in Docker Desktop",
+		"tags": ["containers"],
+		"entry": {
+			"command": "docker",
+			"args": ["mcp", "gateway", "run"]
+		},
+		"auth": "none",
+		"requires": ["Docker with the MCP Toolkit (docker mcp)"],
+		"source": "https://docs.docker.com/ai/mcp-catalog-and-toolkit/toolkit/"
+	},
+	{
+		"id": "cloudflare",
+		"description": "Cloudflare API through code execution (Workers, DNS, R2, ...)",
+		"tags": ["cloud"],
+		"entry": {
+			"url": "https://mcp.cloudflare.com/mcp"
+		},
+		"auth": "oauth",
+		"source": "https://github.com/cloudflare/mcp"
+	},
+	{
+		"id": "figma",
+		"description": "Figma designs and Code Connect through the hosted server",
+		"tags": ["design"],
+		"entry": {
+			"url": "https://mcp.figma.com/mcp"
+		},
+		"auth": "oauth",
+		"source": "https://developers.figma.com/docs/figma-mcp-server/remote-server-installation/"
+	},
+	{
+		"id": "atlassian",
+		"description": "Jira and Confluence through the Atlassian Rovo MCP server (v2)",
+		"tags": ["issues", "docs"],
+		"entry": {
+			"url": "https://mcp.atlassian.com/v2/mcp"
+		},
+		"auth": "oauth",
+		"source": "https://github.com/atlassian/atlassian-mcp-server"
+	}
+]

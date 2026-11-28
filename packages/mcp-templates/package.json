@@ -1,0 +1,41 @@
+{
+	"name": "@rackrot/pi-mcp-templates",
+	"version": "0.0.0",
+	"description": "Catalog of MCP server templates for pi, installed into mcp.json with /mcp-add",
+	"type": "module",
+	"keywords": [
+		"pi-package",
+		"pi-extension"
+	],
+	"license": "MIT",
+	"files": [
+		"src",
+		"data",
+		"README.md"
+	],
+	"scripts": {
+		"test": "node --test test/*.test.ts"
+	},
+	"pi": {
+		"extensions": [
+			"./src/index.ts"
+		]
+	},
+	"dependencies": {
+		"@rackrot/pi-core": "workspace:*"
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": "*"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/rackrot/pi-tools.git",
+		"directory": "packages/mcp-templates"
+	},
+	"engines": {
+		"node": ">=22.13"
+	}
+}
