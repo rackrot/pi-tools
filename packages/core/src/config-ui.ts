@@ -7,7 +7,6 @@ import {
 } from "@earendil-works/pi-coding-agent";
 import {
 	type Component,
-	Container,
 	fuzzyFilter,
 	Input,
 	Key,
@@ -62,7 +61,7 @@ export interface ConfigSection {
 	label: string;
 	fields?: ConfigField[];
 	/** Custom editor. Resolve true when something was saved that needs a pi reload. */
-	open?: (ctx: ExtensionCommandContext) => Promise<boolean | undefined | void>;
+	open?: (ctx: ExtensionCommandContext) => Promise<unknown>;
 	summary?: (ctx: ExtensionCommandContext) => string;
 	/** Top-level config keys with their defaults and sample values; `/rackrot-init` writes it commented out. */
 	example?: Json;

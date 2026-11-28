@@ -33,6 +33,10 @@ Anthropic prompt-cache TTL is 1h by default (writes cost 2x base input instead o
 
 Subagents run in the same process and follow the same variable. To keep them on 5m, set `"cacheRetention": "short"` in `~/.pi/agent/subagents.json` (`@tintinweb/pi-subagents`). Inspired by [mackenney/pi-cache-ttl-config](https://github.com/mackenney/pi-cache-ttl-config); uninstall that package if you have it.
 
+### codebase-memory indexing
+
+When the `codebase-memory-mcp` CLI is installed, core starts its daemon and indexes the working directory in the background at session start, so the graph tools have data. Sessions without a UI (subagents, `pi -p`) skip it. Turn it off with `"codebaseMemory": { "enabled": false }` in the global or project config, or under Core in `/rackrot-config`.
+
 ## `/rackrot-config`
 
 One command for every rackrot package's config. With no argument it lists the sections of the installed packages (Subagents, Skill index, Council, Model aliases, Forgejo MCP); `/rackrot-config <id>` opens one, `/rackrot-config show` prints a summary of each. Tab in a screen switches the save target between global (`~/.pi/agent/rackrot/config.json(c)`) and project (`.pi/rackrot.json(c)`); project values win. Packages add a section with `registerConfigSection` from `@rackrot/pi-core/config-ui`: pass `fields` for scalar settings (core draws the screen) or `open` for a custom editor.
@@ -60,5 +64,7 @@ import { readJson, writeJsonAtomic, readConfigLayers } from "@rackrot/pi-core";
 | `editConfig(path, fn)`        | Rewrite changed top-level keys only, keeping comments         |
 
 Put code here only when two or more packages need it.
+
+`@rackrot/pi-core/retrieval` (embedder, reranker, BM25 and fusion helpers) does not bring the ONNX runtime with it. A package that uses the `onnx` provider depends on `@huggingface/transformers` itself and passes a loader: `createEmbedder(cfg, () => import("@huggingface/transformers"))`.
 
 > Published with `pnpm publish` so the `workspace:` dependency ranges resolve to real versions; earlier releases were not installable from npm.

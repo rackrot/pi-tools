@@ -3,6 +3,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
+import { codebaseMemoryEnabled } from "../src/codebase-memory/index.ts";
 import { configPath, editConfig, readConfig, readConfigStrict } from "../src/config.ts";
 
 const dir = () => mkdtempSync(join(tmpdir(), "pi-core-"));
@@ -25,4 +26,10 @@ test("configPath prefers an existing .jsonc, else defaults to .json", () => {
 	const agent = dir();
 	assert.equal(configPath("global", "/x", agent), join(agent, "rackrot", "config.json"));
 	assert.equal(configPath("project", "/nonexistent", agent), "/nonexistent/.pi/rackrot.json");
+});
+
+test("codebase-memory indexing is on unless the highest layer that sets it says false", () => {
+	assert.equal(codebaseMemoryEnabled([undefined, undefined]), true);
+	assert.equal(codebaseMemoryEnabled([{ enabled: false }, undefined]), false);
+	assert.equal(codebaseMemoryEnabled([{ enabled: false }, { enabled: true }]), true);
 });

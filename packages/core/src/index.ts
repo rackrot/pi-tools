@@ -1,7 +1,7 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import cacheTtl from "./cache-ttl/index.ts";
 import codebaseMemory from "./codebase-memory/index.ts";
-import { registerConfigCommand, registerInitCommand } from "./config-ui.ts";
+import { registerConfigCommand, registerConfigSection, registerInitCommand } from "./config-ui.ts";
 import contextBar from "./context/bar.ts";
 import contextCommand from "./context/index.ts";
 import thinkingBinding from "./thinking-binding/index.ts";
@@ -15,6 +15,20 @@ export default function (pi: ExtensionAPI) {
 	thinkingBinding(pi);
 	cacheTtl(pi);
 	codebaseMemory(pi);
+	registerConfigSection({
+		id: "core",
+		label: "Core",
+		example: { codebaseMemory: { enabled: true } },
+		fields: [
+			{
+				path: ["codebaseMemory", "enabled"],
+				label: "codebase-memory indexing",
+				description:
+					"Start the codebase-memory-mcp daemon and index the working directory at session start (default true).",
+				kind: "boolean",
+			},
+		],
+	});
 	contextCommand(pi);
 	contextBar(pi);
 	registerConfigCommand(pi);
