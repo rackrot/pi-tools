@@ -37,6 +37,27 @@ test("jj push and other hard-to-undo commands need confirmation, even after glob
 	assert.equal(classify("jj describe -m 'git push notes'", new Set()).kind, "allow");
 });
 
+test("later lines, shell keywords, wrappers with options, backticks and eval are still seen", () => {
+	for (const cmd of [
+		"jj log\ngit commit -m x",
+		"if true; then git commit -m x; fi",
+		"{ git status; }",
+		"! git diff --quiet",
+		"sudo -u root git push",
+		"timeout 5 git status",
+		"echo `git push`",
+		"eval 'git commit'",
+		"jj st # don't\ngit add .",
+	]) {
+		assert.equal(classify(cmd, new Set()).kind, "block", cmd);
+	}
+	for (const cmd of ["jj st\njj git push", "nice jj git push", "jj st \\\n && jj git push"]) {
+		assert.equal(classify(cmd, new Set()).kind, "confirm", cmd);
+	}
+	assert.equal(classify("jj describe -m 'line one\ngit push later'", new Set()).kind, "allow");
+	assert.equal(classify("jj describe -m '--ignore-working-copy'", new Set()).kind, "allow");
+});
+
 test("--ignore-working-copy is blocked on mutating jj commands only", () => {
 	assert.equal(classify("jj --ignore-working-copy log", new Set()).kind, "allow");
 	assert.equal(classify("jj op log --ignore-working-copy", new Set()).kind, "allow");

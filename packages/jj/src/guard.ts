@@ -5,7 +5,20 @@ export type Verdict =
 	| { kind: "block"; reason: string }
 	| { kind: "confirm"; reason: string };
 
-const WRAPPERS = new Set(["env", "command", "exec", "nohup", "time"]);
+const WRAPPERS = new Set([
+	"env",
+	"command",
+	"exec",
+	"nohup",
+	"time",
+	"sudo",
+	"nice",
+	"timeout",
+	"xargs",
+]);
+/** Shell words that can precede a command in the same list item (`then git ...`, `{ git ...; }`). */
+const KEYWORDS = new Set(["if", "then", "elif", "else", "do", "while", "until", "{", "!"]);
+const VCS = new Set(["git", "jj"]);
 const SHELLS = new Set(["bash", "sh", "zsh", "dash"]);
 
 /** jj global options that take a separate value, so the value is not mistaken for the subcommand. */
@@ -67,7 +80,7 @@ export function simpleCommands(line: string): string[][] {
 		if (inner) out.push(...simpleCommands(inner));
 		else out.push(words);
 	};
-	for (const tok of parse(line, (k) => `$${k}`)) {
+	for (const tok of parse(separate(line), (k) => `$${k}`)) {
 		if (typeof tok === "string") cur.push(tok);
 		else if ("op" in tok && tok.op === "glob") cur.push(tok.pattern);
 		else if ("op" in tok) flush();
@@ -76,20 +89,52 @@ export function simpleCommands(line: string): string[][] {
 	return out;
 }
 
-function stripPrefixes(words: string[]): string[] {
-	let i = 0;
-	for (;;) {
-		const w = words[i];
-		if (w === undefined) return [];
-		if (/^[A-Za-z_]\w*=/.test(w) || (i > 0 && w.startsWith("-") && WRAPPERS.has(words[0] ?? "")))
+/**
+ * Turns unquoted newlines and backticks into `;`, which shell-quote would otherwise read as
+ * whitespace or word characters, so every line and every `...` substitution is its own command.
+ */
+function separate(line: string): string {
+	let out = "";
+	let quote = "";
+	for (let i = 0; i < line.length; i++) {
+		const c = line[i] as string;
+		if (c === "\\" && quote !== "'") {
+			// A backslash-newline joins two lines; any other escaped character is kept as written.
+			out += line[i + 1] === "\n" ? " " : c + (line[i + 1] ?? "");
 			i++;
-		else if (WRAPPERS.has(base(w))) i++;
-		else return words.slice(i);
+		} else if (quote) {
+			if (c === quote) quote = "";
+			out += c;
+		} else if (c === "'" || c === '"') {
+			quote = c;
+			out += c;
+		} else if (c === "#" && (i === 0 || /\s/.test(line[i - 1] as string))) {
+			// A comment runs to the end of the line; an apostrophe in it must not open a quote.
+			while (i + 1 < line.length && line[i + 1] !== "\n") i++;
+		} else out += c === "\n" || c === "`" ? " ; " : c;
 	}
+	return out;
 }
 
-/** The script of `bash -c '...'`, so a wrapped git or jj call is still seen. */
+function stripPrefixes(words: string[], afterWrapper = false): string[] {
+	let i = 0;
+	while (
+		i < words.length &&
+		(/^[A-Za-z_]\w*=/.test(words[i] as string) ||
+			KEYWORDS.has(words[i] as string) ||
+			(afterWrapper && (words[i] as string).startsWith("-")))
+	)
+		i++;
+	const rest = words.slice(i);
+	if (!WRAPPERS.has(base(rest[0] ?? ""))) return rest;
+	// A wrapper's options and their values come first (`sudo -u root`, `timeout 5`), so look past them for git or jj.
+	const at = rest.findIndex((w, j) => j > 0 && VCS.has(base(w)));
+	return at > 0 ? rest.slice(at) : stripPrefixes(rest.slice(1), true);
+}
+
+/** The script of `bash -c '...'` or `eval ...`, so a wrapped git or jj call is still seen. */
 function shellInline(words: string[]): string | undefined {
+	if (words[0] === "eval") return words.slice(1).join(" ");
 	if (!SHELLS.has(base(words[0] ?? ""))) return undefined;
 	const at = words.findIndex((w) => /^-\w*c\w*$/.test(w));
 	return at > 0 ? words[at + 1] : undefined;
@@ -112,9 +157,21 @@ function jjSubcommand(args: string[]): string[] {
 	return sub;
 }
 
+/** Option names of a jj call, without `-m` message text or anything after `--`. */
+function jjFlags(args: string[]): string[] {
+	const flags: string[] = [];
+	for (let i = 0; i < args.length; i++) {
+		const a = args[i] as string;
+		if (a === "--") break;
+		if (a === "-m" || a === "--message") i++;
+		else if (a.startsWith("-")) flags.push(a.split("=")[0] as string);
+	}
+	return flags;
+}
+
 function jjVerdict(args: string[]): Verdict {
 	const sub = jjSubcommand(args);
-	const flags = args.filter((a) => a.startsWith("-")).map((a) => a.split("=")[0]);
+	const flags = jjFlags(args);
 	const readOnly = READ_ONLY.has(sub[0] ?? "") || READ_ONLY_PAIRS.has(sub.join(" "));
 	if (flags.includes("--ignore-working-copy") && !readOnly) {
 		return {
