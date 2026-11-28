@@ -25,6 +25,7 @@ Restart pi (or run `/reload`) after installing. Pin a version with `npm:@rackrot
 | [`@rackrot/pi-gitignore`](packages/gitignore)         | Create and update `.gitignore` from gitignore.io templates plus custom entries (tool and `/gitignore` command)              | `pi install npm:@rackrot/pi-gitignore`     |
 | [`@rackrot/pi-jj`](packages/jj)                       | Native Jujutsu support: conditional skill, prompt hint, git nudge, confirmations and footer status                          | `pi install npm:@rackrot/pi-jj`            |
 | [`@rackrot/pi-memory`](packages/memory)               | Long-term agent memory in a git-managed Obsidian vault: hybrid search, scoped writes, timed commits, generated overviews    | `pi install npm:@rackrot/pi-memory`        |
+| [`@rackrot/pi-mcp-templates`](packages/mcp-templates) | Catalog of MCP server templates (context7, playwright, github, ...) installed into pi's `mcp.json` with `/mcp-add`          | `pi install npm:@rackrot/pi-mcp-templates` |
 
 Each package README documents its configuration (usually in `~/.pi/agent/settings.json` or `.pi/settings.json`).
 
