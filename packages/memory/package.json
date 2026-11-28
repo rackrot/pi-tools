@@ -1,6 +1,6 @@
 {
 	"name": "@rackrot/pi-memory",
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"description": "Long-term agent memory as Markdown notes in a git-managed, Obsidian-compatible vault",
 	"type": "module",
 	"keywords": [
