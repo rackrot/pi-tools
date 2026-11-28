@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.0](https://github.com/rackrot/pi-tools/compare/pi-agents-v0.4.0...pi-agents-v0.5.0) (2026-11-28)
+
+
+### Features
+
+* **agents:** opt-in lock so configured model/thinking/maxTurns beat the caller's ([d21c576](https://github.com/rackrot/pi-tools/commit/d21c5763686cede50ffef5948ff6422024b8aadb))
+
+
+### Bug Fixes
+
+* **agents:** deny codemode in strict orchestration by default ([23696a0](https://github.com/rackrot/pi-tools/commit/23696a0b24e80f5d689e3761ea57ff0bd1a01d5f))
+* **agents:** let the caller's model, thinking and max_turns override settings ([c37097d](https://github.com/rackrot/pi-tools/commit/c37097d146e9ebc40b04979e6cf63d954b1fa027))
+
 ## [0.4.0](https://github.com/rackrot/pi-tools/compare/pi-agents-v0.3.0...pi-agents-v0.4.0) (2026-11-27)
 
 
