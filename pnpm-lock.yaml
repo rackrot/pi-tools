@@ -59,6 +59,9 @@ importers:
       '@earendil-works/pi-tui':
         specifier: '*'
         version: 1.6.0
+      '@huggingface/transformers':
+        specifier: ^4.3.2
+        version: 4.3.2(@types/node@22.20.5)
       jsonc-parser:
         specifier: ^3.3.1
         version: 3.3.1
@@ -109,6 +112,21 @@ importers:
         specifier: ^1.7.5
         version: 1.7.5
 
+  packages/memory:
+    dependencies:
+      '@earendil-works/pi-coding-agent':
+        specifier: '*'
+        version: 1.6.0(@aws-sdk/credential-provider-node@3.972.99)(@smithy/signature-v4@5.7.5)(google-auth-library@10.9.1)(ws@8.23.0)
+      '@rackrot/pi-core':
+        specifier: workspace:*
+        version: link:../core
+      typebox:
+        specifier: '*'
+        version: 1.4.7
+      yaml:
+        specifier: ^2.8.0
+        version: 2.9.0
+
   packages/model-aliases:
     dependencies:
       '@earendil-works/pi-ai':
@@ -135,9 +153,6 @@ importers:
       '@earendil-works/pi-tui':
         specifier: '*'
         version: 1.6.0
-      '@huggingface/transformers':
-        specifier: ^4.3.2
-        version: 4.3.2(@types/node@22.20.5)
       '@rackrot/pi-core':
         specifier: workspace:*
         version: link:../core

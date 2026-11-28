@@ -1,0 +1,46 @@
+{
+	"name": "@rackrot/pi-memory",
+	"version": "0.0.0",
+	"description": "Long-term agent memory as Markdown notes in a git-managed, Obsidian-compatible vault",
+	"type": "module",
+	"keywords": [
+		"pi-package",
+		"pi-extension"
+	],
+	"license": "MIT",
+	"files": [
+		"src",
+		"skills",
+		"README.md"
+	],
+	"scripts": {
+		"test": "node --test test/*.test.ts"
+	},
+	"pi": {
+		"extensions": [
+			"./src/index.ts"
+		],
+		"skills": [
+			"./skills"
+		]
+	},
+	"dependencies": {
+		"@rackrot/pi-core": "workspace:*",
+		"yaml": "^2.8.0"
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": "*",
+		"typebox": "*"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/rackrot/pi-tools.git",
+		"directory": "packages/memory"
+	},
+	"engines": {
+		"node": ">=22.13"
+	}
+}
