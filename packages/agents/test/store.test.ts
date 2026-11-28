@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import {
+	agentFrontmatterLock,
 	applyOverride,
 	disableContent,
 	discoverAgents,
@@ -22,6 +23,24 @@ test("applyOverride sets, reuses existing key case, and prunes empties", () => {
 	d = applyOverride(d, "reviewer", "model", undefined);
 	d = applyOverride(d, "reviewer", "thinking", undefined);
 	assert.deepEqual(d, { other: 1 });
+});
+
+test("applyOverride keeps an existing lock key when editing other fields", () => {
+	const d = applyOverride({ agentOverrides: { r: { lock: true } } }, "R", "model", "m");
+	assert.deepEqual(d.agentOverrides, { r: { lock: true, model: "m" } });
+});
+
+test("agentFrontmatterLock reads the fenced key, by stem or name, project before global", () => {
+	const root = mkdtempSync(join(tmpdir(), "agents-"));
+	const [proj, glob] = [join(root, "p"), join(root, "g")];
+	for (const d of [proj, glob]) mkdirSync(d);
+	writeFileSync(join(glob, "reviewer.md"), "---\nlock: false\n---\n");
+	writeFileSync(join(proj, "x.md"), "---\nname: Reviewer\nlock: true\n---\n");
+	writeFileSync(join(glob, "body.md"), "---\ndescription: d\n---\nlock: true\n");
+	assert.equal(agentFrontmatterLock("reviewer", [proj, glob]), true);
+	assert.equal(agentFrontmatterLock("reviewer", [glob]), false);
+	assert.equal(agentFrontmatterLock("body", [proj, glob]), undefined);
+	assert.equal(agentFrontmatterLock("none", [join(root, "missing")]), undefined);
 });
 
 test("saveOverride keeps other keys and indentation; refuses unparseable files", () => {
