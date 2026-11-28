@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/rackrot/pi-tools/compare/pi-agents-v0.5.0...pi-agents-v0.5.1) (2026-11-28)
+
+
+### Bug Fixes
+
+* **agents:** subagent-workflows skill review fixes and first eval cases ([be8be00](https://github.com/rackrot/pi-tools/commit/be8be007658fbb2076f60c563cfe3b0262b761ea))
+
 ## [0.5.0](https://github.com/rackrot/pi-tools/compare/pi-agents-v0.4.0...pi-agents-v0.5.0) (2026-11-28)
 
 
