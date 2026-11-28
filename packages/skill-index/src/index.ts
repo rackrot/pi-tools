@@ -6,6 +6,7 @@ import {
 	createEmbedder,
 	createReranker,
 	type Embedder,
+	missingModels,
 	type Reranker,
 } from "@rackrot/pi-core/retrieval";
 import { Type } from "typebox";
@@ -15,6 +16,9 @@ import { indexSection, plan, type SkillInfo, skillBody } from "./plan.ts";
 import { createJudge, type Judge } from "./providers.ts";
 import { searchSkills, skillText } from "./search.ts";
 import { openSettings } from "./ui.ts";
+
+/** The ONNX runtime is this package's dependency, not pi-core's; it is imported on first use. */
+const loadTransformers = () => import("@huggingface/transformers");
 
 /** True when the SKILL.md frontmatter sets `disable-model-invocation: true`. */
 function isDisabled(path: string): boolean {
@@ -86,8 +90,8 @@ export default function (pi: ExtensionAPI) {
 			void providers?.judge?.close?.();
 			providers = {
 				key,
-				embedder: createEmbedder(cfg.embedding),
-				reranker: createReranker(cfg.reranker),
+				embedder: createEmbedder(cfg.embedding, loadTransformers),
+				reranker: createReranker(cfg.reranker, loadTransformers),
 				judge: createJudge(cfg.decision),
 			};
 		}
@@ -106,7 +110,7 @@ export default function (pi: ExtensionAPI) {
 				for (let i = 0; i < pending.length; i += 16) {
 					const batch = pending.slice(i, i + 16);
 					const vectors = await embedder.embed(batch.map(skillText));
-					batch.forEach((s, j) => getDb().setEmbedding(s.id, embedder.id, vectors[j]));
+					for (const [j, s] of batch.entries()) getDb().setEmbedding(s.id, embedder.id, vectors[j]);
 				}
 			} catch {
 				embedFailed = true;
@@ -125,7 +129,14 @@ export default function (pi: ExtensionAPI) {
 			try {
 				getDb().prune(existsSync);
 				syncSkills(ctx.cwd, loadedSkills());
-				backfill(ctx.cwd, providersFor(config(ctx.cwd)).embedder);
+				const cfg = config(ctx.cwd);
+				const missing = missingModels([cfg.embedding, cfg.reranker]);
+				if (missing.length && ctx.hasUI)
+					ctx.ui.notify(
+						`skill-index: ${missing.join(", ")} will be downloaded from Hugging Face on first use (once)`,
+						"info",
+					);
+				backfill(ctx.cwd, providersFor(cfg).embedder);
 			} catch {}
 		});
 	});
