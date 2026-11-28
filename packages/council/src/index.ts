@@ -1,4 +1,4 @@
-import { type ExtensionAPI, type ExtensionContext } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { registerConfigSection } from "@rackrot/pi-core/config-ui";
 import { Type } from "typebox";
 import { loadConfig, type ModelRef } from "./config.ts";
@@ -10,7 +10,7 @@ import {
 	userPrompt,
 	withExtra,
 } from "./prompts.ts";
-import { callChain } from "./run.ts";
+import { callChain, sessionModelId } from "./run.ts";
 import { openSettings } from "./ui.ts";
 import {
 	councilActive,
@@ -26,7 +26,12 @@ const text = (t: string, details: Record<string, unknown> = {}) => ({
 
 /** The session's current model as a fallback when no model is configured. */
 function sessionModel(ctx: ExtensionContext): ModelRef[] {
-	return ctx.model ? [{ model: `${ctx.model.provider}/${ctx.model.id}` }] : [];
+	const model = sessionModelId(ctx.model, ctx.sessionManager.getBranch());
+	if (!model && ctx.model)
+		throw new Error(
+			`The session model ${ctx.model.provider}/${ctx.model.id} is an alias that has not answered yet, so there is no concrete model to call. Set one with /rackrot-config council.`,
+		);
+	return model ? [{ model }] : [];
 }
 
 const FILES_DESC =

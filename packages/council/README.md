@@ -97,6 +97,8 @@ Settings are re-read on every call; descriptions refresh on `/reload`.
 | `thinking`                                     | model default | `minimal`, `low`, `medium`, `high`, `xhigh`, `max`.                                                                 |
 | `timeoutSeconds`                               | 300           | Per model call.                                                                                                     |
 
+When the session runs on a model alias (`@rackrot/pi-model-aliases`), "session model" means the concrete model that produced the latest reply. Aliases themselves cannot be called, so configure a concrete `provider/model` if you want a fixed one.
+
 If some councillors fail, the synthesizer works from the rest and the failures are listed. If every councillor fails the
 tool errors. If the synthesizer fails, the raw councillor answers are returned.
 

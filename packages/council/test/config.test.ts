@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { parseChain, parseConfig, parseRef } from "../src/config.ts";
 import { embedFiles } from "../src/files.ts";
-import { splitModel } from "../src/run.ts";
+import { sessionModelId, splitModel } from "../src/run.ts";
 
 test("parseRef needs provider/model and keeps valid thinking", () => {
 	assert.deepEqual(parseRef("a/b"), { model: "a/b", thinking: undefined });
@@ -75,6 +75,18 @@ test("presets drop councillors without a valid model and empty presets", () => {
 
 test("splitModel keeps slashes in the id", () => {
 	assert.deepEqual(splitModel("openrouter/x/y"), { provider: "openrouter", id: "x/y" });
+});
+
+test("a session on a model alias falls back to the model that last answered", () => {
+	const alias = { provider: "alias", id: "sonnet", api: "pi-virtual" };
+	const reply = (provider: string, model: string) => ({
+		type: "message",
+		message: { role: "assistant", provider, model },
+	});
+	const branch = [reply("a", "old"), reply("b", "x/new"), { type: "message", message: {} }];
+	assert.equal(sessionModelId(alias, branch), "b/x/new");
+	assert.equal(sessionModelId(alias, []), undefined);
+	assert.equal(sessionModelId({ provider: "p", id: "m", api: "openai" }, branch), "p/m");
 });
 
 test("embedFiles reports missing files and truncates", () => {

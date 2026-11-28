@@ -27,7 +27,6 @@ function textEditor(initial: string, done: (v?: string) => void): Component {
 export async function openSettings(ctx: ExtensionCommandContext): Promise<boolean> {
 	let dirty = false;
 	const cwd = ctx.cwd;
-	let scope: Scope = "global";
 	const pathOf = (s: Scope) => configPath(s, cwd);
 	const models = [
 		...new Set(
