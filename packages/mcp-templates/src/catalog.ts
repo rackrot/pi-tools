@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { Json } from "@rackrot/pi-core/json";
 import { isObject } from "@rackrot/pi-core/json";
 
@@ -117,7 +118,7 @@ export function loadCatalog(
 	const dirs = templateDirs(cwd, agentDir);
 	const all: LoadedTemplate[] = [];
 	const problems: string[] = [];
-	readFileTemplates(builtinFile.pathname, "builtin", all, problems);
+	readFileTemplates(fileURLToPath(builtinFile), "builtin", all, problems);
 	for (const origin of ["global", "project"] as const) {
 		const dir = dirs[origin];
 		if (!existsSync(dir)) continue;
