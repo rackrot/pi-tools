@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/rackrot/pi-tools/compare/pi-memory-v1.0.0...pi-memory-v1.0.1) (2026-11-28)
+
+
+### Bug Fixes
+
+* **memory:** keep writes in the global agent folder and recover uncommitted notes ([7c7c2dc](https://github.com/rackrot/pi-tools/commit/7c7c2dcdc4b7131bebda1e9b287348ab8d8fc8df))
+
 ## 1.0.0 (2026-11-28)
 
 
