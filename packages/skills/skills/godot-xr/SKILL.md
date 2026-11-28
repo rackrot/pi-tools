@@ -1,13 +1,13 @@
 ---
 name: godot-xr
-description: Godot 4 XR with OpenXR for VR, AR and passthrough on Meta Quest, Pico and PC VR. Use for XROrigin3D and XRController3D setup, the action map, locomotion, grabbing, in-world UI, hand tracking, passthrough, spatial anchors, or a Quest export, and when project.godot has xr/openxr/enabled=true.
+description: Godot 4 XR with OpenXR for VR, AR and passthrough on Meta Quest, Pico and PC VR. Read before answering any Godot VR or OpenXR question, even a one-line bug, because action names, defaults and export rules changed between Godot 4.3 and 4.7. Covers XROrigin3D and XRController3D setup, controller or thumbstick input that reads nothing, the action map, locomotion, grabbing, in-world UI, hand tracking, passthrough, spatial anchors and Quest export. Also applies when project.godot has xr/openxr/enabled=true.
 ---
 
 # Godot XR (OpenXR)
 
-Build VR and mixed-reality games in Godot 4 with the core OpenXR interface. Examples are GDScript; C# idioms belong to `godot-csharp`. Godot version notes and the facts that change between releases are in [references/platform-features.md](references/platform-features.md).
+Build VR and mixed-reality games in Godot 4 with the core OpenXR interface. Examples are GDScript; C# idioms belong to `godot-csharp`.
 
-Start by reading the project's Godot version from `config/features` in `project.godot` and follow that version, not the newest; per-version changes are in the `godot` plugin's `references/version-notes.md`, if installed.
+Start by reading the project's Godot version from `config/features` in `project.godot` and follow that version, not the newest. XR changes per version are in [references/platform-features.md](references/platform-features.md); general engine changes are in the `godot` skill's `references/version-notes.md`, if installed.
 
 ## Setup checklist
 

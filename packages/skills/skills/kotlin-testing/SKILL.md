@@ -1,13 +1,13 @@
 ---
 name: kotlin-testing
-description: 'Writes, runs and fixes JVM Kotlin tests (kotlin.test, JUnit, Kotest, MockK, coroutines-test, Turbine). Use for UncompletedCoroutinesError or a runTest that hangs, "Module with the Main dispatcher" errors and Dispatchers.setMain in ViewModel tests, MockK "no answer found for", coEvery versus every, Turbine flow assertions, tests slowed by delay, and running one test with ./gradlew :module:test --tests.'
+description: 'Read this before writing, fixing or explaining any Kotlin test that runs on the JVM, even when the answer seems obvious from memory. Covers coroutine tests (runTest and virtual time, a suite slowed by delay or runBlocking, UncompletedCoroutinesError or a runTest that hangs, Dispatchers.setMain and "Module with the Main dispatcher" in ViewModel unit tests), Flow and StateFlow assertions (Turbine, a Loading state or event the test never sees), MockK ("no answer found for", coEvery versus every), kotlin.test, JUnit and Kotest, and running one test with ./gradlew :module:test --tests. Not for tests that need the Android runtime (Compose UI tests, Robolectric, an emulator).'
 ---
 
 # Kotlin testing
 
 Test behavior through the public API with the stack the project already uses. Prefer a hand-written fake over a mock at a seam the code owns (a repository, a clock, a service client); use a mock for a boundary you cannot run in-process or to assert a side effect that is the behavior.
 
-Not for: test strategy and what to test (`unit-testing`); anything that needs the Android runtime, such as Robolectric, resources, `Log`, Compose UI tests or a device (`android-testing`); a Spring context (`spring-boot-testing`); plain Java tests (`java-testing`); production coroutine or Flow design (`kotlin`); build wiring (`gradle`, `android-build`).
+Not for: test strategy and what to test (`test-gap-audit` for finding missing tests); anything that needs the Android runtime, such as Robolectric, resources, `Log`, Compose UI tests or a device (`android-testing`); a Spring context (`spring-boot-testing`); plain Java tests (`java-testing`); production coroutine or Flow design (`kotlin`); build wiring (`gradle`, `android-build`).
 
 Versions verified 2026-11-01 on Maven Central: kotlinx-coroutines-test 1.11.0, Turbine 1.2.1, MockK 1.14.11, Kotest 6.2.6, mockito-kotlin 6.4.0. Keep `kotlinx-coroutines-test` on the same version as `kotlinx-coroutines-core`.
 

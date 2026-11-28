@@ -1,6 +1,6 @@
 ---
 name: blazor
-description: 'Builds and debugs Blazor components and Blazor Web Apps: parameters and EventCallback, render modes, forms and validation, auth by render mode, shared state, data loading, prerendering, JS interop, and Blazor Server to Web App conversion. Use for any .razor file, a new Blazor project, data loading twice, or HttpContext null in a component.'
+description: 'Builds, debugs and answers questions about Blazor components and Blazor Web Apps on .NET 8 to 10: parameters and EventCallback, render modes, forms and validation, auth by render mode, shared state, data loading and its error handling, prerendering, JS interop, dotnet new blazor, and Blazor Server to Web App conversion. Use for any .razor file or Blazor question, also when the code is pasted into the prompt and the workspace is empty: a page that loads data twice or stays on "Loading...", HttpContext null in a component, a component that does not re-render. The .NET 9 and 10 APIs and several lifecycle behaviours here differ from what models remember, so read it before answering from memory.'
 ---
 
 # Blazor
@@ -47,7 +47,7 @@ Components run on a single-threaded synchronization context per circuit or tab.
 - Framework events re-render automatically; call `StateHasChanged()` only for intermediate updates between awaits, or after work the framework doesn't know about.
 - From timers, C# events, SignalR or `[JSInvokable]` callbacks: `await InvokeAsync(() => { ...; StateHasChanged(); })`. Use an `async void` handler with `try/catch` that calls `DispatchExceptionAsync(ex)`; never `_ = InvokeAsync(...)`.
 - Debounce and polling: `CancellationTokenSource` + `await Task.Delay(interval, token)`, not `System.Threading.Timer`.
-- Own a CTS, subscription, timer or JS reference → implement `IAsyncDisposable`: unsubscribe, cancel, dispose; never call `StateHasChanged` there; null-check fields because disposal can run before initialization finishes.
+- Own a CTS, subscription, timer or JS reference → implement `IAsyncDisposable` (or `IDisposable` when nothing needs awaiting): unsubscribe, cancel, dispose; never call `StateHasChanged` there; null-check fields because disposal can run before initialization finishes.
 
 ## Lifecycle traps
 
@@ -55,6 +55,7 @@ Components run on a single-threaded synchronization context per circuit or tab.
 - JS interop only in `OnAfterRenderAsync(firstRender)` or event handlers; JS doesn't exist during prerender ([references/js-interop.md](references/js-interop.md)).
 - `HttpContext` is only valid during static SSR. Interactive components read the user from `[CascadingParameter] Task<AuthenticationState>` ([references/auth.md](references/auth.md)).
 - `<CascadingValue>` doesn't cross render-mode boundaries; use `AddCascadingValue`/`CascadingValueSource<T>` in DI ([references/state.md](references/state.md)).
+- `ComponentBase` swallows `OperationCanceledException` from lifecycle methods, HttpClient timeouts included: the component stays on "Loading" and no `ErrorBoundary` fires. Catch `OperationCanceledException when (!token.IsCancellationRequested)` and set an error state ([references/data.md](references/data.md)).
 
 ## Verify
 

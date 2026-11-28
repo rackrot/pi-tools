@@ -15,7 +15,7 @@ Read this when the repo is on Prisma 7 or moving from 6 to 7. Checked against th
 | Pool | Prisma's pool, tuned by URL params | The driver's pool, tuned on the adapter |
 | Middleware (`$use`) | Available | Removed; use Client Extensions (`$extends`) |
 | Metrics | Preview | Removed |
-| `migrate diff` | `--from-url`, `--to-schema-datasource`, `--shadow-database-url` | `--from-config-datasource`/`--to-config-datasource`; shadow URL in the config |
+| `migrate diff` | `--from-url`, `--to-url`, `--from-schema-datasource`, `--to-schema-datasource`, `--shadow-database-url` | All five removed. `--from-url` and `--from-schema-datasource` become `--from-config-datasource`; `--to-url` and `--to-schema-datasource` become `--to-config-datasource`; the shadow URL moves to `prisma.config.ts` |
 | `db execute` | `--schema`, `--url` | Connection from `prisma.config.ts` only |
 | SSL | Invalid certificates ignored | `pg` validates them; fix the CA or pass `ssl` options to the adapter |
 

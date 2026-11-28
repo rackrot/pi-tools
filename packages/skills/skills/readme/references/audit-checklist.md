@@ -40,7 +40,7 @@ Order fixes by value per hour, not by how easy or how visible they are. The defa
 
 ## Cold-reader test
 
-After a rewrite, give the README to a fresh subagent with no repo context, or to a person, and allow about 60 seconds. Ask:
+After a rewrite, optionally run the cold-reader test with the `cold-read` skill, passing these five questions as the reader's questions, or give the README to a person and allow about 60 seconds:
 
 1. What is this?
 2. Why would I use it instead of the alternative I know?

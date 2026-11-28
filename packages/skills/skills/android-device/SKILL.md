@@ -1,13 +1,13 @@
 ---
 name: android-device
-description: 'Triages Android crashes and manages devices with adb and logcat. Use for an app that closes on launch, a "Caused by" chain or native tombstone, INSTALL_FAILED_UPDATE_INCOMPATIBLE or other INSTALL_FAILED errors, "more than one device/emulator", pm grant and revoke, and deep links with am start. Pins one serial and asks before uninstall, pm clear or wiping data.'
+description: 'Finds why an Android app crashes or closes on a phone or emulator, and runs adb against one device safely. Read it before giving any adb or logcat command. Use for an app that closes on launch with no error, reading a "Caused by" chain or native tombstone off the device, INSTALL_FAILED_UPDATE_INCOMPATIBLE or other INSTALL_FAILED errors, "more than one device/emulator" with a phone and an emulator both attached, pm grant and revoke, and opening a URL or deep link in the app with am start. Pins one serial and asks before uninstall, pm clear or wiping data.'
 ---
 
 # Android device
 
 Pin one device and one app before touching either, read the evidence the device already holds, and ask before any command that destroys data.
 
-Not for: the `android` CLI (project creation, `android run`, emulators, SDK packages, screenshots, layout dumps, input, journeys, `android docs`; `android-skills:android-cli`), writing or running instrumented tests (`android-testing`), and ANR traces (`android-skills:anr-audit-and-fix`).
+Not for (the `android-skills:` names are the third-party `android-skills` plugin, if installed): the `android` CLI (project creation, `android run`, emulators, SDK packages, screenshots, layout dumps, input, journeys, `android docs`; `android-skills:android-cli`), writing or running instrumented tests (`android-testing`), and ANR traces (`android-skills:anr-audit-and-fix`).
 
 ## Target
 
@@ -27,7 +27,7 @@ Not for: the `android` CLI (project creation, `android run`, emulators, SDK pack
 
 ## Crashes
 
-1. Reproduce the crash once, then read the crash buffer after the process has died: `adb -s <serial> logcat -b crash -d`. Use `--pid=$(adb -s <serial> shell pidof -s <appId>)` only while the process is still running.
+1. Reproduce the crash once, then read the crash buffer after the process has died: `adb -s <serial> logcat -b crash -d`; the crash buffer holds the FATAL EXCEPTION block of uncaught Java/Kotlin exceptions and native crash summaries, and survives after main has rolled over. Use `--pid=$(adb -s <serial> shell pidof -s <appId>)` only while the process is still running.
 2. For a Java or Kotlin crash, read the whole `Caused by:` chain to the last one and quote the first frame that belongs to the app's package. Report the exception, that frame as `File.kt:line` and a one-line cause.
 3. For a native crash (`Fatal signal`, `SIGSEGV`, `backtrace:`), read the tombstone: the `logcat -b crash` text, or `adb -s <serial> shell dumpsys dropbox --print data_app_native_crash`. Symbolize frames against the unstripped `.so` from the build.
 4. Done when the report names the exception or signal, the app frame, and the command output it came from. If the buffer is empty, say so and widen with `logcat -d -t 300` before guessing.
@@ -37,7 +37,7 @@ Read [references/logcat.md](references/logcat.md) for buffers, filters and tombs
 ## State
 
 - Permissions: `adb -s <serial> shell pm grant <appId> android.permission.CAMERA` and `pm revoke`. Only runtime (dangerous) permissions can be granted this way.
-- Deep links: `adb -s <serial> shell am start -W -a android.intent.action.VIEW -d '<uri>' <appId>`. Single-quote the URI so the local shell does not split on `&`.
+- Deep links: `adb -s <serial> shell "am start -W -a android.intent.action.VIEW -d '<uri>' <appId>"`. Quote the whole remote command and the URI inside it: adb hands the joined arguments to the device shell, which also treats `&` as a control operator.
 - Check the result with `dumpsys package <appId>` or the activity that came to the front.
 
 Read [references/adb.md](references/adb.md) for these commands in full and for app-state inspection.

@@ -1,6 +1,6 @@
 ---
 name: godot
-description: Writes, reviews and debugs Godot 4 projects (GDScript, nodes and scenes, signals, Resources, autoloads, .tscn/.tres files with uid:// and .uid sidecars). Use for any work in .gd, .tscn, .tres or project.godot, "add X to my Godot game", Control-node UI layout (anchors, containers), porting Godot 3 code or a Godot error, before routing to physics, shader, export, test, C# or networking skills.
+description: Read before answering any Godot 4 question, including one asked from a description or a pasted snippet with no project files in the workspace. Covers GDScript (.gd), scenes and nodes, signals, Resources, autoloads, hand edits to .tscn/.tres, uid:// and .uid files, Control UI layout, Godot 3 code that breaks in 4.x (KinematicBody2D, yield, export var, onready var) and changed defaults in 4.3 to 4.7. Entry point that routes on to the physics, shader, export, test, C# and networking skills.
 ---
 
 # Godot
@@ -9,9 +9,9 @@ The entry point for Godot 4 work. Written for Godot 4.x and checked against 4.7;
 
 ## Orient first
 
-1. Read `project.godot`. `config/features=PackedStringArray("4.6", "Forward Plus")`: the first token is the engine minor; match the renderer by name (`Forward Plus`, `Mobile`, `GL Compatibility`), not position; `C#` in the list or a root `.csproj` means a .NET project. Write for that version, never the newest. A `.tscn` with `format=2` or `config_version=4` means Godot 3: stop and confirm the engine with the user.
+1. Read `project.godot`. `config/features=PackedStringArray("4.6", "Forward Plus")`: the first token is the engine minor; match the renderer by name (`Forward Plus`, `Mobile`, `GL Compatibility`), not position; `C#` in the list or a root `.csproj` means a .NET project. Write for that version, never the newest. A `.tscn` with `format=2` or `config_version=4` means Godot 3: stop and confirm the engine with the user. For a project on 4.5 or later, or an upgrade between minors, read [references/version-notes.md](references/version-notes.md) before answering: changed defaults (glow, `area_mask`, font hinting, `physics_quadrant_size`) may differ from what you remember.
 2. Note autoloads (`[autoload]`), the main scene (`run/main_scene`), input actions (`[input]`) and enabled plugins (`[editor_plugins]`).
-3. Check for the editor MCP: if `godot-editor` tools are available (`get_project_info` and friends), follow the project's `godot-mcp` skill (`.claude/skills/godot-mcp/SKILL.md`) for editor work. See "Editor MCP" below.
+3. Check for the editor MCP: if `godot-editor` tools are available (`get_project_info` and friends), use them for editor work, and follow the project's `godot-mcp` skill if it ships one. See "Editor MCP" below.
 4. Read the scene and script you are changing, plus the scenes that instance it (Grep for its `res://` path and its `uid://`).
 
 ## Route
@@ -27,10 +27,9 @@ This skill owns the language, scene tree, signals, Resources and file formats. H
 | `.cs`, `.csproj`, `[Export]`, `partial` classes | `godot-csharp` |
 | `@rpc`, MultiplayerSpawner/Synchronizer, ENet, dedicated servers | `godot-multiplayer` |
 | Behavior trees, Phantom Camera, Dialogue Manager (Beehave, LimboAI) | `godot-addons` if installed |
-| EditorPlugin, `plugin.cfg`, `@tool` scripts, inspector plugins, gizmos | `godot-editor-tools` if installed |
+| EditorPlugin, `plugin.cfg`, addons, docks, inspector plugins, gizmos, undoable edits to the open scene | `godot-editor-tools` if installed |
 | GDExtension in C++ (godot-cpp) or Rust (gdext), `.gdextension` files | `godot-gdextension` if installed |
 | OpenXR for VR/AR, XROrigin3D, hand tracking, passthrough, Quest | `godot-xr` if installed |
-| Connecting Claude to the editor (install the godot-mcp addon) | `/godot-mcp-setup` |
 | Feel, level design, UI/UX, audio mix, AI, game design, architecture, assets, prototyping, playtests, performance (engine-neutral technique) | `game-craft` if installed |
 
 Thin topics stay here as references. Read the one that matches the task:
@@ -55,17 +54,17 @@ Thin topics stay here as references. Read the one that matches the task:
 | Save files, settings, `user://`, migrations | [references/save-and-config.md](references/save-and-config.md) |
 | Profiler, monitors, hot paths | [references/performance.md](references/performance.md) |
 | Threads, WorkerThreadPool, background loading | [references/threading.md](references/threading.md) |
-| `@tool` scripts, configuration warnings, EditorPlugin basics | [references/tool-scripts.md](references/tool-scripts.md) |
+| `@tool` scripts on game nodes, configuration warnings, one-off `EditorScript`s | [references/tool-scripts.md](references/tool-scripts.md) |
 | Error messages, the debugger, tracing signals | [references/debugging.md](references/debugging.md) |
 | What changed between 4.x minors | [references/version-notes.md](references/version-notes.md) |
 
 ## Editor MCP
 
-When `godot-editor` tools are available, follow the project's `godot-mcp` skill for editor work: scene and node edits with undo, `save_scene`, `create_script`/`edit_script` diagnostics, `run_headless` diagnostics, `import_assets`, `build_dotnet`. This skill never repeats its tool table.
+When `godot-editor` tools are available, use them for editor work, and follow the project's `godot-mcp` skill if it ships one: scene and node edits with undo, `save_scene`, `create_script`/`edit_script` diagnostics, `run_headless` diagnostics, `import_assets`, `build_dotnet`. This skill does not list those tools.
 
 - Don't hand-edit a `.tscn` the editor has open: the editor overwrites it on its next save. Edit through the tools, then `save_scene`.
 - `run_headless` reads files on disk, so save first. Godot exits 0 after a script error, so read its `diagnostics`, not the exit code.
-- Without the server, edit files and verify with the `godot` CLI (below). To connect Claude to the editor, suggest `/godot-mcp-setup`.
+- Without the server, edit files and verify with the `godot` CLI (below).
 
 ## GDScript defaults
 

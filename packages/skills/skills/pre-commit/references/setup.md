@@ -93,6 +93,7 @@ prek run --all-files
 It exits nonzero when a hook fails or modifies files. Also:
 
 - Check out the repo, install a pinned prek, and run it. For GitHub Actions, `j178/prek-action` wraps the install and run. Pin it by SHA per the repo's action-pinning convention (the `gh-actions` skill, if installed).
+- On Forgejo or Codeberg, the workflow file, runner label and action reference belong to `forgejo-actions`; this skill supplies only the prek step.
 - `--from-ref origin/main --to-ref HEAD` needs both refs in the checkout, so fetch deeper. Fall back to `--all-files` when history is shallow.
 - `prek update --check` in a scheduled job flags stale revs without rewriting the file.
 - pre-commit.ci is a hosted alternative for GitHub repos. It runs the config, can push autofix commits to pull requests and opens autoupdate PRs, configured through the `ci:` key (`autofix_prs`, `autoupdate_schedule`, `skip`). It supports only hooks from remote repositories, so `repo: local` and `language: system` hooks go in `ci: skip`. It sends your code to a third-party service, so confirm the user wants it before adding the key or the app.

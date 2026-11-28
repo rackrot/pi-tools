@@ -37,7 +37,7 @@ aws cloudwatch get-metric-statistics --namespace AWS/Lambda --metric-name Durati
 | Area | Look for | Evidence needed | Fix |
 | --- | --- | --- | --- |
 | EC2 | Low average and peak CPU, memory headroom | 7 to 14 days of metrics | Smaller type, Graviton, Savings Plan for the steady part |
-| Lambda | Memory far above `@maxMemoryUsed`, or a long, CPU-bound duration | Logs Insights REPORT lines | Tune memory (more memory can cut duration and cost), arm64 after a test |
+| Lambda | Memory far above `@maxMemoryUsed`, or a long, CPU-bound duration | An aggregate Logs Insights query on REPORT lines (`stats max(@maxMemoryUsed), avg(@duration)` filtered to `@type = "REPORT"`), not raw log lines | Tune memory (more memory can cut duration and cost), arm64 after a test |
 | RDS | Low CPU and connections, Multi-AZ on non-production | `CPUUtilization`, `DatabaseConnections` | Smaller class, single-AZ for dev, Aurora Serverless v2 for spiky load |
 | DynamoDB | Provisioned capacity far above consumed, or on-demand on steady load | `ConsumedRead/WriteCapacityUnits` against provisioned | Switch billing mode or add auto scaling |
 | EBS | `available` (unattached) volumes, gp2 volumes | `describe-volumes` | Delete after snapshot approval, move to gp3 |

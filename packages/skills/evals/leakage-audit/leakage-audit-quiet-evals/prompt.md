@@ -1,6 +1,6 @@
 ---
 name: leakage-audit-quiet-evals
-description: "Near miss: writing trigger evals belongs to skill-evals, not leakage-audit."
+description: "Near miss: writing trigger evals is eval authoring, not leakage-audit."
 tags: [trigger]
 runs: 1
 max_turns: 6

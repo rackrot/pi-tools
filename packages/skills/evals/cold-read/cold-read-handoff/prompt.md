@@ -2,7 +2,7 @@
 name: cold-read-handoff
 description: "A fresh-eyes check before a handoff routes to cold-read."
 tags: [routing]
-runs: 1
+runs: 3
 max_turns: 6
 model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]

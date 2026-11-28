@@ -1,6 +1,6 @@
 # @rackrot/pi-skills
 
-Curated and tested skills adapted for pi. 170 skills, 413 eval cases.
+Curated and tested skills adapted for pi. 167 skills, 939 eval cases.
 
 ```bash
 pi install npm:@rackrot/pi-skills

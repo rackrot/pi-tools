@@ -1,13 +1,13 @@
 ---
 name: kotlin
-description: 'Writes, reviews and fixes idiomatic Kotlin outside @Composable code. Use for "Smart cast to String is impossible, because name is a mutable property", a non-exhaustive when, !! NullPointerException, events lost from a MutableSharedFlow, stateIn that never emits, a coroutine that outlives its owner, GlobalScope or runBlocking freezing the caller, swallowed CancellationException, or a Java-to-Kotlin conversion. Covers null safety, sealed classes, scope functions, structured concurrency, Flow and Java interop.'
+description: 'Read before answering, writing, reviewing or converting any Kotlin (.kt) code outside @Composable functions, including a pasted snippet or a question with no project files. Symptoms: "Smart cast to String is impossible, because name is a mutable property", a non-exhaustive when, !! NullPointerException, events lost from a MutableSharedFlow, stateIn that never emits, a coroutine that outlives its owner, GlobalScope or runBlocking freezing the caller, swallowed CancellationException, a Java-to-Kotlin conversion. Covers null safety, sealed classes, scope functions, structured concurrency, Flow and Java interop. Not for Kotlin tests (kotlin-testing).'
 ---
 
 # Kotlin
 
 Follow the project's Kotlin style and toolchain; improve the code at hand without reformatting the file.
 
-Not for: tests (`kotlin-testing`), Android lifecycle, ViewModel state policy and Room (`android`), `@Composable` code (`jetpack-compose`), build files (`gradle`, or `android-build` for AGP), plain `.java` files (`java`), Spring Boot configuration (`spring-boot`).
+Not for: tests (`kotlin-testing`), Android lifecycle, ViewModel state policy and Room (`android`), `@Composable` code (`jetpack-compose`), build files (`gradle`, or `android-build` for AGP), plain `.java` files (`java`), Spring Boot configuration, Spring Data JPA and transactions (`spring-boot`).
 
 ## Orient
 
@@ -44,21 +44,18 @@ Not for: tests (`kotlin-testing`), Android lifecycle, ViewModel state policy and
 1. Cold `Flow` for a stream per collector; `StateFlow` for current state with a `.value`; `SharedFlow` or `Channel` for events. A `SharedFlow` with `replay = 0` drops an event emitted while nobody collects. A `Channel` delivers each event to one collector and buffers until it arrives.
 2. State holders keep a private `MutableStateFlow`, expose `asStateFlow()`, and change it with `update { it.copy(...) }`, never `value = value.copy(...)`.
 3. Derive state with `stateIn(scope, SharingStarted.WhileSubscribed(5_000), initial)`; use `Eagerly` when `.value` must be correct with no collector.
-4. `flowOn` moves the upstream, not the collector. `catch` handles upstream errors only, so put it before `collect`/`launchIn` and rethrow cancellation.
+4. `flowOn` moves the upstream, not the collector. `catch` handles upstream errors only, so put it before `collect`/`launchIn` and rethrow cancellation. An exception thrown inside `collect { }` is not seen by `catch`; move the work into `onEach { }` and write `.onEach { }.catch { }.collect()`.
 5. Read [references/flow.md](references/flow.md) for event delivery, `stateIn` pitfalls and operator choices.
-6. Lifecycle-aware collection and restoration after process death are `android`; operator, cancellation and delivery semantics stay here. A defect that spans both needs both skills.
+6. Events that are lost, replayed or split, and the choice of event type (`SharedFlow`, `Channel` or consumed state), stay here, as do operator and cancellation semantics. Lifecycle-aware collection (`repeatOnLifecycle`, `collectAsStateWithLifecycle`) and `SavedStateHandle` restoration after process death go to `android`. If the question is why the event vanished or which type to use, it is this skill; if it is when the UI subscribes or what survives a killed process, it is `android`.
 7. Done when you can state consumer count, behavior with no collector, replay and buffer.
 
 ## Other references
 
 - [references/java-interop.md](references/java-interop.md): platform types, `@Jvm*` annotations, `@Throws`, SAM overloads, Kotlin called from Java. Read when Java and Kotlin call each other.
 - [references/java-to-kotlin.md](references/java-to-kotlin.md): converting `.java` files, in dependency order, with framework annotation targets. Read for any conversion request.
-- [references/spring-jpa.md](references/spring-jpa.md): Kotlin with Spring and JPA entities (`data class` entities, equality, `open` and the JPA plugin, DTOs). Read when a Kotlin class carries `@Entity` or `@Service`.
+- [references/spring-jpa.md](references/spring-jpa.md): only the Kotlin-specific parts of Spring and JPA (`plugin.spring` and `plugin.jpa`, regular classes instead of `data class` entities, the nullable id, equality and `hashCode`, `@field:` targets, `suspend` controllers, `data class` DTOs). Read when a Kotlin class carries `@Entity` or `@Service`. General JPA questions (N+1, fetching, transactions, locking) go to `spring-boot`.
 
 ## Gotchas
 
-- `catch (e: Exception)` and `runCatching` both catch `CancellationException`; the coroutine then keeps running as if it was not cancelled.
 - `MutableSharedFlow<Event>()` with a UI collector that starts after the emit loses the event. Do not "fix" it with `replay = 1`, which replays a stale event to every new collector.
-- `StateFlow` skips equal values; mutating a list in place and re-assigning the same instance never emits.
-- `stateIn(..., WhileSubscribed)` returns the initial value until a collector arrives, so reading `.value` right after construction sees the placeholder.
 - A coroutine started in `init {}` runs before the subclass is initialised and cannot be tested in isolation. Start it from a named function.

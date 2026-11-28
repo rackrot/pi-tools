@@ -1,11 +1,11 @@
 ---
 name: branching-models
-description: Follows whichever branching model a repo already uses, and answers "which branching model does this repo use" or "should we use trunk-based or git-flow". Covers git-flow (main + develop, feature/release/hotfix branches, git-flow-next or AVH or plain git), HubFlow (`git hf`, `[hubflow]` config) and trunk-based (short-lived branches, flags, release branches with cherry-picks). Use for "git flow feature start", "finish a release", "hotfix", "git flow init", "develop branch", "git hf", "trunk-based", "release branch cherry-pick". Not for commit messages or branch names (git-commit), history (git-history), GitHub releases (gh-release) or opening a PR (ship).
+description: "Works in a git-flow or trunk-based repo: where a hotfix or release branches from, is merged and tagged, and what a git-flow-next or AVH command does. Answers \"which branching model does this repo use\" and \"should we use trunk-based or git-flow\". Use for develop, release/*, hotfix/* or support branches, \"finish a release\", a prod fix with a release branch open, or patching an old major line. Not for commit messages, cherry-pick mechanics or conflicts, rebasing, squashing or recovering history (git-history), release notes (gh-release, forgejo-release), PRs (gh-pr, forgejo-pr), or HubFlow and `git hf` (hubflow). Also trunk-based work: short-lived branches, flags, release-branch cherry-picks."
 ---
 
-# Branching models: git-flow, HubFlow, trunk-based
+# Branching models: detect, choose, git-flow, trunk-based
 
-Procedures for three models: git-flow (Driessen: `main` is every release, tagged; `develop` integrates the next release; `feature`, `release`, `hotfix`, `support` branches), HubFlow (git-flow plus auto-push and PR-reviewed features) and trunk-based (one trunk, flags, optional release branches).
+Detects which branching model a repo uses, advises on choosing one, and runs git-flow (Driessen: `main` is every release, tagged; `develop` integrates the next release; `feature`, `release`, `hotfix`, `support` branches). Also covers trunk-based repos (one trunk, short-lived branches, branch for release). HubFlow repos go to the hubflow skill.
 
 ## Detect the repo's model first
 
@@ -14,7 +14,7 @@ git config --get-regexp '^gitflow\.'; git config --get-regexp '^hubflow\.'; test
 git ls-remote --heads origin | awk '{print $2}' | sed 's#refs/heads/##'
 ```
 
-- `[hubflow]` config: HubFlow. Follow [references/hubflow.md](references/hubflow.md).
+- `[hubflow]` config: HubFlow: use the hubflow skill.
 - `[gitflow]` config, a `.gitflow` file, or `develop` plus `release/*`, `hotfix/*` branches: git-flow. Follow the git-flow sections below.
 - Only `main` plus short-lived branches, CI filtering on `main` only, flag libraries in dependencies: trunk-based or GitHub flow. Follow the trunk-based section below.
 - `[gitflow]` config lives in `.git/config`, per clone, so a fresh clone has none. A lone `develop` branch is weak evidence. Check branches, merge history and CI filters (`grep -rnE 'develop|release/|hotfix/' .github/workflows .gitlab-ci.yml 2>/dev/null`). If still unclear, ask the user which model the team follows.
@@ -28,8 +28,7 @@ Read [references/detection.md](references/detection.md) when the check above is 
 - Run `git status` first. Stop on a dirty tree unless the user says otherwise.
 - Never push, force-push, delete remote branches, or tag-and-push without the user's go-ahead. Finishing a release or hotfix, tagging, deleting a branch and any force operation also need the user's confirmation. Show the command and ask. Pushing to trunk is itself a push: ask even for a one-line fix.
 - git-flow: finish is local only with default config, but before any finish run `git config --get-regexp '^gitflow\..*push'`; a set push option (for example `gitflow.release.finish.push true`) makes finish a push, so get the user's go-ahead first.
-- HubFlow pushes on its own: `git hf` feature, release and hotfix `start` and `finish` push and finish deletes remote branches. State what a command will push or delete and get a go-ahead; the full ask-first list is in [references/hubflow.md](references/hubflow.md).
-- Branch naming and commit messages: defer to the `git-commit` skill when it is installed. The tools default to `feature/`, `release/`, `hotfix/`, `support/` prefixes.
+- Branch naming and commit messages: defer to a commit-message skill if one is installed. The tools default to `feature/`, `release/`, `hotfix/`, `support/` prefixes.
 
 ## Choosing a model (only when asked)
 
@@ -38,7 +37,7 @@ Offer this as a suggestion; do not restructure a repo's branching uninvited.
 - git-flow fits explicitly versioned software, or several versions supported in the wild (libraries, SDKs, desktop/mobile/embedded apps, on-prem products), with batched or gated releases (QA sign-off, regulated release). Driessen's 2020 note says it "may still be as good of a fit" there.
 - A team deploying continuously from one version should use something simpler: Driessen recommends "a much simpler workflow (like GitHub flow)"; trunk-based is the stricter alternative, with feature flags and fast CI. Trunk-based fits poorly with iterations of four weeks or more, large unsplittable stories, slow or flaky CI, or no test and flag discipline.
 - The sources disagree on versioned software: trunkbaseddevelopment.com says Git Flow is incompatible with trunk-based development, which would release such software from trunk tags and release branches; git-flow's author says git-flow still fits it.
-- HubFlow is archived: never recommend it for a new project (see the reference).
+- HubFlow is archived: never recommend it for a new project.
 
 ## git-flow: pick the tool
 
@@ -46,7 +45,7 @@ Run `git flow version`:
 - `X.Y.Z (git-flow-next)` (2.x) or `git-flow-next version X` (1.x): git-flow-next, the only maintained CLI. Recommend it.
 - `X.Y.Z (AVH Edition)`: gitflow-avh, archived 2023-06-19. It is what `apt install git-flow` ships. Works, unmaintained.
 - `0.4.1`: nvie's original, archived 2025-10-14. Do not recommend.
-- Not installed: use the plain-git sequences, or suggest `brew install git-flow-next` / `winget install GitTower.GitFlowNext` (per the README, unverified) / `scoop install git-flow-next`. There is no apt package of git-flow-next. Do not install anything without asking.
+- Not installed: use the plain-git sequences, or suggest `brew install git-flow-next` / `winget install GitTower.GitFlowNext` / `scoop install git-flow-next`. There is no apt package of git-flow-next. Do not install anything without asking.
 
 ## git-flow: day-to-day procedures
 
@@ -81,11 +80,14 @@ Spell these out to the user when the repo uses git-flow-next:
 - **No push without `--push`.** Finish is local only; `--push` pushes the target, develop and the tag. Ask before using it.
 - **Finish fetches by default** and aborts if the branch or parent is behind or diverged; use `--no-fetch` offline. After a conflict: `finish --continue` or `--abort`.
 - **`-f` means different things.** In git-flow-next `-f` is `--force`; in AVH `release finish -f FILE` is the tag message file. Use `-m "msg"` for the message in both, and `--messagefile` in git-flow-next.
+
+Full flag lists and config keys: [references/cli-commands.md](references/cli-commands.md). Read it when a flag, config key or AVH-to-next migration question comes up.
+
+### AVH quirks
+
 - AVH parses options with getopt: flags go before the name (`release finish -m "msg" 1.0`). git-flow-next accepts either order.
 - AVH fast-forwards a feature with exactly one commit even though it uses `--no-ff`.
 - AVH allows one open release and one open hotfix at a time.
-
-Full flag lists and config keys: [references/cli-commands.md](references/cli-commands.md). Read it when a flag, config key or AVH-to-next migration question comes up.
 
 ### git-flow gotchas
 
@@ -95,13 +97,14 @@ Full flag lists and config keys: [references/cli-commands.md](references/cli-com
 
 ## HubFlow
 
-The archived DataSift fork (`git hf`, `[hubflow]` config, `master` + `develop`, features pushed to origin and merged by GitHub PR). Use it only in a repo already set up for it. It pushes and deletes remote branches on its own, `feature finish` expects the PR already merged, and release and hotfix finish silently resolve conflicts toward the release branch (`-Xtheirs`). Read [references/hubflow.md](references/hubflow.md) before running any `git hf` command: it has the command table, the ask-first list and the warnings.
+HubFlow (`git hf`, `[hubflow]` config) is the archived DataSift fork of git-flow; use the hubflow skill for it.
 
 ## Trunk-based
 
 One trunk (`main`) that everyone integrates into at least daily; unfinished work is hidden, not parked on a long-lived branch. Use the style the repo already has: straight to trunk, or short-lived branches.
 
 - Before a push to trunk: `git pull --rebase origin main`, then run the build and tests CI runs. A short-lived branch starts with `git switch -c NAME --no-track origin/main`; one developer, hours to about two days, merged once to close it, then deleted. Never create or publish release artifacts from it.
+- Straight to trunk suits small teams with fast, thorough builds; pairing counts as review. Aim for three or fewer active branches (DORA). Keep reviews to minutes, tens of minutes at most; a wait of an hour or two hurts cycle time.
 - Revert a broken trunk commit at once (`git revert <sha>`); do not leave trunk red.
 - Incomplete code that is not behind a flag should not be merged. A large change gets a flag (see `feature-flags`; remove it about a month after release) or branch by abstraction on trunk, where no pushed commit may jeopardise going live, never a long-lived branch.
 - Release from trunk: a release may be just an annotated tag on a trunk commit. Fix bugs on trunk and roll forward. Version by commit count or date unless the repo uses semver.
@@ -114,5 +117,6 @@ git tag -a v1.4.1 -m "v1.4.1"                            # pushing the branch an
 ```
 
   Fix on the release branch only when the bug cannot be reproduced on trunk, then cherry-pick it back to trunk. Run the trunk CI on active release branches. When the version is out of production, tag the released commit, then delete the branch (ask before deleting the remote one).
+- One person, on a rotation, does the cherry-picks onto a release branch.
 - Refuse or flag: merging a release branch back into trunk, merging trunk into a release branch, merging between release branches, one release branch across several major versions, code freezes, fixing on the release branch then merging down.
 - With several agents writing at once, give each writer its own worktree and short-lived branch, sync with trunk at every checkpoint, and land branches one at a time. At very high commit rates pushes race; use the repo's merge queue if it has one, do not invent one.

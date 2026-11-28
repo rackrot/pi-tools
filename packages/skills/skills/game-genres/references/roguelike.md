@@ -27,14 +27,21 @@ Design anchor: the Berlin Interpretation (RogueBasin, 2008) lists "roguelikeness
 
 ```text
 TURN_COST = 100
+cursor = 0                               # kept between calls
+tick():
+    for a in actors: a.energy += a.speed  # 100 = normal, 150 = hasted, 50 = slowed
 next_actor():
     loop:
-        for a in actors (stable order):
-            a.energy += a.speed          # 100 = normal, 150 = hasted, 50 = slowed
-            if a.energy >= TURN_COST: a.energy -= TURN_COST; return a
+        for i in 0 .. len(actors)-1:
+            a = actors[(cursor + i) % len(actors)]
+            if a.energy >= TURN_COST:
+                a.energy -= TURN_COST
+                cursor = (cursor + i + 1) % len(actors)
+                return a
+        tick()                           # nobody ready: advance time
 ```
 
-The scheduler blocks on the player's input when the player is next; monsters resolve instantly. Actions may cost different energy (a heavy attack 150, a quick step 50).
+An actor whose energy is still >= TURN_COST after acting gets another turn before the next tick, which is how a speed-150 actor acts three times for every two turns of a speed-100 one. The scheduler blocks on the player's input when the player is next; monsters resolve instantly. Actions may cost different energy (a heavy attack 150, a quick step 50).
 
 ## Generation, FOV and loot
 

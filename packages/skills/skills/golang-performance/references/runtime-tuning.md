@@ -31,4 +31,4 @@ Since Go 1.25, on Linux the runtime defaults `GOMAXPROCS` to the cgroup CPU band
 
 Release notes change allocator and compiler behavior. Go 1.27 adds size-specialized allocation routines for small objects, which can shift allocation-heavy benchmark baselines. Rebuild the "before" benchmark on the same toolchain as the "after".
 
-The Green Tea garbage collector is the default since Go 1.26 (an experiment in 1.25). The Go 1.26 notes expect 10-40% less GC overhead in GC-heavy programs. `GOEXPERIMENT=nogreenteagc` at build time disables it, and the notes expected that opt-out to be removed in 1.27. A GC-heavy benchmark crossing 1.25 and 1.26 changes for that reason, not your code.
+The Green Tea garbage collector is the default since Go 1.26 (an experiment in 1.25). The Go 1.26 notes expect 10-40% less GC overhead in GC-heavy programs. `GOEXPERIMENT=nogreenteagc` at build time disables it. It still builds on Go 1.27; the 1.26 notes planned its removal, so check your toolchain. A GC-heavy benchmark crossing 1.25 and 1.26 changes for that reason, not your code.

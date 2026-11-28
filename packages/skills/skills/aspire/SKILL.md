@@ -1,6 +1,6 @@
 ---
 name: aspire
-description: 'Builds, runs, tests and deploys Aspire apps (formerly .NET Aspire): the AppHost resource model, service defaults, integrations, the aspire CLI, integration tests, and aspire publish/deploy. Use for *.AppHost or apphost.cs/apphost.ts work, AddProject/AddPostgres/WithReference wiring, or a service that fails to start or connect under aspire run.'
+description: 'Builds, runs, tests and deploys Aspire apps (formerly .NET Aspire): AppHost resource model, service defaults, integrations, the aspire CLI, Aspire.Hosting.Testing, aspire publish/deploy. Use for any *.AppHost, apphost.cs/apphost.ts or DistributedApplication.CreateBuilder code, AddProject/AddPostgres/AddRabbitMQ/WithReference/WaitFor wiring, startup order between resources, moving Docker Compose to Aspire, or a service that fails to start or connect under aspire run or F5. Read it before answering even when the workspace has no files: Aspire 13 APIs and CLI differ from what older versions did.'
 ---
 
 # Aspire
@@ -58,7 +58,7 @@ For an agent, prefer the detached flow so the terminal isn't held by `aspire run
 
 ```bash
 aspire start                      # build + start the AppHost in the background
-aspire wait api --timeout 180     # block until healthy (default status: healthy)
+aspire wait api --timeout 180     # block until healthy (defaults: status healthy, timeout 120 s)
 aspire describe                   # resources, state, endpoints
 aspire logs api --tail 200        # one resource's console logs
 aspire otel traces                # traces from the terminal (preview)
@@ -71,7 +71,7 @@ When a resource fails: `aspire describe` for its state and exit code, `aspire lo
 
 ## Test
 
-Integration tests start the real AppHost with `Aspire.Hosting.Testing`; bound every step with a timeout and wait for health before calling a service. Template and rules: [references/testing.md](references/testing.md). For a single service in isolation, use `WebApplicationFactory<T>` instead (see `aspnet-core` and `dotnet-testing`).
+Integration tests start the real AppHost with `Aspire.Hosting.Testing`; bound every step with a timeout and wait for health before calling a service. By default the dashboard is off and proxied ports are randomized; pass `"DcpPublisher:RandomizePorts=false"` in the AppHost args to fix ports. Template and rules: [references/testing.md](references/testing.md). For a single service in isolation, use `WebApplicationFactory<T>` instead (see `aspnet-core` and `dotnet-testing`).
 
 ## Deploy
 
@@ -79,7 +79,7 @@ Add a compute environment to the AppHost (`AddDockerComposeEnvironment`, `AddKub
 
 ## Gotchas
 
-- `MapDefaultEndpoints()` maps `/health` and `/alive` only in Development by design; don't expose them unconditionally in production without reading the security note in the template.
+- `MapDefaultEndpoints()` maps `/health` and `/alive` only in Development by design; don't expose them unconditionally in production without reading the security note in the template. Outside Development, map a health endpoint deliberately (for example an internal-only `/health`) or the `WithHttpHealthCheck("/health")` target and the generated probes will 404.
 - `aspire new`/`aspire init` and `aspire agent init` can write agent skill files (`.claude/skills/...`) and MCP config into the repo; don't run `aspire agent init` unless the user asks.
 - Installing the CLI: prefer a package manager (`dotnet tool install -g Aspire.Cli`, `brew install --cask microsoft/aspire/aspire`, `winget install Microsoft.Aspire`, `npm install -g @microsoft/aspire-cli`). If using the install script, download it, read it, then run it rather than piping `curl` into `bash`.
 - `AddPythonApp` and some other hosting APIs are marked experimental (ASPIREHOSTINGPYTHON001-style diagnostics); suppress the diagnostic deliberately, not project-wide.

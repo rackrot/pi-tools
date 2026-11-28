@@ -4,7 +4,6 @@ description: The same tunneling symptom in a Unity project does not route to god
 tags: [routing, negative]
 runs: 1
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

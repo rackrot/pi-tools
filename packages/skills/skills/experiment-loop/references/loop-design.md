@@ -9,9 +9,9 @@ Read this when a loop will run on a schedule or with nobody watching, or when yo
 | A clear done test (all checks green, a batch processed) | Goal-seeking | It reaches the goal, or the budget runs out |
 | No endpoint, a state to keep healthy | Regulator | It never stops and acts only when the state changes |
 | Poll until a condition holds (watch CI turn green) | Regulator with an exit | The exit condition holds |
-| Something that must happen on a clock | Either, wrapped in `/schedule` | The scheduler fires it |
+| Something that must happen on a clock | Either, wrapped in a scheduler | The scheduler fires it |
 
-Scheduling and polling alone need no design. Use `/loop` or `/schedule` directly.
+Scheduling and polling alone need no design. Use whatever scheduler or polling command the environment provides.
 
 ## Review: five ways a loop fails
 

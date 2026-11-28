@@ -51,4 +51,4 @@ Read when changing plugin versions or executions, lifecycle bindings, profiles, 
 
 ## Maven 4
 
-- Maven 4.0.0-rc-7 is the newest Maven 4 release on Maven Central as of 2026-10-20, with no GA. Do not change `<modelVersion>` or rely on Maven 4 behaviour unless the project already builds with Maven 4 and the user asks.
+- Maven 4 has no GA yet; the dated release status is in SKILL.md. Do not change `<modelVersion>` or rely on Maven 4 behaviour unless the project already builds with Maven 4 and the user asks.

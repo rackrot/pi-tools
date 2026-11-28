@@ -1,6 +1,6 @@
 ---
 name: trigger-release-finish
-description: A git-flow release finish request routes to git-flow.
+description: A git-flow release finish request routes to branching-models.
 tags: [routing]
 runs: 3
 max_turns: 6

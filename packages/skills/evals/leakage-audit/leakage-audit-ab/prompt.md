@@ -1,11 +1,10 @@
 ---
 name: leakage-audit-ab
-description: "An is-this-A/B-measuring-anything question routes to leakage-audit."
+description: "An A/B result where the same model wrote the variants and judged the comparisons routes to leakage-audit. Phrased without the description's trigger sentences."
 tags: [routing]
 runs: 1
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 
-Is this A/B design actually measuring anything? The model picks the winner and the same model scores it.
+we ran prompt v2 against v1 on 200 support tickets. v2 won 71% of the head to head comparisons, and the comparisons were judged by the same model that wrote both replies. can I report that 71% to the team as a real improvement?

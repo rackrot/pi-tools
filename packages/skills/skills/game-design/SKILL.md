@@ -1,17 +1,17 @@
 ---
 name: game-design
-description: Writes and reviews game design documents and decisions, covering pillars, core loop, one-page pitch, mechanic specs, progression, economy and balancing (curves, sinks and faucets, loot tables), difficulty and scope cuts. Use for a "GDD", "design doc", "core loop", "balance this", "economy", "progression", "drop rates" or "too hard".
+description: Game design documents and game numbers - one-page pitch, GDD, pillars, core loop, mechanic specs, scope cuts, XP and damage curves, difficulty and wave scaling, in-game economy (faucets and sinks, prices, inflation), loot tables, drop rates and pity. Read it before answering any game design, balance, economy or loot question, including a quick one with no files to look at, because it holds the templates and starting numbers to use. Use for "GDD", "design doc", "pitch", "core loop", "balance this", "too hard", "too much gold", "nothing to spend it on", "drop rates" or "never drops".
 ---
 
 # Game design
 
 Procedures and templates for deciding what a game is and tuning its numbers. Output is a document, a spec, a table of numbers or a simulation, never engine code. Building the mechanic goes to the engine skill (for Godot, the `godot` skill).
 
-Not for: genre norms and genre-specific systems, moment-to-moment feel and juice (`game-feel`), level layout and pacing (`level-design`), running playtests and reading feedback (`game-playtest`), or a fast throwaway build (`game-prototype`). Use each one if installed.
+Not for: genre norms and genre-specific systems (`game-genres`), moment-to-moment feel and juice (`game-feel` or `game-craft`), level layout and pacing (`level-design` or `game-craft`), running playtests and reading feedback (`game-playtest` or `game-craft`), or a fast throwaway build (`game-prototype` or `game-craft`). Use each one if installed.
 
 ## Pick the artifact
 
-Ask which one the user needs, then follow its section:
+Find the row that matches the request and read its file before writing anything: the templates, formulas and starting numbers are only in those files, not on this page. Ask which artifact is wanted only when no row matches.
 
 | Request | Artifact | Read |
 |---|---|---|
@@ -20,7 +20,7 @@ Ask which one the user needs, then follow its section:
 | "Spec this mechanic", "how should X work" | Mechanic spec | [references/gdd-template.md](references/gdd-template.md) section 4 |
 | "Balance", "XP curve", "damage formula", "too hard", "too easy" | Balance model and tuning table | [references/balancing.md](references/balancing.md) |
 | "Economy", "currency", "shop prices", "inflation", "drop rates", "loot table" | Sources-and-sinks map, simulation, drop tables | [references/economy.md](references/economy.md) |
-| "Cut scope", "too much to build" | Cut list | Step 6 below |
+| "Cut scope", "too much to build" | Cut list | Step 6 below and [references/gdd-template.md](references/gdd-template.md) section 6 |
 
 ## Workflow
 

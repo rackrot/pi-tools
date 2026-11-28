@@ -2,7 +2,7 @@
 name: cold-read-quiet-doubt
 description: "Near miss: attacking a decision belongs to doubt-review, not cold-read."
 tags: [trigger]
-runs: 1
+runs: 3
 max_turns: 6
 model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]

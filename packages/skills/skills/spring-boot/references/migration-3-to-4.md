@@ -31,7 +31,7 @@ Boot 4 splits the large auto-configure jar into focused modules. Each technology
 
 - Group and packages move from `com.fasterxml.jackson` to `tools.jackson`. `jackson-annotations` keeps `com.fasterxml.jackson.annotation`.
 - Renames: `@JsonComponent` to `@JacksonComponent`, `@JsonMixin` to `@JacksonMixin`, `Jackson2ObjectMapperBuilderCustomizer` to `JsonMapperBuilderCustomizer`, `JsonObjectSerializer`/`JsonValueDeserializer` to `ObjectValueSerializer`/`ObjectValueDeserializer`. `ObjectMapper` becomes `JsonMapper` in new code.
-- Properties: `spring.jackson.read.*` and `spring.jackson.write.*` move under `spring.jackson.json.*`.
+- Properties: `spring.jackson.read.*` and `spring.jackson.write.*` move under `spring.jackson.json.*`, and `spring.jackson.parser.*` keys become `spring.jackson.json.read.*` where a Jackson 3 equivalent exists.
 - `spring.jackson.use-jackson2-defaults=true` keeps Jackson 2 behavior; the `spring-boot-jackson2` module (`spring.jackson2.*`) is a temporary stopgap, for example with Jersey, which does not support Jackson 3 yet.
 - Libraries that expose Jackson 2 types in their API (some Kotlin modules, older Spring add-ons) need Jackson 3 releases.
 

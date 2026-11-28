@@ -52,8 +52,6 @@ What this spec does not cover.
 Anything else a slicer needs (omit when empty).
 ```
 
-Choose test seams before writing the testing section. Reuse an existing seam at the highest level that works, since fewer seams mean fewer fragile tests. Confirm the seams with the user.
-
 ## Per-requirement issue
 
 For a spec with numbered requirements, title the issue with the requirement ID and a short description. The body holds the requirement text, how it maps to current code, and acceptance criteria.

@@ -34,7 +34,7 @@ Read before the first Cost Explorer, Budgets or Compute Optimizer call. These ar
 ## Changes
 
 - `aws compute-optimizer update-enrollment-status --status Active` opts the account in (`Inactive` opts out and deletes recommendations). It is a write: show it and wait for approval, with `--include-member-accounts` only if the user wants the org enrolled.
-- Creating budgets or anomaly subscriptions is a write too. Use the write habits in `references/cli.md`.
+- Creating budgets or anomaly subscriptions is a write too. Use the write procedure in `aws-cli`.
 
 ## Hand-off
 

@@ -1,13 +1,13 @@
 ---
 name: game-architecture
-description: Structures game code in any engine. Covers the game loop and fixed timestep, state machines (flat, hierarchical, parallel), composition, event buses, object pools, data-driven content, inventory and ability systems, scene flow and save systems. Use for "how should I structure", "state machine", "save system", "game loop" or "inventory system".
+description: "Rules and pitfalls for structuring game code in any engine: game loop and fixed timestep, player and object state machines (enum, per-state objects, hierarchical, parallel), event buses, object pools, item and inventory data, abilities, buffs and stat modifiers, scene flow, and save files that survive patches. Read it before designing, restructuring or reviewing these systems, even with no project files to look at. Use for \"how should I structure\", a sprawling player state machine, buffs that stack or expire wrongly, pooled bullets, how systems should talk to each other, or a save system. Not for NPC decisions (game-ai), controller feel (game-feel) or frame rate (game-performance)."
 ---
 
 # Game architecture
 
 How to structure game code so it survives growth. The basics are well known; this skill exists for the choices and the pitfalls. When you recommend a structure, name the alternative you rejected and the deciding factor ("a hierarchical machine, not a flat one, because grounded and airborne states share their transitions"). A pick with no named alternative can't be challenged.
 
-Not for: engine API (for Godot, the `godot` skill covers nodes, signals, autoloads and file access, if installed); controller feel (`game-feel`); NPC decision-making (`game-ai`); frame-rate work (`game-performance`); general software design outside games (`coding`).
+Not for: engine API (for Godot, the `godot` skill covers nodes, signals, autoloads and file access, if installed); controller feel (`game-feel`); NPC decision-making (`game-ai`); frame-rate work (`game-performance`); general software design outside games (`codebase-design`). The `game-craft` umbrella routes architecture and save questions here.
 
 ## Workflow
 
@@ -47,10 +47,10 @@ Not for: engine API (for Godot, the `godot` skill covers nodes, signals, autoloa
 - **Composition over inheritance.** Build entities from small components (health, hurtbox, mover), not deep class trees. Use inheritance for "is a variant of" with only exported values changed.
 - **Calls down, events up, a bus sideways.** A parent calls its children directly. Children emit events their owner listens to. Unrelated systems (achievements, audio, UI) use an event bus. Don't use the bus between a parent and child that already hold references to each other.
 - Keep the global singletons few and explicit (game state, save, audio, bus). Each one is hidden coupling.
-- **Data-driven content:** items, enemies and abilities are data files with a stable string ID that never changes after release. Code references IDs; saves store IDs, not file paths or object references.
+- **Data-driven content:** items, enemies and abilities are data files with a stable string ID that never changes after release. Code references IDs; saves store IDs, not file paths or object references. Build the ID-to-definition registry from an explicit list (exported array, manifest or generated index), never by scanning a folder at runtime: exported builds rename, pack or convert asset files, so a scan that works in the editor finds nothing in the shipped game.
 - **Scene flow:** one owner handles transitions (menu, loading, level, results). It loads the next scene asynchronously behind a loading screen, then swaps. Don't let arbitrary scripts change scenes.
 - **Object pools** for things spawned often and briefly (bullets, particles, damage numbers). Reset all state on acquire, not only on release. Code that keeps a reference to a pooled object after release will act on its next life, so give pooled objects a generation counter and check it.
-- Read `references/patterns.md` for the event-bus rules, pooling, the inventory model and the ability, effect and stat-modifier model.
+- Before designing or reviewing an event bus, pool, inventory, item registry, ability or buff system, read `references/patterns.md`.
 
 ## Save systems
 

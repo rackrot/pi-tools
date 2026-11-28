@@ -2,7 +2,7 @@
 name: godot-testing-vs-jest
 description: "A Jest test question for a web game does not load godot-testing."
 tags: [routing]
-runs: 1
+runs: 3
 max_turns: 6
 model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]

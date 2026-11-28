@@ -1,6 +1,6 @@
 ---
 name: aws-cli
-description: 'AWS CLI v2 mechanics for scripts and write commands: pagination (--no-paginate, --max-items), --output and --query, retries and timeouts, waiters, --cli-input-json skeletons, dry runs, client tokens. Use when writing or debugging an aws command or script, when output is truncated, before a create, update, delete or launch command, or when env keys vs profile precedence is in question. Not for read-only questions about what exists (aws-resource-query) or profiles, SSO and IAM (aws).'
+description: 'AWS CLI v2 behaviour that is easy to get wrong from memory: --page-size vs --max-items and --starting-token, --no-paginate, --output values (off, yaml-stream) and --query, AWS_REGION vs AWS_DEFAULT_REGION, --profile vs AWS_PROFILE vs env keys, read timeouts, retries, waiters, --cli-input-json skeletons, dry runs, client tokens. Read before writing, reviewing or explaining any aws command or any script that calls aws, when a call times out or output is truncated, and before a create, update, delete or launch command. Not for read-only questions about what exists (aws-resource-query) or profiles, SSO and IAM (aws).'
 ---
 
 # AWS CLI v2 mechanics
@@ -10,7 +10,7 @@ Use this skill when the command itself is the problem: output shape, truncation,
 ## Procedure
 
 1. Run `aws --version`. It must report `aws-cli/2.`. If it reports 1.x or nothing, the wrong binary is first on PATH; fix that before debugging anything else.
-2. For any write (create, update, delete, launch, terminate, put, attach), show the exact command to the user and wait for confirmation before running it. The same applies to a write through the aws-mcp `run_script` or `get_presigned_url` tools; read the `aws-resource-query` skill's `references/aws-mcp.md` before calling them.
+2. For any write (create, update, delete, launch, terminate, put, attach), name the account, profile, region and affected resources, show the exact command to the user, and wait for confirmation before running it. After the write, run a read command to confirm the change and report what changed. The same applies to a write through the aws-mcp `run_script` or `get_presigned_url` tools; read the `aws-resource-query` skill's `references/aws-mcp.md` before calling them.
 3. Pass `--region` explicitly in every script and every write command.
 4. If the command supports `--dry-run` (check with `aws <service> <command> help`), run it first. A `DryRunOperation` error means the request would have succeeded; it is the pass signal, not a failure.
 5. If the command supports `--client-token`, give each logical request a unique token and reuse the same token when retrying it, so a retry does not create a second resource.
@@ -21,12 +21,13 @@ Use this skill when the command itself is the problem: output shape, truncation,
 - By default the CLI pages through results itself and returns everything.
 - `--no-paginate` returns only the first page. Scripts that use it silently miss items.
 - `--max-items N` caps output and prints a `NextToken`. Resume with `--starting-token <token>`; the token must be non-empty.
-- `--page-size N` changes how many items each underlying API call fetches. It does not change the output.
-- If you resume with `--starting-token`, set `--page-size` equal to `--max-items`, or fetch all pages and slice locally.
+- `--page-size N` changes how many items each underlying API call fetches. It does not change the output, except when resuming (see next line).
+- When resuming with `--starting-token`, different `--page-size` and `--max-items` values can skip or repeat items (AWS docs). Set `--page-size` equal to `--max-items`, or fetch all pages and slice locally.
 
 ## Output and query
 
 - `--output` takes `json`, `yaml`, `yaml-stream`, `text`, `table`, or `off`. `AWS_DEFAULT_OUTPUT` sets the default; `--output` overrides it.
+- `--output off` is valid in current v2 releases (models often think it is not): it prints nothing to stdout, and errors still go to stderr. Use it instead of `> /dev/null`.
 - `--query` takes a JMESPath expression applied to the response. Use `--output text` when the result feeds a shell pipeline.
 - Use `--output json` for anything another program parses.
 

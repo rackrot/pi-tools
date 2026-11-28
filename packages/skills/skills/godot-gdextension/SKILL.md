@@ -1,17 +1,17 @@
 ---
 name: godot-gdextension
-description: Native Godot 4 extensions with GDExtension, in C++ (godot-cpp) or Rust (godot-rust gdext). Use when a project has a .gdextension file, SConstruct or a godot-cpp submodule, or when binding a native class, building per-platform libraries, wrapping a C/C++ library, debugging a native crash, or an export that reports "No GDExtension library found".
+description: "Builds, binds and debugs native Godot 4 extensions (GDExtension) in C++ with godot-cpp or Rust with godot-rust gdext. Read this before answering anything about a .gdextension file, SConstruct or a godot-cpp submodule, which godot-cpp version or api_version to build against, calling a C, C++ or Rust library from Godot, native hot reload or crashes, or a load error such as \"No GDExtension library found\" or \"GDExtension entry point not found\", including when the project files are not there to inspect."
 ---
 
 # GDExtension
 
 GDExtension loads a shared library into a stock Godot build, so no custom engine is needed. Its classes look like built-in ones to GDScript and the editor. Version-specific details are in the references; this file holds the decisions and the rules that don't change.
 
-Start by reading the project's Godot version from `config/features` in `project.godot` and follow that version, not the newest; per-version changes are in the `godot` plugin's `references/version-notes.md`, if installed.
+Start by reading the project's Godot version from `config/features` in `project.godot` and follow that version, not the newest; per-version changes are in the `godot` skill's `../godot/references/version-notes.md`, if installed.
 
 ## When to go native
 
-Use GDScript or C# first. Profile before deciding (see `godot`'s performance guidance). GDExtension earns its cost when:
+Use GDScript or C# first. Profile before deciding (see the `godot` skill's `../godot/references/performance.md`, if installed). GDExtension earns its cost when:
 
 - A measured hot loop is still too slow after algorithmic fixes and typed GDScript (pathfinding over huge grids, voxel meshing, custom physics, simulation).
 - You must call an existing C or C++ library (a codec, a physics or networking SDK).
@@ -33,7 +33,7 @@ Debugging native code, hot reload and sanitizers for both: [references/debugging
 1. **Target the oldest engine you support.** Extensions are forward-compatible within Godot 4: one built against 4.3's API loads in 4.4 to 4.7, but not the reverse. The exception is 4.0: extensions built for 4.0 don't load in 4.1+. Set the build's API version (godot-cpp `api_version`, gdext `api-4-x` feature) and `compatibility_minimum` in the `.gdextension` file to the same version.
 2. **The `.gdextension` file is the contract.** `entry_symbol` must equal the exported init function name. `[libraries]` maps feature tags (`linux.debug.x86_64`, `windows.release.x86_64`, `macos.release`, `android.release.arm64`, `web.release.wasm32`) to binaries; entries match top to bottom, so put more specific tags first. Prefer paths relative to the `.gdextension` file so the folder can move. `[icons]` gives nodes editor icons; `[dependencies]` lists extra shared libraries to copy on export.
 3. **Ship release binaries.** An export loads `template_release` builds. If the matching entry is missing for a platform, the native classes don't exist at runtime and scenes using them break. Build every platform in CI (the godot-cpp template ships GitHub Actions workflows).
-4. **`reloadable = true` is for development.** It reloads the library in the editor on rebuild (godot-cpp on 4.2+; gdext supports it too). Restart the editor if a class layout change confuses the reload.
+4. **`reloadable = true` is for development.** It reloads the library in the editor on rebuild (Godot 4.2+). godot-cpp builds also need `scons use_hot_reload=yes`, which is off by default in godot-cpp 10; gdext needs nothing extra. Restart the editor if a class layout change confuses the reload.
 5. **Put it in an addon folder** (`addons/<name>/` with `bin/` and the `.gdextension`) when it will be reused or shared, so other projects copy one folder.
 6. **Calling from scripts.** GDScript sees registered classes as built-in types (`MyNode.new()`, typed vars, autocompletion). C# does not get generated wrappers for extension classes: use `ClassDB.Instantiate("MyNode")`, `Get`/`Set`/`Call`/`Connect` by name, or write a thin C# wrapper class.
 
@@ -42,7 +42,7 @@ Debugging native code, hot reload and sanitizers for both: [references/debugging
 1. Start from the official template (godot-cpp-template) or `cargo new --lib` for gdext; keep a small Godot test project in the repo (`project/` or `godot/`).
 2. Set the API version and `compatibility_minimum` (rule 1).
 3. Bind one class, build for the host (`scons` or `cargo build`), open the test project, and confirm the class appears in the Create Node dialog and runs.
-4. Add properties, signals and methods; rebuild with `reloadable = true` while iterating.
+4. Add properties, signals and methods; rebuild with `reloadable = true` while iterating (godot-cpp: build with `use_hot_reload=yes`).
 5. Build `template_release` for each shipping platform; export the test project once per platform before calling it done.
 
 ## Gotchas

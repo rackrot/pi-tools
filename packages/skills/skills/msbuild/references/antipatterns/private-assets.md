@@ -10,7 +10,7 @@ become a dependency of consumers of the produced package.
 <PackageReference Include="MinVer" Version="5.0.0" PrivateAssets="all" />
 ```
 
-Typical candidates from the original catalog include:
+Typical candidates include:
 
 - Analyzer and code-fix packages.
 - Source generators intended to run only in the producer.

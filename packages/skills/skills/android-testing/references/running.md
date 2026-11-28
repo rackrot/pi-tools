@@ -56,7 +56,7 @@ dependencies {
 }
 ```
 
-Verified 2026-11-01: Espresso 3.7.0 is the latest release; use the version the project pins. Orchestrator makes the suite slower; use it to isolate state or contain crashes, not by default. `clearPackageData` clears the test app's data on the test device only.
+Use the version the project pins. Orchestrator makes the suite slower; use it to isolate state or contain crashes, not by default. `clearPackageData` clears the test app's data on the test device only.
 
 ## Flaky instrumented tests
 

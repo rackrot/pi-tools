@@ -12,7 +12,7 @@ Read this when debugging a native-boundary failure or reviewing interop code for
 | Silent data corruption | Wrong type size (`long`, `size_t`, `bool`), packing, or encoding | Compare `Marshal.SizeOf<T>()` and `Marshal.OffsetOf<T>()` against C `sizeof`/`offsetof`; test with known input and output |
 | Intermittent crash after a GC | GC moved an unpinned object or collected a delegate | Root delegates; pin with `GCHandle` or use unmanaged memory for pointers native code keeps; force `GC.Collect()` in a test to reproduce |
 | Crash or corruption on free | Mismatched allocator | Free with the library's function; never mix `malloc`/`free` with `CoTaskMem*` or `FreeHGlobal` |
-| Stale or wrong error code | Missing `SetLastPInvokeError`, or another call in between | Set it on the declaration; read the error immediately |
+| Stale or wrong error code | Missing `SetLastError = true`, or another call in between | Set it on the declaration; read the error immediately |
 | Works on x64, breaks on Windows x86 | Calling convention | Add `Cdecl`/`StdCall` per the header |
 
 ## Review pitfalls
@@ -20,7 +20,7 @@ Read this when debugging a native-boundary failure or reviewing interop code for
 | Pitfall | Fix |
 |---|---|
 | `int` or `ulong` for `size_t` | `nuint` |
-| `long` for C `long` | `CLong`/`CULong` (+ `DisableRuntimeMarshalling` with `LibraryImport`) |
+| `long` for C `long` | `CLong`/`CULong` |
 | `bool` without `MarshalAs` | `UnmanagedType.Bool` (4 bytes) or `U1` (1 byte) |
 | Implicit string encoding | `StringMarshalling` / `CharSet.Unicode` / `LPUTF8Str` |
 | Raw `IntPtr` handle in the public API | `SafeHandle` subclass |
@@ -33,7 +33,7 @@ Read this when debugging a native-boundary failure or reviewing interop code for
 2. Debug with mixed-mode (native and managed) debugging: Visual Studio "Enable native code debugging", or `lldb` with the SOS extension on Linux and macOS (`dotnet tool install -g dotnet-sos`, then `dotnet-sos install`).
 3. Assert struct sizes and offsets in a unit test for every struct crossing the boundary.
 4. Run the native library under AddressSanitizer or Valgrind with a C test harness when corruption may be on the native side.
-5. Post-mortem dumps of crashed processes: see the `dotnet-diagnostics` plugin.
+5. Post-mortem dumps of crashed processes: see the `dotnet-diagnostics` skill.
 6. .NET Framework only: Managed Debugging Assistants `pInvokeStackImbalance` and `invalidOverlappedToPinvoke` catch calling-convention and pinning bugs.
 
 ## Docs

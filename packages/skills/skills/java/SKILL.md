@@ -1,6 +1,6 @@
 ---
 name: java
-description: 'Writes, reviews, debugs and upgrades modern Java (17+): records, sealed types, pattern-matching switch, Optional, executors, CompletableFuture, virtual threads, JDK upgrades and javax.* to jakarta.* migration. Use when editing or debugging *.java, such as a MatchException or non-exhaustive switch over a sealed type, javax.servlet imports that no longer compile on Jakarta EE 9+, a record whose List changes after construction, a thread-pool or interrupt bug, or "review this Java class".'
+description: 'Use for any question about Java source code (*.java, JDK 17+), including when the code is pasted into the message and the answer looks obvious: a bug, a "why does this happen", a review before merge, a cleanup, a JDK upgrade. Typical cases: MatchException or a non-exhaustive switch over a sealed type, a record whose List changes after construction, a JVM that will not exit or a thread pool that is never shut down, swallowed InterruptedException, CompletableFuture and virtual threads, javax.* imports that no longer compile on Jakarta EE 9+. Not for pom.xml or Gradle build files, JUnit or Mockito tests, Spring Boot, Kotlin or Android framework code.'
 ---
 
 # Java
@@ -14,7 +14,7 @@ Not for: Maven POM and dependency work (`maven`), Gradle builds (`gradle`), JUni
 - Find the language level before writing: `maven.compiler.release` or `<release>` in `pom.xml`, `java.toolchain.languageVersion` in `build.gradle*`, `.java-version` or `.sdkmanrc`, and the CI JDK. Use no API or syntax newer than that level, whatever JDK is installed.
 - Under a `com.android.*` plugin, the language level comes from `compileOptions` and the runtime from `minSdk` plus desugaring, not from the installed JDK. Use no virtual threads, and no API above `minSdk` without a version check (`java.time` on `minSdk` below 26 needs core library desugaring).
 - Use no preview features unless the build already enables them (`--enable-preview`).
-- Read the class, its callers and its tests. With an indexed repo use `search_graph` and `trace_path`; otherwise Grep or the LSP.
+- Read the class, its callers and its tests (Grep or the LSP; `search_graph`/`trace_path` if those tools are available).
 - Follow the project's formatter, null-annotation library (JSpecify, Checker, JetBrains) and logging facade. Add none.
 
 ## Types and data
@@ -51,7 +51,7 @@ Not for: Maven POM and dependency work (`maven`), Gradle builds (`gradle`), JUni
 - `CompletableFuture`: a failure nobody observes vanishes, so end every chain with `exceptionally`, `handle` or `whenComplete`, or return the future to someone who will. Pass an explicit executor to `*Async` methods for blocking work. Add `orTimeout`.
 - Read [references/concurrency.md](references/concurrency.md) before adding a lock, executor, `CompletableFuture` chain or virtual-thread code, and when debugging a race, deadlock, pinning or shutdown hang.
 
-Verified on 2026-10-20 (openjdk.org): JDK 25 is an LTS. Virtual threads no longer pin the carrier inside `synchronized` from JDK 24 (JEP 491); on 21 to 23, prefer `ReentrantLock` around blocking calls. `ScopedValue` is final in 25 (JEP 506); `StructuredTaskScope` is still preview there (JEP 505).
+Verified on 2026-10-20 (openjdk.org): JDK 25 is an LTS. Virtual threads no longer pin the carrier inside `synchronized` from JDK 24 (JEP 491); on 21 to 23, prefer `ReentrantLock` around blocking calls. `-Djdk.tracePinnedThreads` works on 21 to 23 only; from 24 use the `jdk.VirtualThreadPinned` JFR event. `ScopedValue` is final in 25 (JEP 506); `StructuredTaskScope` is still preview there (JEP 505).
 
 ## Validate
 

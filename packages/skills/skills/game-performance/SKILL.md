@@ -7,7 +7,7 @@ description: Finds and fixes game frame-rate problems by measuring first, in any
 
 Performance work is measurement: profile, find the one biggest cost, fix it, measure again. Don't change code for speed until a profile points at it. The intuitive culprit is usually wrong, and an unmeasured fix adds complexity for nothing.
 
-Not for: the engine's profiler UI, monitors and rendering settings (for Godot, the `godot` skill's performance reference, if installed); physics jitter and tunneling (`game-feel`); restructuring code without a measured cost (`game-architecture`); slow non-game code such as tools, servers and build scripts (`problem-solving`).
+Not for: the engine's profiler UI, monitors and rendering settings (for Godot, the `godot` skill's performance reference, if installed); physics jitter and tunneling (`game-feel`); restructuring code without a measured cost (`game-architecture`); slow non-game code such as tools, servers and build scripts (`problem-solving`, if installed).
 
 ## Workflow
 
@@ -70,3 +70,4 @@ Not for: the engine's profiler UI, monitors and rendering settings (for Godot, t
 - `game-architecture`: pooling, update order and data layout.
 - `game-feel`: physics interpolation and jitter, which are not frame-rate problems.
 - `level-design`: spreading procedural generation across frames.
+- `game-craft`: the umbrella for other engine-neutral game topics.

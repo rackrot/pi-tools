@@ -1,11 +1,11 @@
 ---
 name: dotnet-performance
-description: "Measurement-first .NET performance work: hot-path anti-pattern scans (async, allocations, strings, LINQ, regex, JSON, I/O), BenchmarkDotNet setup and result reading, and SIMD with TensorPrimitives or Vector128. Use when C# code is slow or allocates too much, to review a hot path, write or compare benchmarks, or vectorize a loop."
+description: "Reviews and speeds up C# and .NET code: hot-path scans for CPU and allocation waste (async, strings, LINQ, regex, JSON, I/O), BenchmarkDotNet setup and result reading, SIMD with TensorPrimitives or Vector128. Read it before answering whenever C# code is slow, GC or gen0 pressure is high, a method shows up in a trace or flame graph, or someone asks for a speed pass, also when the code is pasted in the message and there are no files to open: it decides which findings to report without a profile, their severity and the report format. Also use to write or compare benchmarks or vectorize a loop."
 ---
 
 # .NET performance
 
-Not for collecting traces or dumps from a running process (`dotnet-diagnostics`), slow builds (`msbuild`), EF Core query tuning (`ef-core`), general C# correctness (`csharp`), test strategy (`unit-testing`), or production metrics (`observability-instrumentation`).
+Not for collecting traces or dumps from a running process (`dotnet-diagnostics`), slow builds (`msbuild`), EF Core query tuning (`ef-core`), general C# correctness (`csharp`), test strategy (`dotnet-testing`), or production metrics (`observability-instrumentation`).
 
 Measure first, change one thing, measure again the same way. A speedup counts only when a like-for-like BenchmarkDotNet comparison or a before/after profile shows it. Check the TFM and SDK (`dotnet --version`, `<TargetFramework>`) before suggesting an API: many fixes below need .NET 7, 8 or 9.
 
@@ -22,7 +22,7 @@ Without any of these, report only Critical findings and say the rest matter only
 ## Workflow: scan a hot path
 
 1. **Load the critical patterns.** Read [references/critical-patterns.md](references/critical-patterns.md) every time: sync-over-async, double-awaited `ValueTask`, `stackalloc` in loops, culture-sensitive comparisons, uncached `JsonSerializerOptions` and `HttpClient`, catastrophic regex backtracking.
-2. **Detect signals and load only matching references.** Use codebase-memory (`search_graph`, `search_code`) or the C# language server (csharp-ls) to find the callers and hot entry points, then grep the files:
+2. **Detect signals and load only matching references.** Find the callers and hot entry points with whatever code-navigation tool is available (for example the C# language server), then grep the files:
 
    | Signal in code | Read |
    | --- | --- |
@@ -46,7 +46,32 @@ Without any of these, report only Critical findings and say the rest matter only
    | Info | Applies, but the code may not be hot | Only if profiling shows impact |
 
    Raise everything in user-named hot code to its maximum severity. Escalate an Info pattern to Moderate at 11+ instances, and flag 50+ as a codebase-wide issue.
-6. **Report compactly.** Group by severity. One block per finding: `ID. Title (N instances)`, Impact (one line), Files (`File.cs:L42, ...`), Fix (one line), Caveat only when there is a version or correctness risk. Code only for non-obvious rewrites. Merge findings that share a fix. List good practices found as one-line bullets. End with a severity/count/top-issue table and a note that findings need benchmark confirmation before shipping.
+6. **Report in exactly this format**, also for a single pasted method. Code only for non-obvious rewrites. Merge findings that share a fix. Add `Caveat:` only when there is a version or correctness risk. Omit a severity heading that has no findings.
+
+   ```text
+   ## Critical
+   C1. <Title> (<N> instances)
+   Impact: <one line>
+   Files: <File.cs:L42, File.cs:L88>
+   Fix: <one line>
+
+   ## Moderate
+   M1. ...
+
+   ## Info
+   I1. ...
+
+   ## Good practices found
+   - <one line each>
+
+   | Severity | Count | Top issue |
+   | --- | --- | --- |
+   | Critical | <n> | <title> |
+   | Moderate | <n> | <title> |
+   | Info | <n> | <title> |
+
+   These findings need benchmark confirmation before shipping.
+   ```
 7. **Prove the fixes you make.** For each change you apply, run a BenchmarkDotNet before/after (below) and the project's tests. Keep a change only if the improvement is outside the error bars and the code stays readable; put the result table in the commit body.
 
 ## BenchmarkDotNet

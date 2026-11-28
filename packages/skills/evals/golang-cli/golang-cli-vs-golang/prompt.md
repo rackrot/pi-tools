@@ -2,9 +2,8 @@
 name: golang-cli-vs-golang
 description: A cobra flag and env var binding question routes to golang-cli:golang-cli.
 tags: [routing]
-runs: 1
+runs: 3
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

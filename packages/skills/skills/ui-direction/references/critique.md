@@ -1,6 +1,6 @@
 # Critique — judging the render
 
-Owner-taste caps (monospace, index numbers, hairlines) and the
+Gallery-fashion caps (monospace, index numbers, hairlines) and the
 picture and motion quotas apply only when the brief does not call for them; also covers an existing-system mode.
 
 `inspect.mjs` passing means nothing banned or broken was measured. It says nothing about whether the
@@ -10,7 +10,7 @@ intentions, the pictures only show what is there.
 **Modes.** In **new page** mode use everything below. In **existing system** mode (the page extends a
 product with its own design system or DESIGN.md) skip passes 3 and 14 and the creativity caps, and judge
 type, colour, components and spacing against the system's own documented values instead of these
-defaults; the `web-design` skill covers the system side.
+defaults.
 
 ## Contents
 

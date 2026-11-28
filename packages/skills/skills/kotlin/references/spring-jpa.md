@@ -48,17 +48,4 @@ class Order(
 
 If the entity can be a Hibernate proxy, compare through the `Hibernate.getClass`-aware check your project already uses rather than `javaClass` alone.
 
-## Uniqueness and idempotency
-
-Enforce uniqueness in the database (`uniqueConstraints = [UniqueConstraint(columnNames = ["variant_id", "order_id"])]`) because an application check alone races; add the application lookup (`findByVariantIdAndOrderId`) for a clean error message instead of a raw `DataIntegrityViolationException`.
-
-## Fetching and traps
-
-- Diagnose N+1 from SQL logs or query counts, not from annotations. Fix with `@EntityGraph`, `JOIN FETCH`, batch fetching or DTO projections, and say how the query plan changes. Do not set `FetchType.EAGER` to silence lazy errors.
-- Collection fetch joins with pagination load everything in memory; multiple bag fetches multiply rows.
-- Maintain both sides of a bidirectional association in domain methods.
-- `orphanRemoval` and cascade remove are different.
-- `toString`, debug logging, JSON serialization and IDE inspection trigger lazy loads. With `open-in-view` off, map to DTOs inside the transaction.
-- Bulk updates and deletes bypass the persistence context; later reads may be stale.
-- `@Version` is the clearest optimistic locking.
-- Do not expose entities directly in API responses.
+General JPA and Spring Data concerns (N+1, fetch joins and pagination, bulk updates, optimistic locking, uniqueness, open-in-view, never returning entities) belong to `spring-boot`.

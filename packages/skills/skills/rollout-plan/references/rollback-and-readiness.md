@@ -1,6 +1,6 @@
 # Rollback and readiness
 
-Read when writing the rollback section, checking release readiness, or setting health and shutdown behavior.
+Read when writing the rollback section or setting health and shutdown behavior.
 
 ## Rollback commands
 
@@ -32,15 +32,7 @@ Pre-deploy: tests pass, review done, config and env vars present in the target, 
 
 Post-deploy: new version healthy, old pods or instances terminated, dashboards and alerts quiet, outcome recorded.
 
-## Production readiness
-
-Check what applies to the workload and skip the rest.
-
-- Application: no secrets in code or config files, structured logs without personal data, health endpoint reports real status.
-- Infrastructure: pinned image and dependency versions, environment variables validated at startup (fail fast), CPU and memory limits, scaling bounds, TLS on all endpoints.
-- Monitoring: request rate, latency, and error metrics exported; alerts on error rate; searchable logs; uptime check on the health endpoint.
-- Security: dependencies scanned, CORS limited to allowed origins, rate limiting on public endpoints, authorization verified, security headers set.
-- Operations: migration tested against production-sized data, runbook for common failures, on-call and escalation defined.
+For a ship-or-block review of the app itself (secrets, auth, CORS, rate limits, dependency scanning, env validation, observability), use `production-readiness`.
 
 ## Health and shutdown
 

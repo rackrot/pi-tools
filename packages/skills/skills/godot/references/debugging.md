@@ -11,7 +11,7 @@ Reproduce, isolate (smallest scene that still fails), form one hypothesis, trace
 - `godot --headless --path . --quit`: loads the project and main scene once; parse and load errors print to stderr. Add `--verbose` for more.
 - `godot --headless --path . --check-only --script res://path/file.gd`: parse-check one script. `--check-only` does nothing without `--script`.
 - `godot --headless --path . --import` (implies `--editor --quit`) before the first headless run of a fresh checkout, so the `.godot/` import cache exists.
-- When the godot-mcp editor addon is connected, its script validation and `run_headless` tools return the same diagnostics; follow the project's `godot-mcp` skill.
+- When the godot-mcp editor addon is connected, its script validation and `run_headless` tools return the same diagnostics; follow the project's `godot-mcp` skill if it ships one.
 
 ## Logging
 

@@ -1,23 +1,15 @@
 ---
 name: api-oauth-provider
-description: Designs and reviews the OAuth 2.1 authorization-server (issuer) side of an API, including MCP auth servers, and decides API keys versus OAuth for the platform's own consumers. Use when third-party apps or agents need delegated access to your users' data, or when setting grants and PKCE, token lifetimes, refresh rotation, scopes, consent screens, client registration, discovery metadata, or how issued API keys are hashed and stored.
+description: Designs, reviews and debugs the OAuth 2.1 authorization server (the token-issuing side) of a platform, including authorization for MCP servers. Use when third-party apps or agents need delegated access to your users' data, when setting grants, PKCE, redirect URI matching, token lifetimes, scopes, consent screens, client registration or discovery metadata, or when your own token endpoint misbehaves, such as refresh-token rotation or replay detection logging users out, concurrent refreshes from several tabs, or revocation. Not for issuing static API keys or deciding keys versus OAuth (api-keys, if installed), or the app side of login.
 ---
 
 # OAuth provider (issuer side)
 
-This skill covers the server that issues tokens. Not for the app side of login, callbacks or token validation (`app-auth`), webhook signing (`api-webhooks`), or choosing an identity vendor. Each named skill applies if installed. The target is the OAuth 2.1 profile. RFC 9700 (BCP 240, January 2025) is final. The consolidated OAuth 2.1 document (draft-ietf-oauth-v2-1) was still an Internet-Draft, revision 16, when this skill was last checked (October 2026), so cite it as a draft and recheck before calling it an RFC.
+This skill covers the server that issues tokens. Not for the app side (login, callbacks, validating tokens you receive), issuing static API keys or deciding keys versus OAuth (`api-keys`), webhook signing (`api-webhooks`), or choosing an identity vendor. Each named skill applies if installed. The target is the OAuth 2.1 profile. RFC 9700 (BCP 240, January 2025) is final. The consolidated OAuth 2.1 document (draft-ietf-oauth-v2-1) was still an Internet-Draft, revision 17 (31 October 2026), when this skill was last checked, so cite it as a draft and recheck before calling it an RFC.
 
 ## Keys or OAuth
 
-Decide per surface, since mature platforms run both. A key identifies the calling application, not a user.
-
-- Use a static key when no user is in the flow: server-to-server calls, sandboxes, public or read-mostly data, per-caller rate limits.
-- Use OAuth (the rest of this skill) when a third-party app acts for a user, or when cross-org machine traffic on sensitive data justifies short-lived scoped tokens.
-- If you find yourself adding expiry, per-request scopes and fine-grained revocation to a static key, you are rebuilding OAuth. Adopt the real thing. Redirect URIs and consent screens for a server calling itself are over-engineering.
-- Never ship a long-lived key to a browser or other semi-trusted client. Mint a short-lived scoped token server-side. For CI and agent workloads, prefer workload identity federation, where the environment attests and no stored secret exists.
-- Use a key as the sole credential for a sensitive operation only with extra controls, such as IP or network access policy.
-
-For keys you issue, store only a SHA-256 hash of a high-entropy key. Read `references/api-key-storage.md` for the hashing rationale and lookup rules.
+Use OAuth (the rest of this skill) when a third-party app or agent acts for a user, or when cross-org machine traffic on sensitive data needs short-lived scoped tokens. Otherwise, and for the keys-versus-OAuth decision itself, see `api-keys` if installed.
 
 ## Ask first
 
@@ -46,8 +38,8 @@ Read `references/protocol-baseline.md` for the endpoint checklist, token-family 
 ## Refresh tokens
 
 - **Default: rotation with family reuse detection.** Each refresh token belongs to a family traced to the original grant. Presenting a consumed token again revokes the whole family. RFC 9700 section 4.14 explains the limit of this: the server cannot tell which party presented the stale token, only that revoking the active one is safe. Treat it as a tripwire.
-- Add a short reuse grace window (seconds) from the start. Multi-tab SPAs and network retries re-present a just-consumed token, and without a window they look like attacks and log real users out. Inside the window, return the successor already issued for that token (an idempotent refresh) and mint no new sibling. A second child would let a replayed stolen token start a branch that family reuse detection never sees. If you must re-issue, allow it once and revoke the family on the next presentation. Choose the window from your own client behavior.
-- RFC 9700 requires public-client refresh tokens to be sender-constrained or rotated. A reusable, unconstrained refresh token for a public client is not an option.
+- Add a short reuse grace window (seconds) from the start. Multi-tab SPAs and network retries re-present a just-consumed token, and without a window they look like attacks and log real users out. Inside the window, return the successor already issued for that token (an idempotent refresh) and mint no new sibling. A second child would let a replayed stolen token start a branch that family reuse detection never sees. Because tokens are stored hashed, keep the successor's token response encrypted, keyed by the predecessor's hash, for the length of the grace window, and delete it when the window closes. If you must re-issue, allow it once and revoke the family on the next presentation. Choose the window from your own client behavior.
+- RFC 9700 requires public-client refresh tokens to be sender-constrained or rotated. A reusable, unconstrained refresh token for a public client is not an option. When serving MCP, the MCP 2026-07-28 security considerations are stricter: authorization servers MUST rotate public-client refresh tokens, so sender-constraining is not an alternative there.
 - Confidential clients are already sender-constrained by client authentication, so non-rotating tokens with a per-client cap can be defensible for them.
 - Sender-constrain with DPoP (RFC 9449) or mTLS when tokens guard financial or health data or long-lived agent tokens widen the theft blast radius. Many client libraries don't support DPoP yet, so ship it as an option, not a baseline, unless your clients are known.
 - Cap refresh lifetime hardest for browser clients, where storage exposure is highest.
@@ -97,4 +89,4 @@ State the profile you checked or designed against, which items you verified by t
 
 ## Sources checked
 
-rfc-editor.org (RFC 6749, 7009, 7591, 7636, 7662, 8414, 8628, 8707, 9126, 9207, 9449, 9700, 9728), datatracker.ietf.org/doc/draft-ietf-oauth-v2-1 (revision 16, rechecked October 2026), and modelcontextprotocol.io/specification/2026-07-28/basic/authorization (with its client-registration and security-considerations pages).
+rfc-editor.org (RFC 6749, 7009, 7591, 7636, 7662, 8414, 8628, 8707, 9126, 9207, 9449, 9700, 9728), datatracker.ietf.org/doc/draft-ietf-oauth-v2-1 (revision 17, dated 31 October 2026), and modelcontextprotocol.io/specification/2026-07-28/basic/authorization (with its client-registration and security-considerations pages).

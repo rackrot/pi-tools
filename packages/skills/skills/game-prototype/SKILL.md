@@ -1,13 +1,13 @@
 ---
 name: game-prototype
-description: "Timeboxed game prototyping: a greybox mechanic spike or vertical slice that answers one question with keep or kill criteria, and game-jam planning (scope to the clock, hour schedule, cut list, submit early). Use when prototyping a mechanic, greyboxing, or planning a jam or 48-hour build."
+description: "Timeboxed game prototyping and game jams: sets up a greybox mechanic spike or vertical slice around one question, judges playtest results against fixed keep, kill or retune rules, and scopes a jam to the clock (per-length budget for mechanics, levels and audio, hour schedule, feature freeze, cut list, submit early). Use when prototyping or greyboxing a mechanic, deciding whether to keep, kill or retune a prototype, or planning or checking a plan for a game jam or 48-hour build. Its verdict rules and jam budgets are stricter than common advice, so read it before giving a verdict or reviewing a plan."
 ---
 
 # Game prototype
 
 A game prototype exists to produce a decision (keep, kill or retune), not a product. Two modes share one discipline: **spike** (no deadline beyond a timebox, answers "is this fun?") and **jam** (a fixed external deadline and a submission). Pick the mode first; if the user names a jam, a weekend or a submission, it is jam mode.
 
-Not for web UI or state-model prototypes (`prototype`), the production build of a validated mechanic (the engine skill, such as `godot`), design documents and balancing (`game-design`), juice and camera feel (`game-feel`), structured playtest sessions (`game-playtest`), or uploading a build (`game-publish`). Use each one if installed.
+Not for web UI or state-model prototypes (`prototype`), the production build of a validated mechanic (the engine skill, such as `godot`), design documents and balancing (`game-design` or `game-craft`), juice and camera feel (`game-feel` or `game-craft`), structured playtest sessions (`game-playtest` or `game-craft`), or uploading a build (`game-publish`). Use each one if installed.
 
 ## Spike mode
 
@@ -50,7 +50,7 @@ Containment: build the spike outside the shipping code (`prototypes/<idea>/`, a 
 
 | | 48-hour jam | 72-hour jam | 1-week jam |
 | --- | --- | --- | --- |
-| Core mechanics | 1, playable by hour 6 | 1 or 2 | 2 or 3 interacting |
+| Core mechanics | 1, playable by hour 8 | 1 or 2 | 2 or 3 interacting |
 | Content | 1 level or one generated space | 3 to 5 levels | 8 to 12 plus progression |
 | Art | placeholder, one palette | one cohesive set | themed set plus UI |
 | Audio | 3 to 5 SFX, 1 loop | SFX, 1 or 2 tracks | adaptive music |
@@ -69,7 +69,7 @@ H38-44  feature freeze: fix crashes and soft-locks only
 H44-48  export, clean-path test, screenshots, page, submit by ~H46
 ```
 
-Feature triage, asked in order for every idea: does the loop work without it (then it is a stretch goal); would a player notice it missing (if not, cut it); is it under 30 minutes of work (if not, defer past the ship buffer). Under deadline pressure the default answer is cut.
+Feature triage for every idea, first match wins: the loop does not work without it, so build it now; the loop works without it and a player would not notice it missing, so cut it; a player would notice it and it takes under 30 minutes, so it is a stretch goal, built only before the feature freeze; otherwise cut it for the jam and note it for a post-jam update. Under deadline pressure the default answer is cut.
 
 Pre-submit check, on an extracted copy:
 

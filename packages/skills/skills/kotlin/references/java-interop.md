@@ -27,7 +27,7 @@ Keep these annotations only while Java still calls the code; remove them once ca
 
 ## Annotation targets
 
-Java annotations on a Kotlin constructor `val` go to the parameter by default. Choose the target explicitly when the framework reads a field or getter: `@field:Column`, `@get:JsonProperty`, `@param:Inject`, `@set:`. A Bean Validation annotation that is silently ignored is usually on the wrong target (`@field:NotBlank`, `@get:NotBlank`).
+Before Kotlin 2.4 an annotation on a constructor `val` goes only to the parameter; from 2.4 (or with `-Xannotation-default-target=param-property` on 2.2+) it goes to the parameter and the property, or the field when the property target does not apply. Check the Kotlin version first, and write the target explicitly when the framework reads a field or getter: `@field:Column`, `@get:JsonProperty`, `@param:Inject`, `@set:`. A Bean Validation annotation that is silently ignored is usually on the wrong target (`@field:NotBlank`, `@get:NotBlank`).
 
 ## Other conversions
 

@@ -1,11 +1,11 @@
 ---
 name: api-idempotency
-description: Designs idempotency keys and safe retries for HTTP APIs, server and client. Use when adding an Idempotency-Key header, fixing duplicate or double-submitted writes, auditing a key implementation for races (atomic claim, in-flight state, replay window), or setting client retry policy, full-jitter backoff, retry budgets and SDK retry defaults.
+description: Designs and reviews idempotency keys and safe retries for HTTP APIs, server and client. Use when adding an Idempotency-Key header, fixing duplicate or double-submitted writes, reviewing an idempotency or retry design or settling its open questions, auditing a key implementation for races (atomic claim, in-flight state, replay window), or setting client retry policy, full-jitter backoff, retry budgets and SDK retry defaults. Read it before answering even a short either-or question on these, because several of its rules contradict the cautious default.
 ---
 
 # Idempotency keys and safe retries
 
-Not for the shape of error responses (`api-rest-design`), webhook delivery retries or verifying and acknowledging received webhooks (`api-webhooks`), or Postgres locking and index details (`postgres`), each if installed. Deduplicating received webhook events by event ID is this skill's job: use the key store and atomic claim below, keyed on the provider's event ID.
+Not for the shape of error responses (`api-rest-design`), webhook delivery retries or verifying and acknowledging received webhooks (`api-webhooks`), each if installed. Postgres locking and index details are out of scope. Deduplicating received webhook events by event ID is this skill's job: use the key store and atomic claim below, keyed on the provider's event ID.
 
 A retried write is safe only when both halves exist: a server that collapses duplicates and a client that retries with discipline. Retry guidance without key support, or keys without retry guidance, leaves the guarantee open exactly where a dropped connection tests it.
 
@@ -31,7 +31,7 @@ Collect these from the repo, then ask the user only for what the code cannot ans
 - Scope keys per caller: unique on `(account_id, idempotency_key)`, never global.
 - Recommend a derivation. Prefer an event-derived key (`order-confirm-<orderId>`), which a retry cannot fail to reuse. Next best is request-scoped, then a random UUID generated once and reused. A fresh value per attempt (`Date.now()`, a regenerated UUID) defeats the mechanism, so document it as the anti-pattern.
 - Store a fingerprint (a checksum of the payload) beside the key. The same key with a different payload is a client bug. Reject it with a distinct code instead of silently replaying. Status choice: `422` is what the expired IETF draft proposes, and `409` is common in the field. Pick one and keep it distinct from the in-flight response.
-- Store both outcomes. Decide explicitly whether a stored failure replays verbatim or may be re-attempted without side effects. Leaving it undecided is a design gap.
+- Store both outcomes. Decide explicitly whether a stored failure replays verbatim (the client sends a new key to try again) or may be re-attempted without side effects. Either choice is valid once decided and documented. Replaying a stored 5xx is safe when no foreign-call outcome is left unknown, because the derived vendor key or the completer (section 3) resolves it. Leaving it undecided is the design gap, not the replay.
 
 ### 2. Atomic claim
 
@@ -77,7 +77,7 @@ Run recovery as background jobs. A completer pushes abandoned in-flight requests
 - Bound both attempts and total duration, and log each retry (attempt, error, next wait).
 - Add a fleet retry budget. Stop retrying once retries exceed a set share of traffic over a sliding window, because 100 instances each retrying 3 times amplify load 300x while each looks reasonable.
 - Set one overall deadline at the top and budget per-attempt timeouts inside it. Do not create a fresh overall timeout per attempt.
-- Use the language's retry library (tenacity, Resilience4j, or equivalent) before hand-rolling. See `python` for its reliability guidance and `coding` for the repo-wide retry policy, each if installed.
+- Use the language's retry library (tenacity, Resilience4j, or equivalent) before hand-rolling.
 - For SDKs you ship, default retries on, with jitter and a small attempt cap, and auto-generate keys for unsafe operations. Defaults are the contract for callers who never read docs.
 
 ## Document the contract

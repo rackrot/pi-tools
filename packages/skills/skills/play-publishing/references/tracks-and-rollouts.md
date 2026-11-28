@@ -19,7 +19,7 @@
 - Start production at a small fraction (for example 5 or 10 percent), watch crash and ANR rates in Android vitals, then raise in steps.
 - Raising the percentage is a rollout change: confirm each step.
 - Halting stops new installs of the release while keeping existing ones. Resume or supersede it with a higher `versionCode`.
-- A rollout cannot be reduced; to go back, halt and ship a fixed build with a higher `versionCode`.
+- Lowering the percentage does not take the release back from users who already have it; to stop exposure, halt, then ship a fixed build with a higher `versionCode`.
 
 ## versionCode
 

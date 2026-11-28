@@ -1,6 +1,6 @@
 ---
 name: forgejo-issues
-description: "Reads, creates, edits, closes and labels a single issue on Codeberg or a self-hosted Forgejo with fj, including templates, milestones, dependencies and issue search. Use when the user wants to file or update one Forgejo or Codeberg issue, set its labels or milestone, or find issues by query. Not for GitHub issues (`gh-issues`)."
+description: "Reads, creates, edits, closes and labels a single issue on Codeberg or a self-hosted Forgejo with fj, including templates, milestones, dependencies and issue search. Use when the user wants to file or update one Forgejo or Codeberg issue, set its labels or milestone, or find issues by query. Not for GitHub issues (`gh-issues`), or when fj is missing or not logged in (`forgejo-cli`)."
 ---
 
 # Forgejo issues with fj
@@ -36,7 +36,7 @@ fj issue -R <remote> templates
 ## Create
 
 1. Search for a duplicate first: `fj issue search "<keywords>" -s all`. If one exists, offer to comment on it instead.
-2. List labels and milestones rather than guessing: `fj repo labels view` (several remotes: `fj repo labels <host/owner/repo> view`), `fj milestone search --state all`. With forgejo-mcp tools present (`mcp__plugin_forgejo-mcp_forgejo__*`), use them for label IDs and organization labels.
+2. List labels and milestones rather than guessing: `fj repo labels view` (several remotes: `fj repo labels <host/owner/repo> view`), `fj milestone search --state all`. With forgejo-mcp tools present (their names contain `forgejo`, such as `mcp__forgejo__*`), use them for label IDs and organization labels.
 3. List the repo's templates with `fj issue templates`. Use one with `--template "<name>"`, otherwise a body from [templates](references/templates.md). If the repo disables blank issues, `--template` is required.
 4. Write the body to a file, show the commands, get approval, run them:
 
@@ -45,7 +45,7 @@ fj issue create "Login fails with SSO enabled" --body-file /tmp/issue-body.md --
 fj issue edit 123 labels -a bug
 ```
 
-`issue create` has no label flag, so labels are a second command with the number it printed. `edit N labels` takes `-a/--add` and `-r/--rm`. Check `fj issue edit 123 labels --help` for how several labels are passed. Keep titles specific and under about 72 characters. Omitting `--body` and `--body-file` opens an editor, which hangs a non-interactive run.
+`issue create` has no label flag, so labels are a second command with the number it printed. `edit N labels` takes `-a/--add` and `-r/--rm`. The help does not say how several labels are passed to `-a`; add one label per command, or test on a scratch issue before batching. Keep titles specific and under about 72 characters. `issue create`, `issue comment` and `milestone create` open an editor when the body or description is omitted, which hangs a non-interactive run; always pass it.
 
 ## Edit, comment, close
 

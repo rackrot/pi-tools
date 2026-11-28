@@ -1,13 +1,13 @@
 ---
 name: dotnet-ai-apps
-description: Chooses and wires AI and ML in .NET apps with Microsoft.Extensions.AI (IChatClient, embeddings), Microsoft Agent Framework, vector search and RAG, ML.NET, ONNX Runtime and OllamaSharp. Use for adding an LLM call or chatbot to a .NET service, a tool-calling agent in C#, RAG over documents, or choosing between an LLM and ML.NET for a prediction.
+description: "Chooses and wires AI and ML in C#/.NET apps: LLM calls and chatbots with Microsoft.Extensions.AI (IChatClient), tool-calling agents with Microsoft Agent Framework, embeddings and RAG, ML.NET predictions (churn, scoring, classification), ONNX Runtime, Ollama. Read before answering any .NET request that involves an LLM, GPT, Azure OpenAI, an agent or a prediction model, including plan-only questions with no code to inspect: these packages renamed and removed APIs recently and older samples no longer compile. Not for building an MCP server or for Python or TypeScript AI stacks."
 ---
 
 # AI and ML in .NET apps
 
 Pick the technology first, then deliver only what was asked. A request for a plan, comparison or architecture ("don't write code yet") gets that, not a scaffolded project.
 
-Not for: Python, TypeScript or other non-.NET AI stacks; building an MCP server in C# (`mcp-server`); Anthropic API specifics such as model IDs, prompt caching or the Claude SDKs (use the Claude API docs or the `claude-api` skill if installed); general ASP.NET Core endpoint work (`aspnet-core`); package version policy (`nuget`); training deep-learning models (train in Python, export to ONNX, then come back here for inference).
+Not for: Python, TypeScript or other non-.NET AI stacks; building an MCP server in C# (`mcp-server`); Anthropic API specifics such as model IDs, prompt caching or the Claude SDKs (use the Claude API docs); general ASP.NET Core endpoint work (`aspnet-core`); package version policy (`nuget`); training deep-learning models (train in Python, export to ONNX, then come back here for inference).
 
 ## Orient
 
@@ -49,7 +49,7 @@ Every answer, plan or code, covers the guardrails of its branch:
 - **LLM call:** set `Temperature` and `MaxOutputTokens` in `ChatOptions`; pin a dated model or deployment version, not a floating alias; pass a `CancellationToken` and a timeout; rely on the provider SDK's retry for transient errors (the OpenAI and Azure clients retry 429 and 5xx by default) and tune it there or with a resilience pipeline; validate structured output with `GetResponseAsync<T>` and a fallback when parsing fails.
 - **Agent:** build on `IChatClient` with `AsAIAgent(...)` or `new ChatClientAgent(...)`; cap the tool loop with `FunctionInvokingChatClient.MaximumIterationsPerRequest`; define each tool with `AIFunctionFactory.Create` and a clear description; enforce a token or cost budget from `UsageDetails`; log tool names and metadata, not raw sensitive content; require approval for tools with side effects; prefer one agent with tools over multi-agent.
 - **RAG:** chunk on semantic boundaries (headings, paragraphs), not fixed character counts; embed once at ingestion and store the vectors, never re-embed the corpus per query; search through MEVD with the store the user asked for; drop hits below a minimum score; keep source attribution per answer.
-- **ML.NET:** `new MLContext(seed: ...)`; `TrainTestSplit` and evaluate on the held-out set; report real metrics (MicroAccuracy, MacroAccuracy and LogLoss; AUC and F1; or RMSE and R²); serve with `PredictionEnginePool<TIn, TOut>`, never a singleton `PredictionEngine`.
+- **ML.NET:** `new MLContext(seed: ...)`; `TrainTestSplit` and evaluate on the held-out set; report real metrics (MicroAccuracy, MacroAccuracy and LogLoss; AUC and F1; or RMSE and R²); serve with `PredictionEnginePool<TIn, TOut>`, never a singleton `PredictionEngine`. A plan names every one of these (fixed seed, held-out split, the metrics, `PredictionEnginePool`) even when the answer must be short.
 - **ONNX:** one warmed `InferenceSession` from DI; validate input and output names, types and shapes at startup; dispose results; preprocess exactly as at training.
 
 ## 4. Decide depth

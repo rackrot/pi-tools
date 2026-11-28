@@ -17,7 +17,7 @@ aws s3api list-objects-v2 --bucket <bucket> --prefix <prefix> --max-items 50 \
   --query 'Contents[].[Key,Size,LastModified,StorageClass]' --output table
 ```
 
-`get-bucket-policy`, `get-public-access-block`, and `get-bucket-encryption` return an error when nothing is configured (`NoSuchBucketPolicy` and similar). Report that as "not configured". `s3api get-object`, `s3 cp`, and `s3 presign` are denied.
+`get-bucket-policy`, `get-public-access-block`, and `get-bucket-encryption` return an error when nothing is configured (`NoSuchBucketPolicy` and similar). Report that as "not configured". `s3api get-object` and `s3 cp` are denied. `s3 presign` is state-changing: only on request, see Changes in SKILL.md.
 
 ## EBS and EFS
 

@@ -1,11 +1,11 @@
 ---
 name: gh-repo-setup
-description: Audits and sets up a GitHub repository's surface with gh. Covers label taxonomy, issue forms, PR template, CODEOWNERS, SECURITY.md, CONTRIBUTING.md, and branch or tag rulesets, with a dry-run plan and an applied/skipped/failed report. Use when creating or tidying a repo, or when asked to add rulesets, templates, or labels. GitHub only, not for Forgejo, Codeberg or Gitea.
+description: "Audits and sets up a GitHub repository's surface with gh: branch protection through rulesets (block force-pushes and deletion of main, require PR approvals, bypass actors), label taxonomy, issue forms, PR template, CODEOWNERS, SECURITY.md and CONTRIBUTING.md, with a dry-run plan and an applied/skipped/failed report. Use when creating or tidying a repo, when asked to protect a branch, stop direct or force pushes, require reviews before merge, or add rulesets, templates or labels. GitHub only, not for Forgejo, Codeberg or Gitea."
 ---
 
 # GitHub Repo Setup
 
-Not for workflow content (`gh-actions`), Dependabot config (`dependabot`), security features (`gh-code-security`), agent instruction files (`agent-instructions`), or a Forgejo, Codeberg or Gitea repo.
+Not for workflow content, Dependabot config, security features (`gh-code-security`), agent instruction files, or a Forgejo, Codeberg or Gitea repo.
 
 ## Forge gate
 
@@ -33,7 +33,7 @@ Creating labels, rulesets, or settings changes shared state, and committing or p
 
 ## Plan
 
-Show a table of `module | action (create/update/skip) | exact command | reason` and wait for approval. Write out the exact `gh` or `gh api` command for each write, including its overwrite behavior (for example, `gh label create --force` replaces the color and description of an existing label, so list the labels it would change). Ask only what changes the plan: whether automation bots depend on specific label names, which language community files use, and who owns the code for CODEOWNERS.
+Open the plan with one markdown table whose header row is `| module | action | exact command | reason |`, one row per module (action is create, update or skip), then wait for approval. File contents and JSON bodies go below the table; the command cell names the file it sends. Write out the exact `gh` or `gh api` command for each write, including its overwrite behavior (for example, `gh label create --force` replaces the color and description of an existing label, so list the labels it would change). Ask only what changes the plan: whether automation bots depend on specific label names, which language community files use, and who owns the code for CODEOWNERS.
 
 ## Modules
 
@@ -45,7 +45,7 @@ Run in this order. Skip any module the repo already satisfies.
 | Issue forms | `.github/ISSUE_TEMPLATE/*.yml` plus `config.yml` | [community files](references/community-files.md) |
 | PR template | `.github/PULL_REQUEST_TEMPLATE.md` | [community files](references/community-files.md) |
 | Ownership and policy | `CODEOWNERS`, `SECURITY.md`, `CONTRIBUTING.md` | [community files](references/community-files.md) |
-| CI | Default workflow | Hand off to `gh-actions`. It owns triggers, permissions, and action refs. When `.github/workflows/` exists, add it to CODEOWNERS with the CI owners (see community files) |
+| CI | Default workflow | Out of scope: do not write workflow content here. When `.github/workflows/` exists, only add it to CODEOWNERS with the CI owners (see community files) |
 | Rulesets | Branch and tag protection through the REST API | [rulesets](references/rulesets.md). Read it before any ruleset write |
 
 Prefer rulesets to legacy branch protection. They layer, can be switched to `evaluate` or `disabled` without deleting, and can be listed and audited through one API.

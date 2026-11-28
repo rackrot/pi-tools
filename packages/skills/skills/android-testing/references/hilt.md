@@ -1,6 +1,6 @@
 # Hilt in tests
 
-Verified 2026-11-01: Hilt 2.60.1 is the latest release. Use the project's version; the setup below is stable across 2.4x and later.
+Use the project's version; the setup below is stable across 2.4x and later.
 
 ## Instrumented tests
 

@@ -1,13 +1,13 @@
 ---
 name: aws-resource-query
-description: Answers questions about live AWS resources with read-only AWS CLI calls (describe, list, safe get) using the user's profile or SSO session, and never prints secret values. Use when asked what exists in an AWS account or region, how a resource is configured, or what state it is in now (EC2, Lambda, ECS/EKS, S3, RDS, DynamoDB, IAM, VPC), or before calling the aws-mcp `run_script` or `get_presigned_url` tools. Not for credentials, IAM policy or sign-in (use `aws`).
+description: "Answers questions about live AWS resources with read-only AWS CLI calls, and decides which aws commands may run and what may be printed: a deny list for calls that return secrets or data, --query projections, profile and region setup. Use when asked what exists in an AWS account or region, how a deployed resource is configured or what state it is in now (EC2, Lambda, ECS/EKS, S3, RDS, DynamoDB, IAM, VPC), even when the request does not say AWS and the workspace has no code for it; when vetting a describe, list or get command; or before calling the aws-mcp `run_script` or `get_presigned_url` tools. Not for credentials, IAM policy or sign-in (use `aws`), or scripts and writes (use `aws-cli`)."
 ---
 
 # AWS resource query
 
 Translate a question about an AWS account into AWS CLI commands, run them, and report what exists. Reads by default; changes a resource only when the user asks (see Changes). Never prints a secret value.
 
-Not for incident triage from logs and metrics (`aws-cloudwatch`, if installed), Well-Architected or cost review (`aws-well-architected`, if installed), or writing infrastructure as code (`terraform`, if installed). For credentials, IAM policy, sign-in, CLI quirks and the write-command rule, use `aws`.
+Not for incident triage from logs and metrics (`aws-cloudwatch`, if installed), Well-Architected or cost review (`aws-well-architected`, if installed), or writing infrastructure as code (`terraform`, if installed). For credentials, IAM policy and sign-in, use `aws`. For CLI mechanics, scripts and write commands, use `aws-cli`.
 
 ## Before the first command
 
@@ -36,6 +36,7 @@ Always denied, with the metadata alternative to offer instead:
 | `sts get-session-token`, `get-federation-token`, `assume-role*` | Mints credentials | `get-caller-identity` |
 | `ecr get-login-password`, `get-authorization-token`; `codeartifact get-authorization-token`; `eks get-token`; `rds generate-db-auth-token`; `redshift get-cluster-credentials*`; `ec2 get-password-data`; `lightsail get-instance-access-details` | Returns a credential or token | The matching `describe-*` call |
 | `ssm get-command-invocation`; `logs get-log-events`, `filter-log-events`, `tail` | Output and log lines often contain secrets | `aws-cloudwatch` for logs, scoped and filtered |
+| `lambda get-function`; `ec2 get-console-output` | `get-function` returns a presigned download URL for the code package; console text can contain secrets | `lambda get-function-configuration` with a projection; `ec2 describe-instance-status` |
 | `s3api get-object`, `s3 cp`; `dynamodb get-item`, `query`, `scan`; `sqs receive-message` | Reads data, not metadata (`receive-message` also hides messages from other consumers) | Counts and configuration (`describe-table`, `get-queue-attributes`) |
 
 Output-expanding flags are denied on every command: `--with-decryption`, `--details` (for example `ssm list-command-invocations --details`, which adds command output), `--include-value` and `--include-values`, and `--attribute userData`.
@@ -51,7 +52,7 @@ Some allowed calls return secrets inside their full output. Print them only with
 | `lambda list-functions`, `get-function-configuration` | `Environment.Variables` |
 | `ecs describe-task-definition` | Container `environment` values |
 | `ecs describe-tasks` | `overrides.containerOverrides[].environment` |
-| `ec2 describe-launch-template-versions`; `autoscaling describe-launch-configurations`; `ec2 describe-instance-attribute --attribute userData` | `UserData` scripts |
+| `ec2 describe-launch-template-versions`; `autoscaling describe-launch-configurations` | `UserData` scripts |
 | `elasticbeanstalk describe-configuration-settings` | Environment `OptionSettings` values |
 | `batch describe-job-definitions` | Container `environment` and `secrets` |
 | `apprunner describe-service` | `RuntimeEnvironmentVariables` |
@@ -67,14 +68,8 @@ This list is a sample. Treat any unlisted call the same way.
 
 ## Changes
 
-State-changing commands run only when the user asks for that change. Rules:
-
-- **Scope**: Limit to exactly the requested change. State the account, profile, region, and affected resources before running.
-- **Show first**: Display the exact command before executing it, and wait for approval.
-- **DryRun**: Use `--dry-run` or equivalent (EC2 and others support it) for risky changes.
-- **Confirm destructive steps**: Explicitly confirm before delete, terminate, overwrite, IAM/permission changes, or public exposure.
-- **Verify after**: Run a read command afterwards to confirm the change and report what changed.
-- **Never print secrets**: Secrets stay redacted in output, regardless.
+A state-changing command runs only when the user asks for that exact change. Follow the `aws-cli` write procedure: show the command and wait for approval, dry run where supported, pass an explicit `--region`, and verify with a read afterwards.
+Secrets stay redacted in output regardless.
 
 ## Shaping output
 
@@ -94,7 +89,7 @@ Read the one that matches the question. Each lists intent-to-command mappings.
 - `references/network.md` for VPC, subnets, security groups, load balancers, Route 53, and CloudFront.
 - `references/identity-and-security.md` for IAM, KMS, Secrets Manager and SSM metadata, ACM, GuardDuty, Security Hub, and Config.
 - `references/ops-and-cost.md` for alarms, log groups, CloudTrail, queues and topics, EventBridge, API Gateway, Step Functions, tag-based search, Cost Explorer, and Budgets.
-- `references/aws-mcp.md` whenever `mcp__plugin_aws-mcp_aws-mcp__*` tools are present: read it before calling `aws___run_script` or `aws___get_presigned_url`. The deny list and projection rules above apply to those tools too.
+- `references/aws-mcp.md` when tools from an aws-mcp server (such as `run_script` or `get_presigned_url`) are available: read it before calling them. Skip this file otherwise. The deny list and projection rules above apply to those tools too.
 
 ## Errors
 

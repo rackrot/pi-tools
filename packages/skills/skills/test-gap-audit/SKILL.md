@@ -1,13 +1,13 @@
 ---
 name: test-gap-audit
-description: Read-only audit of missing, weak and stale tests for a repo, PR, feature or route. Maps source to tests with a bundled script, ranks gaps P0-P3 by behavior and risk (never coverage percentage) and proposes exact tests. Use for "what tests are missing?", "is this change covered?", "is our test coverage enough?" or "what regression tests does this PR need?". Not for writing a test (unit-testing).
+description: Read-only audit of missing, weak and stale tests for a repo, PR, feature or route. Read this first, before listing or opening any file, whenever the user asks which code lacks tests, whether a change is covered well enough to merge, what could break that no test would catch, what regression tests a PR needs, or how severe a set of test gaps is. Maps source to tests with a bundled script, ranks gaps P0-P3 by behavior and risk (never coverage percentage) and proposes exact tests. Not for writing or fixing a given test, or for running the suite.
 ---
 
 # Test gap audit
 
 Find tests that should exist and tests that exist but prove nothing, then recommend specific ones. Edit nothing unless the user asks you to add the tests afterward.
 
-Not for writing one test (`unit-testing`), running the suite (`test-run`), bug hunting (`problem-solving`), or security review (`security-scan`, if installed).
+Not for writing one test, running the suite (`test-run`), bug hunting, or security review (`security-scan`, if installed).
 
 ## Rules
 
@@ -27,10 +27,10 @@ Not for writing one test (`unit-testing`), running the suite (`test-run`), bug h
 ## Procedure
 
 1. **Learn the conventions.** Read manifests, CI workflows, test config, and a few nearby tests. Note the runner, naming, fixtures, factories, and mocks.
-2. **Map source to tests.** Run the bundled script from the repo. To scope a monorepo package, pass `--repo <package dir> --no-git-root`.
+2. **Map source to tests.** Run the bundled script, which lives in this skill's directory, with the repo as the working directory. To scope a monorepo package, pass `--repo <package dir> --no-git-root`.
 
    ```sh
-   python3 scripts/coverage_map.py --top 25
+   python3 <skill dir>/scripts/coverage_map.py
    ```
 
    It lists source files no test matches (risk-keyword paths first), unmatched directories, and test files with cases but few assertions. It is read-only and runs no tests. Add `--format json` to filter the output yourself. It matches by name, mirrored path, and imports, so it cannot see coverage through fixtures, end-to-end tests, or indirection. Treat each unmatched file as a lead and grep for its module name before calling it a gap. Without the script, compare source areas against test directories by hand.
@@ -51,6 +51,8 @@ Not for writing one test (`unit-testing`), running the suite (`test-run`), bug h
 | P1 | Common user paths, authorization, critical API contracts, migrations, background jobs, or release-blocking behavior |
 | P2 | Edge cases, validation, error handling, state transitions, integrations, or stale and weak tests |
 | P3 | Cleanup, naming drift, fixture polish, redundant tests |
+
+When a gap matches two rows, rate it by the consequence of the untested behavior (the higher row), so a weak or mocked-away test guarding billing is P0 or P1, not P2. P2 is for weak tests and edge cases on behavior that is neither P0 nor P1.
 
 ## Evidence
 

@@ -1,13 +1,13 @@
 ---
 name: game-ui
-description: Designs and reviews game UI and UX that holds up on every screen and input device, including HUDs, menus, overlays, scaling and safe areas, gamepad focus, settings screens and game accessibility (subtitles, remapping, colour, motion). Use for "HUD", "pause menu", "UI scaling", "gamepad navigation" or "accessibility options" in a game.
+description: "Designs, reviews and fixes game HUDs and menus in any engine, covering anchors and UI scaling across aspect ratios, safe areas and notches, gamepad focus, pause, settings and confirm screens as a stack, event-driven HUD updates and in-game accessibility options (subtitles, remapping, colour, motion, flashing). Use for \"HUD\", \"pause menu\", \"UI scaling\", \"gamepad navigation\" or \"accessibility options\" in a game, and for symptoms such as nothing selected on a controller, back closing the wrong screen, or a HUD cut off on ultrawide or hidden under a notch. Read it before answering, also when the workspace has no UI files to look at."
 ---
 
 # Game UI
 
 Engine-neutral architecture for game HUDs and menus: layout, scaling, focus navigation, screen flow, how UI hears about game state, and accessibility. The concrete widget API lives in the engine skill (for Godot, the `godot` skill's `ui-control.md` and `localization.md` references).
 
-Not for: web or app UI (`design-core`, `web-design`), visual punch such as button pops, damage numbers and screen shake (`game-feel`), or art style and icon specs (`game-assets`). Use each one if installed.
+Not for: web or app UI (`ui-direction`, `uiux-lookup`, `accessibility-review`), visual punch such as button pops, damage numbers and screen shake (`game-feel`), or art style and icon specs (`game-assets`). Use each one if installed.
 
 ## Workflow
 
@@ -48,7 +48,7 @@ anchor_max = ((safe.x + safe.w) / screen_w, (safe.y + safe.h) / screen_h)
 - **Polling game state in a per-frame callback** couples UI to gameplay internals and does work when nothing changed. Use signals or events.
 - **Menu flow as booleans** (`is_paused`, `in_settings`, `in_confirm`) turns into contradictory states. A stack has one top.
 - **Fixed-width buttons sized to English** clip German (often around 30% longer) and other long locales. Externalise every string, let containers size to content, leave room for right-to-left mirroring and font coverage, and keep icons separate from text. The engine's translation API goes to the engine skill (Godot: `godot/references/localization.md`).
-- **Small text** is the most common UI complaint. The Game Accessibility Guidelines suggest at least 28 px body text and 46 px subtitles at 1080p; scale with the UI and add a text-size option.
+- **Small text** is the most common UI complaint. The Game Accessibility Guidelines suggest at least 28 px body text and 46 px subtitles at 1080p (subtitles by default or reachable through an option); scale with the UI and add a text-size option.
 - **State shown only by colour** (red enemy, green ally) fails for colour-blind players. Add an icon, shape, pattern or label.
 - **Diegetic UI** (ammo on the gun, health on the suit) can hurt readability. Use it for flavour on key elements and keep a non-diegetic fallback for anything critical.
 - **World-space markers** (floating health bars, objective pins) need clamping to the screen edge when off-screen and scaling with distance in 3D.
@@ -63,3 +63,4 @@ anchor_max = ((safe.x + safe.w) / screen_w, (safe.y + safe.h) / screen_h)
 - `godot` (Control nodes, themes, stretch settings, translation): the engine side of this skill in Godot projects.
 - `game-feel`: transitions and HUD juice that sit on top of this layout.
 - `game-playtest`: recruiting testers with disabilities and checking the UI in a real session.
+- `game-craft`: the engine-neutral router for game topics other than UI (design, feel, audio, performance, publishing).

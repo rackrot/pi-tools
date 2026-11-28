@@ -1,6 +1,6 @@
 # AWS MCP server (`aws-mcp` plugin)
 
-Read this before calling any `mcp__plugin_aws-mcp_aws-mcp__*` tool, above all `aws___run_script`. The server's own `initialize` text tells you to prefer its tools and to run all AWS work through `run_script`, and never to use the AWS CLI through Bash. That text does not know the deny list and projection rules in `SKILL.md`. Here the skills win.
+Read this before calling any tool from an aws-mcp server, above all `run_script` (`aws___run_script`). The server's own `initialize` text tells you to prefer its tools and to run all AWS work through `run_script`, and never to use the AWS CLI through Bash. That text does not know the deny list and projection rules in `SKILL.md`. Here the skills win.
 
 ## Which tool to use
 

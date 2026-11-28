@@ -46,10 +46,10 @@ Correctness rules:
 | Moves allowed | Heuristic | Formula (`dx = abs(ax-bx)`, `dy = abs(ay-by)`) |
 | --- | --- | --- |
 | 4-way grid | Manhattan | `dx + dy` |
-| 8-way grid | Octile | `(dx + dy) + (sqrt(2) - 2) * min(dx, dy)` |
+| 8-way grid | Octile | `D*(dx + dy) + (D2 - 2*D) * min(dx, dy)`, D = straight step cost, D2 = diagonal step cost (sqrt(2) when D = 1) |
 | Any angle | Euclidean | `sqrt(dx*dx + dy*dy)` |
 
-Multiply by the cheapest step cost so `h` is in the same units as `g`. If `h` can exceed the true cost, A* is faster but no longer optimal (weighted A*); do that deliberately, not by accident. On an 8-way grid, forbid diagonal moves that cut a blocked corner.
+Multiply Manhattan and Euclidean by the cheapest step cost so `h` is in the same units as `g`; octile already uses D and D2. If `h` can exceed the true cost, A* is faster but no longer optimal (weighted A*); do that deliberately, not by accident. On an 8-way grid, forbid diagonal moves that cut a blocked corner.
 
 ## Picking the graph
 

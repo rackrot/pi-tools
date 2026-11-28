@@ -1,6 +1,6 @@
 ---
 name: gh-issues
-description: Reads, creates, edits, closes and labels a single GitHub issue with gh, including issue types, sub-issues, blocked-by links, milestones, Projects V2 fields and issue search. Use when the user wants to file or update one issue, set its type, parent, labels or project field, or find issues by query. Not for Forgejo or Codeberg remotes (`forgejo-cli`).
+description: Files, reads, edits, closes and labels one GitHub issue at a time with gh, covering title, labels, assignee, milestone, issue type, sub-issues, blocked-by links and Projects V2 fields, plus issue search. Use whenever the user asks to file, open, create or update a GitHub issue, link or re-parent tickets, or find issues by query. Read it before inspecting the repo, because it says how to check the remote and which gh flags exist. Not for triaging a backlog (`gh-triage`), splitting a plan into issues (`issue-breakdown`), or Forgejo and Codeberg remotes (`forgejo-issues`).
 ---
 
 # GitHub issues with gh
@@ -11,7 +11,7 @@ Not for turning a plan or spec into many linked issues (`issue-breakdown`) or cl
 
 ## Forge gate
 
-Before any command, check the repo's host (`git remote get-url origin`, or the `-R` target). Proceed when it is github.com or a host `gh auth status --hostname <host>` knows. Otherwise stop: "not a GitHub remote; on Forgejo or Codeberg use forgejo-cli if installed".
+Before any command, check the repo's host (`git remote get-url origin`, or the `-R` target). Proceed when it is github.com or a host `gh auth status --hostname <host>` knows. Otherwise stop: "not a GitHub remote; on Forgejo or Codeberg use forgejo-issues".
 
 ## Approval gate
 
@@ -63,13 +63,15 @@ gh issue edit 123 --type Task --milestone "v2.0"
 gh issue edit 123 --add-sub-issue 124,125
 gh issue edit 124 --parent 123
 gh issue edit 124 --add-blocked-by 120
+gh issue edit 124 --remove-blocked-by 120 --add-blocking 130
+gh issue edit 124 --remove-parent
 gh issue comment 123 --body-file /tmp/comment.md
 gh issue close 123 --reason "not planned" --comment "Out of scope because ..."
 gh issue close 123 --duplicate-of 120
 gh issue reopen 123
 ```
 
-Fetch the issue before editing so unchanged fields stay as they are. `--body` replaces the whole body, so read the current body and edit it rather than overwriting it. `gh issue delete` and `gh issue transfer` are hard to undo. Use them only when the user names them.
+The removal flags (`--remove-parent`, `--remove-sub-issue`, `--remove-blocked-by`, `--remove-blocking`, `--remove-type`) and `--add-blocking` were seen in gh 2.106.0 and may be missing from older releases, so confirm them with `gh issue edit --help`. Fall back to the REST DELETE calls in [api](references/api.md) when they are absent. Fetch the issue before editing so unchanged fields stay as they are. `--body` replaces the whole body, so read the current body and edit it rather than overwriting it. `gh issue delete` and `gh issue transfer` are hard to undo. Use them only when the user names them.
 
 ## Pick the reference
 

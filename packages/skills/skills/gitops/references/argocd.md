@@ -42,7 +42,7 @@ spec:
 - The finalizer makes deleting the Application also delete what it deployed. Omit it when Application deletion must leave workloads running.
 - Use a dedicated `AppProject` instead of `default`, so each project limits which repos, clusters, and namespaces its Applications can use.
 - Pin `targetRevision` to a tag or commit for production when you need an explicit promotion step. A branch name follows every commit.
-- Auto-sync acts only when the Application is OutOfSync, tries once per commit and parameter set, and doesn't retry a failed revision until it changes. Fix and push, or sync manually.
+- Auto-sync acts only when the Application is OutOfSync, tries once per commit and parameter set, and doesn't retry a failed revision until it changes. Fix and push, or sync manually. `retry` re-runs the same sync operation up to `limit` times; once that is exhausted, auto-sync does not start a new attempt for the same commit. Set `retry.refresh: true` to pick up a newer revision while a sync is retrying.
 - Rollback with `argocd app rollback` doesn't work while automated sync is on. Revert the commit in Git instead.
 
 ## App of Apps and ApplicationSet

@@ -10,17 +10,18 @@ Step back from the session's chosen path and ask several fresh reads what the cu
 
 ## Not for
 
-- Cross-model review of a diff or plan: use `second-opinion`.
+- Cross-model review of a diff or plan: use `second-opinion`, if installed (or the second_opinion tool where the host provides it).
 - Attacking a plan in one chosen mode: use `devils-advocate`.
 - Splitting an artifact across different failure-mode lenses: use `lens-review`.
+- Refuting a claim, a stranger's cold read, or lens judgement of an artifact: use `fresh-eyes` (--disprove, --cold, --lens); its --tunnel flag runs this skill.
 
 ## Workflow
 
 The user invoked this, so you may spawn the bounded fresh subagents below. They are read-only inputs, not authority to change the plan.
 
 1. Name the current direction: the decision the session is about to keep building on.
-2. Strip the problem to its goal, constraints and known facts. Remove the session's examples, suggested answer, preferred naming and framing-specific wording.
-3. Spawn 2 to 5 independent fresh subagents (default 3) in one message, each given only the stripped restatement. Same-model reads are fine, because this pass makes no cross-model claim.
+2. Strip the problem to its goal, constraints and known facts. Remove the session's examples, suggested answer, preferred naming and framing-specific wording. Do not name the current direction in the restatement, not even to exclude it or to ask for alternatives to it.
+3. Spawn 2 to 5 independent fresh subagents (default 3) in one message, each given only the stripped restatement. Same-model reads are fine, because this pass makes no cross-model claim. The cap holds when the user asks for more: run 5, and say in one line that reads past 5 repeat the same blind spots instead of adding coverage.
 4. Collect each read without steering it toward the current direction.
 5. Classify each read against the direction:
    - divergent-incompatible: challenges a premise the direction depends on;
@@ -38,7 +39,6 @@ The user invoked this, so you may spawn the bounded fresh subagents below. They 
 - Same-model convergence is reassurance, never proof. Never call the direction verified, proved or settled.
 - Advisory and read-only. Surface candidates and risks; leave decisions and edits to the main workflow.
 - Run only when the user asks. The fan-out is an opt-in spend.
-- For a cross-model read, use `second-opinion`.
 
 ## Before finishing
 

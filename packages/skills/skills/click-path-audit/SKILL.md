@@ -1,13 +1,13 @@
 ---
 name: click-path-audit
-description: Audits UI event handlers for behavior bugs. It maps each state action's side effects, then traces every handler call in order to find sequential undo, async races, stale closures, dead paths and effects that reset what a click just set. Use when a button does nothing or leaves the wrong state though each function works alone, or after a shared-state refactor.
+description: "Use when a button, toggle or form submit does nothing, flips back, flickers, or shows success without the promised result even though each function and its tests pass; when someone asks what fires on a click; or to check every control on a page after a state or store refactor. Read it before answering, also when the handler code is pasted in the prompt: it gives the trace format, the six named bug patterns the report must use and the rule for labelling findings that were not run. Not for API or payload errors, styling or performance."
 ---
 
 # Click-path audit
 
 Each function in a handler can be correct while the handler is not. A later call resets what an earlier call set, two async results land in the wrong order, or an effect clears the flag the click just raised. Static reading and per-function tests miss these, because the bug lives in the sequence. This skill traces the sequence.
 
-Not for building or fixing components (`react`), API or data-shape bugs (`problem-solving`), styling, or performance profiling.
+Not for building or fixing components, API or data-shape bugs, styling, performance profiling, or a single Vue or Pinia reactivity, watcher or hydration bug (`vue`); use this skill when the fault is in the order of calls a control sets off.
 
 It is store-agnostic. "State action" below means any writer of shared state: a Redux reducer, a Zustand or Pinia action, a context setter, a signal, a component's own `setState`.
 
@@ -23,7 +23,7 @@ It is store-agnostic. "State action" below means any writer of shared state: a R
    foreign resets: selectItem resets composeMode (owned by setComposeMode)
    ```
 
-   The foreign-reset list is the key output. Read the action bodies, including reducers, middleware, and subscriptions that run on write. Do not infer effects from names. When the repo is indexed, the codebase-memory MCP tools (`search_graph`, `trace_path`) find every writer of a field faster than Grep.
+   The foreign-reset list is the key output. Read the action bodies, including reducers, middleware, and subscriptions that run on write. Do not infer effects from names. If `search_graph` and `trace_path` are available, use them to find every writer of a field; otherwise Grep for the field name and the setter names.
 3. **Trace each touchpoint.** For each button, toggle, form submit, and change handler in scope, list its calls in execution order and what each reads and writes.
 
    ```

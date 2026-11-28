@@ -32,7 +32,7 @@ aws kinesis list-streams --query 'StreamNames' --output table
 aws firehose list-delivery-streams --query 'DeliveryStreamNames' --output table
 ```
 
-`sqs receive-message`, `purge-queue`, and `sns publish` are denied. Subscription output can include subscriber addresses, so show endpoints only when asked.
+`sqs receive-message` is denied. `purge-queue` and `sns publish` are state-changing: only on request, see Changes in SKILL.md. Subscription output can include subscriber addresses, so show endpoints only when asked.
 
 ## API Gateway and Step Functions
 

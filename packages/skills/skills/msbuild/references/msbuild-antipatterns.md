@@ -1,7 +1,6 @@
 # MSBuild anti-pattern catalog
 
-The numbered catalog retains its
-smell, impact, and correction structure. Use relevant entries for troubleshooting or an
+Each numbered entry gives a smell, its impact, and a correction. Use relevant entries for troubleshooting or an
 explicit authoring review, not as a mandate to rewrite every matching pattern.
 
 Confirm evaluated behavior and exceptions before editing. Preserve framework/package versions,

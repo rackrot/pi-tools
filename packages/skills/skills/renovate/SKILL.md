@@ -1,6 +1,6 @@
 ---
 name: renovate
-description: "Configures and troubleshoots Renovate (renovate.json, presets, packageRules, groups, schedules, automerge, minimumReleaseAge), sets up self-hosted Renovate for Forgejo or Codeberg (platform=forgejo), and sweeps open Renovate PRs, merging only green ones with fj on Forgejo or gh on GitHub. Use when adding or editing Renovate config, diagnosing missing or noisy Renovate PRs, setting up automated dependency update PRs on a Forgejo instance, or asked to merge or clear the Renovate PRs. Not for .github/dependabot.yml (`dependabot`)."
+description: "Configures and troubleshoots Renovate (renovate.json, presets, packageRules, groups, schedules, automerge, minimumReleaseAge), sets up self-hosted Renovate on Forgejo or Codeberg (platform=forgejo), and sweeps open Renovate PRs, merging only green ones with fj on Forgejo or gh on GitHub. Use when adding, editing or reviewing Renovate config, answering how a Renovate option behaves, diagnosing missing or noisy Renovate PRs, setting up automated dependency update PRs on Forgejo, or asked to merge or clear Renovate PRs. Read it before answering from memory, even for a pasted config or PR list: config locations, schedule syntax and fj flags differ from recall. Not for .github/dependabot.yml."
 ---
 
 # Renovate
@@ -8,8 +8,6 @@ description: "Configures and troubleshoots Renovate (renovate.json, presets, pac
 Two jobs: change Renovate config ([Configure](#configure)), or sweep the open Renovate PRs ([Sweep open PRs](#sweep-open-prs)). The config work is forge-neutral. Only the sweep and the hosting setup depend on the forge.
 
 Checked against docs.renovatebot.com on 2026-10-19 (Renovate 44.171.1, the latest release that day). Renovate 44 was an accidental major with no breaking changes. If the repo pins an older Renovate, check the docs for that version before using an unfamiliar option.
-
-Not for `.github/dependabot.yml` (`dependabot`).
 
 ## Forge gate
 
@@ -99,6 +97,6 @@ Same rules. Use:
 - `gh repo view --json squashMergeAllowed,mergeCommitAllowed,rebaseMergeAllowed`, then the repo's default: a method the user names, else the convention in CONTRIBUTING or the repo's instructions, else the only allowed method, else rebase (ask if disallowed). Never use a disallowed method. Report which and why.
 - Re-check each PR with `gh pr view <n> --json state,mergeable,statusCheckRollup`. `SUCCESS`, `NEUTRAL`, `SKIPPED` pass; anything else, or still running, does not. If `mergeable` is `UNKNOWN`, wait and re-check.
 - `gh pr merge <n> --<method> --delete-branch` after approval. Never `--admin`.
-- Behind or conflicting PRs: Renovate rebases them itself; with approval, tick the rebase checkbox in the PR body. Red: report the check and first error line (`gh-actions` for causes, if installed).
+- Behind or conflicting PRs: Renovate rebases them itself; with approval, tick the rebase checkbox in the PR body. Red: report the check and first error line.
 
 Report with the same table.

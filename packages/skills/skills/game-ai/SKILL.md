@@ -7,7 +7,7 @@ description: Designs NPC and enemy decision-making in any engine - finite state 
 
 Build NPC behavior from three separate layers: **decide** (what to do), **path** (how to route there) and **steer** (how to move along the route). A behavior tree picks a target, the pathfinder returns waypoints, steering follows them. Keep each layer swappable and testable on its own.
 
-Not for: an engine's concrete navigation API (in Godot, `NavigationRegion`/`NavigationAgent`, baking, avoidance and layers live in the `godot` skill's navigation reference), addon APIs such as beehave or LimboAI (`godot-addons`), state-machine architecture for non-AI game state (`game-architecture`), movement and collision feel (`game-feel`, `godot-physics`), wave spawning and lanes (tower defense), procedural maps (`level-design`).
+Not for: an engine's concrete navigation API (in Godot, `NavigationRegion`/`NavigationAgent`, baking, avoidance and layers live in the `godot` skill's navigation reference), addon APIs such as beehave or LimboAI (`godot-addons`), state-machine architecture for non-AI game state (`game-architecture`), movement and collision feel (`game-feel`, `godot-physics`), wave spawning and lanes (`game-genres`, tower-defense reference), procedural maps (`level-design`).
 
 ## Orient
 
@@ -54,7 +54,7 @@ Perception writes facts to the agent's memory (the blackboard); decisions read t
 - **Hearing:** gameplay events (gunshot, footstep, door) broadcast a position and loudness radius; agents in range get a "heard at" fact.
 - **Memory:** store last-known position and time seen. When sight is lost, search that spot before giving up; forget after a timeout.
 - **Damage from an unseen source:** turn toward it and go alert.
-- **Reaction delay:** 0.2 to 0.6 s between "saw the player" and "shoots" reads as fair. Instant reaction reads as cheating.
+- **Reaction delay** (between "saw the player" and "shoots"): keep it between 0.2 s (hardest) and 0.6 s (easiest). Below 0.2 s reads as cheating, above 0.6 s reads as asleep.
 
 ## Pathfinding
 
@@ -82,7 +82,7 @@ integrate:      vel += steering * dt; vel = clamp_length(vel, max_speed); pos +=
 
 ## Difficulty knobs
 
-Tune difficulty through what the AI perceives and how fast it acts, not by inflating health or damage.
+Tune difficulty through what the AI perceives and how fast it acts. Leave enemy health and damage at their normal values on every difficulty; if a preset has a health or damage multiplier, set it to 1.0 and move the difference into the knobs below.
 
 | Knob | Easier | Harder |
 | --- | --- | --- |
@@ -92,6 +92,7 @@ Tune difficulty through what the AI perceives and how fast it acts, not by infla
 | Memory of last-known position | forgets fast | searches thoroughly |
 | Attack tokens (how many attack at once) | 1 to 2 | 3 to 4 |
 | Flanking and grenades | off | on |
+| Health and damage multipliers | 1.0 | 1.0 (leave unchanged) |
 
 - **Attack tokens:** a shared pool limits how many enemies attack the player at once; the rest reposition or posture. This one knob fixes most "unfair dogpile" complaints.
 - Telegraph big attacks (wind-up animation, sound) so the player can respond.
@@ -121,3 +122,4 @@ Tune difficulty through what the AI perceives and how fast it acts, not by infla
 - `game-architecture`: state machines for non-AI game state, event buses, data-driven design.
 - `game-performance`: profiling when AI shows up in the frame budget.
 - `level-design`: the generated or authored spaces agents navigate.
+- `game-craft`: engine-neutral requests that span several craft areas (feel, performance, saves...). Enemy and NPC decision-making stays here.

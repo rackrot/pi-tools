@@ -1,6 +1,6 @@
 ---
 name: helm
-description: Authors, validates and releases Helm charts (Chart.yaml, values and schema, helpers, dependencies, lint and template checks, helm diff, atomic upgrades, OCI publishing, provenance). Use when creating or changing a chart, packaging or publishing one, or debugging a failed helm install or upgrade.
+description: Authors, validates, releases and debugs Helm charts and releases (Chart.yaml, values and schema, helpers, dependencies, lint and template checks, helm diff and other plugins, install and upgrade flags, stuck or failed releases, OCI publishing, provenance). Use when creating or changing a chart, packaging Kubernetes YAML as one versioned installable for other teams, publishing a chart, writing or porting a helm install or upgrade command, or debugging a failed, stuck or locked helm release. Helm 4 renamed flags and changed how plugins install, so read this before answering a Helm question from memory, even when no chart files are in the workspace.
 ---
 
 # Helm charts
@@ -14,6 +14,7 @@ Build charts that render to valid, hardened manifests from a small, documented v
 - `helm lint`, `helm template`, `helm show`, `helm get`, `helm list`, `helm history`, and `helm diff` change nothing. Run them freely.
 - `helm install`, `upgrade`, `rollback`, `uninstall`, and `push` change a cluster or registry. Ask first, and state the kube context and namespace.
 - Don't run `helm get values` or `helm get manifest` on a release and paste the result. Both can contain credentials. `helm diff` redacts Secret values by default, so don't add `--show-secrets`.
+- Don't pass `--verify=false` to `helm plugin install` to get past a signature error, even when the error message suggests it. Install the signed release tarball (see [release](references/release.md)) or ask.
 
 ## Workflow
 

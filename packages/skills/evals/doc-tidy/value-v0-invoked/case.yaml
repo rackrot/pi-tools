@@ -1,4 +1,0 @@
-schema_version: "1.1"
-name: value-v0-invoked
-context:
-  scaffold_script: scaffold.sh

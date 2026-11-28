@@ -13,12 +13,12 @@ Run this migration only when the user asks for it (a move to Tomcat 10+, Jakarta
    | `javax.servlet` | `jakarta.servlet` |
    | `javax.persistence` | `jakarta.persistence` |
    | `javax.validation` | `jakarta.validation` |
-   | `javax.annotation` (`@PostConstruct`, `@Resource`) | `jakarta.annotation` |
+   | `javax.annotation` (`@PostConstruct`, `@Resource`), not `javax.annotation.processing` | `jakarta.annotation` |
    | `javax.inject`, `javax.enterprise` | `jakarta.inject`, `jakarta.enterprise` |
    | `javax.ws.rs` | `jakarta.ws.rs` |
-   | `javax.el`, `javax.json`, `javax.mail`, `javax.websocket`, `javax.faces`, `javax.transaction` | the `jakarta.` equivalent |
+   | `javax.el`, `javax.json`, `javax.mail`, `javax.websocket`, `javax.faces`, `javax.transaction` (not `javax.transaction.xa`) | the `jakarta.` equivalent |
 
-4. **Leave JDK packages alone.** `javax.sql`, `javax.naming`, `javax.crypto`, `javax.net`, `javax.security.auth`, `javax.swing`, `javax.xml.parsers`, `javax.xml.transform` ship with the JDK and keep their names. A global find-and-replace on `javax.` breaks the build.
+4. **Leave JDK packages alone.** `javax.sql`, `javax.naming`, `javax.crypto`, `javax.net`, `javax.security.auth`, `javax.swing`, `javax.xml.parsers`, `javax.xml.transform`, `javax.transaction.xa`, `javax.annotation.processing` ship with the JDK and keep their names. A global find-and-replace on `javax.` breaks the build.
 5. **Dependencies.** Replace coordinates (`javax.servlet:javax.servlet-api` becomes `jakarta.servlet:jakarta.servlet-api`) and move every library that touches these APIs to its Jakarta release: Hibernate 6+, Jersey 3+, Tomcat 10+, Jackson `jakarta.rs` modules, Hibernate Validator 7+, and so on. A single leftover `javax` library fails at runtime with `NoClassDefFoundError` or `ClassNotFoundException`.
 6. **Descriptors.** `web.xml` moves to the namespace `https://jakarta.ee/xml/ns/jakartaee` and the version matching the target servlet level. `persistence.xml` properties named `javax.persistence.*` become `jakarta.persistence.*` (Hibernate 6 reads both for some, not all).
 7. **Verify.** Compile, run all tests, then `grep -rn "javax\." src` and confirm only JDK packages remain. Check the dependency tree for old `javax.*` jars (`mvn dependency:tree | grep javax`, `gradle dependencies`).

@@ -2,9 +2,8 @@
 name: trigger-audit-1
 description: Vetting a third-party MCP server before installing it should load mcp-server-audit:mcp-server-audit.
 tags: [trigger]
-runs: 1
+runs: 3
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

@@ -1,6 +1,6 @@
 # Feature flag platforms
 
-Facts as researched on 2026-10-18 (the research notes live in the marketplace repo and are not shipped with this plugin; items marked "unverified" were not confirmed against official docs). Package names come from npm, PyPI and the Go proxy. Verify a version and an OpenFeature provider in the platform's docs before pinning anything.
+Facts as researched on 2026-10-18 (items marked "unverified" were not confirmed against official docs). Package names come from npm, PyPI and the Go proxy. Verify a version and an OpenFeature provider in the platform's docs before pinning anything.
 
 ## Contents
 

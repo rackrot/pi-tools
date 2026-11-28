@@ -1,13 +1,13 @@
 ---
 name: deprecation-migration
-description: 'Plans deprecations and migrations: whether to sunset or keep a system, moving consumers off an old API, library or feature safely, and zero-downtime schema changes via expand/contract. Use for "sunset the v1 API", "migrate users off the legacy service", "remove this feature safely", "rename or drop a column without downtime".'
+description: 'Plans retiring an API, service, library, feature or database column and moving its callers to the replacement: the keep-or-retire decision, who migrates the callers, when it is safe to delete, strangler/adapter/flag cutovers, and zero-downtime column renames, drops or retypes via expand/contract. Use for "sunset the v1 API", "get the other teams off the old library", "nobody owns this service but it is still called", "the removal date is here, can we delete it", "rename a column in production without downtime". Read it even with no code to look at: its rules (delete at measured zero usage, the owner migrates callers) differ from common practice. Not for the deploy plan itself (rollout-plan).'
 ---
 
 # Deprecation and migration
 
 Code is a liability: every line carries tests, patches, dependency updates and onboarding cost. Deprecation removes code that no longer earns its keep; migration moves its consumers to the replacement without breaking them.
 
-Related, if installed: `db-schema-design` for designing the schema and its migration files (this skill covers the rollout sequence), `postgres` or `mysql` for engine-specific locking, `api-rest-design` for API versioning and deprecation headers, `rollout-plan` for staged rollout and rollback of the deploys themselves.
+Related, if installed: `mysql` for engine-specific locking, `prisma` for Prisma migration-file and `migrate deploy` mechanics (this skill covers the phase order), `api-rest-design` for deciding whether an API change is breaking, the version scheme, notice windows and the Deprecation/Sunset header semantics, `rollout-plan` for staged rollout and rollback of the deploys themselves. Not for upgrading or rewriting a legacy stack (runtime, framework or major version upgrade): use `modernize`.
 
 ## Principles
 
@@ -20,7 +20,7 @@ Related, if installed: `db-schema-design` for designing the schema and its migra
 Answer these before deprecating anything:
 
 1. Does it still provide unique value? If yes, keep it. If no, go on.
-2. Who depends on it? Measure consumers (metrics, logs, dependency and code search such as `search_code` / `search_graph` in codebase-memory), don't guess.
+2. Who depends on it? Measure consumers (metrics, logs, dependency and code search), don't guess.
 3. Does a replacement exist? If not, build it first. Never deprecate without an alternative.
 4. What does migration cost each consumer? Automate it if you can; if it's manual and heavy, weigh it against the maintenance cost.
 5. What does *not* deprecating cost? Security exposure, engineer time, complexity tax, over two to three years.
@@ -30,9 +30,9 @@ Answer these before deprecating anything:
 ## The process
 
 1. **Build the replacement.** It covers every critical use case, has a migration guide, and is proven in production.
-2. **Announce.** A notice with status and date, the replacement, the removal date (or "advisory, no date yet"), the reason, and a step-by-step migration guide. Add runtime signals where the platform has them (deprecation warnings, `Deprecation`/`Sunset` response headers, `@deprecated` annotations).
+2. **Announce.** A notice with status and date, the replacement, the removal date (or "advisory, no date yet"), the reason, and a step-by-step migration guide. Add runtime signals where the platform has them (deprecation warnings, `Deprecation`/`Sunset` response headers, `@deprecated` annotations). This skill only sends the headers; `api-rest-design` defines their semantics.
 3. **Migrate incrementally**, one consumer at a time: find every touchpoint, switch it, verify behavior matches (tests, integration checks), remove the old references, confirm no regressions.
-4. **Remove**, only once measured usage is zero, not because a calendar date passed: delete the code, its tests, docs, config and the deprecation notices themselves. Grep afterwards; nothing should still reference it.
+4. **Remove**, only once measured usage is zero, not because a calendar date passed: delete the code, its tests, docs, config and the deprecation notices themselves. Grep afterwards; nothing should still reference it. If a compulsory date arrives with callers left, migrate the stragglers yourself (churn rule) or escalate; the date sets when you finish the migration, not when you delete.
 
 Patterns for steps 3 and 4 (strangler, adapter, per-consumer feature flag) with examples: read [references/migration-patterns.md](references/migration-patterns.md) when choosing how to route consumers from old to new.
 

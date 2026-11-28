@@ -4,7 +4,6 @@ description: "Near miss: doubting a risky production change belongs to doubt-rev
 tags: [trigger]
 runs: 1
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

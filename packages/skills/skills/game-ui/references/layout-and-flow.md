@@ -30,7 +30,7 @@ Then pick the aspect policy:
 | Keep (letterbox or pillarbox) | Fixed frame with bars | Hard-framed designs, fixed-screen puzzles |
 | Keep width or keep height | One axis fixed, the other expands | Side-scrollers (keep height), vertical shooters (keep width) |
 
-When the engine blends width and height matching (for example a 0 to 1 match slider), use 0.5 by default, 1.0 when vertical layout must never clip, 0.0 when horizontal must never clip.
+When the engine blends width and height matching (for example a 0 to 1 match slider, where 0 = match width and 1 = match height, as in Unity's Canvas Scaler), use 0.5 by default, 1.0 when vertical layout must never clip, 0.0 when horizontal must never clip.
 
 ## 2. Safe-area handling
 

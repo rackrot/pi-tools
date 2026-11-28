@@ -81,4 +81,4 @@ Do not rewrite every layer in one change, and do not touch an already-suspending
 
 ## Dispatchers
 
-Inject dispatchers (`class Repo(private val io: CoroutineDispatcher = Dispatchers.IO)`) so tests can replace them. Default for CPU work, IO for blocking calls, `Main` only for UI. `Dispatchers.IO` exists on the JVM and Android only; in multiplatform code provide it through DI.
+Inject dispatchers (`class Repo(private val io: CoroutineDispatcher = Dispatchers.IO)`) so tests can replace them. Default for CPU work, IO for blocking calls, `Main` only for UI. `Dispatchers.IO` is not available in common code or on JS/Wasm (on Native it needs `import kotlinx.coroutines.IO`); in multiplatform code provide the dispatcher through DI.

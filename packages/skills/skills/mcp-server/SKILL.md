@@ -1,13 +1,13 @@
 ---
 name: mcp-server
-description: Designs and builds MCP servers with the official TypeScript, Python, Go or Rust SDK, from the tool surface (workflow tools, descriptions, write-tool safeguards, auth) to stdio or Streamable HTTP and Inspector tests. Use when planning an MCP server's tools, when agents pick the wrong tool, or when implementing, extending or upgrading a server.
+description: Designs and builds MCP servers with the official TypeScript, Python, C# (.NET), Go or Rust SDK, from the tool surface (workflow tools, descriptions, write-tool risk tiers and approval gates, auth) to stdio or Streamable HTTP, SDK major-version migration and MCP Inspector CLI tests. Use when planning an MCP server's tools, when agents pick the wrong tool, when implementing, extending, testing or upgrading a server, or when someone wants an AI assistant (Claude Desktop, Cursor, Claude Code, an agent) to call their own API, database or internal system.
 ---
 
 # Design and build an MCP server
 
 Not for security or release review of a finished server (`mcp-server-review`, if installed), auditing third-party servers before installing them (`mcp-server-audit`, if installed), wiring an existing server into a Claude Code plugin (`plugin-dev:mcp-integration`, if installed), or building the OAuth authorization server (`api-oauth-provider`, if installed).
 
-Step 1 decides what the server exposes; the rest implement it with the official SDK for the repo's language. One reference per SDK holds the install line, registration code, and transport setup.
+Step 1 decides what the server exposes; the rest implement it with the official SDK for the repo's language. One reference per SDK (C# excepted, see step 2) holds the install line, registration code, and transport setup.
 
 The official SDKs changed shape with the 2026-07-28 protocol revision (new package names, renamed classes, transport options moved). Code from older tutorials and from model memory often fails to import. Check each SDK's current docs before writing against it. On 2026-10-17, 2026-07-28 was still the latest revision, and the references record the SDK versions they were checked against.
 
@@ -17,6 +17,7 @@ The official SDKs changed shape with the 2026-07-28 protocol revision (new packa
 2. **Pick the SDK.** Use the repo's existing language. For a new server with no constraint, pick the language the server's backing code already uses. Read the matching reference:
    - [TypeScript](references/typescript.md): read when the project is Node, Bun, Deno, or a web-standard runtime.
    - [Python](references/python.md): read when the project is Python.
+   - C#: use when the project is .NET. There is no reference file. Use the official C# SDK (the `ModelContextProtocol` NuGet package, plus `ModelContextProtocol.AspNetCore` for Streamable HTTP), check its current API with Context7 or the SDK docs before writing code, and pin the version as in step 9. Steps 1 and 3 to 11 apply unchanged. On stdio, send logs to stderr: .NET console logging writes to stdout by default, so configure the console logger to send every level to stderr.
    - [Go](references/go.md): read when the project is Go.
    - [Rust](references/rust.md): read when the project is Rust.
 
@@ -40,7 +41,7 @@ The official SDKs changed shape with the 2026-07-28 protocol revision (new packa
       npx @modelcontextprotocol/inspector@2.11.0 --cli <command> <args> --method tools/list
       ```
 
-      Inspector 2.11.0 needs Node 22.19 or later, which is newer than the TypeScript SDK's Node 20 minimum. Add `--format json` to parse the output, and note that a `tools/call` that returns `isError: true` exits with code 5. Run it only against a server you own, and use the web UI (omit `--cli`) to explore.
+      Inspector 2.11.0 needs Node 22.19 or later, which is newer than the TypeScript SDK's Node 20 minimum. Newer Inspector releases raise that floor (2.17.0 needs Node 22.23.4 or later), so check the `engines` field before bumping the pin. Add `--format json` to parse the output, and note that a `tools/call` that returns `isError: true` exits with code 5. Run it only against a server you own, and use the web UI (omit `--cli`) to explore.
     - To try the server in Claude Code, `claude mcp add <name> -- <command> <args>` registers a stdio server and `claude mcp add --transport http <name> <url>` registers an HTTP one. Both write Claude Code settings, so ask first. Packaging a server inside a plugin is `plugin-dev:mcp-integration`, if installed.
 11. **Hand off.** Run `mcp-server-review` (if installed) before release.
 

@@ -1,19 +1,19 @@
 ---
 name: accessibility-review
-description: "Audits a design, mockup or page against WCAG 2.2 AA at design level: contrast, focus visibility, target size, keyboard and dragging alternatives, labels, errors and authentication. Use for \"audit accessibility\", \"check a11y\", \"is this accessible?\" or a WCAG check before handoff."
+description: "Audits a design, mockup, spec or page for accessibility barriers against WCAG 2.2 AA: contrast, focus visibility, target size, keyboard and dragging alternatives, labels, errors and authentication. Use when someone asks if a screen works for people with low vision, keyboard-only or motor-impaired users, shares colors, sizes or focus styles to check before handoff, or says \"audit accessibility\", \"check a11y\", \"is this accessible?\" or \"does this meet WCAG / ADA / EAA\". Not for game accessibility options (game-ui) or a single rule lookup (uiux-lookup)."
 ---
 
 # Accessibility review
 
 Audit a design or page for WCAG 2.2 Level AA conformance and report findings by principle, with the criterion, severity and fix for each.
 
-Target: the arguments given with the command
+Target: the design, page or files the user names.
 
 ## Scope
 
 - This is a design-level audit: what can be judged from mockups, screenshots, specs, markup or a page's source and rendered output.
-- Manual testing with a real screen reader (NVDA, JAWS, VoiceOver, Orca, TalkBack) goes to `screen-reader-testing`. Recommend it for anything this audit can only infer, such as what a custom widget actually announces.
-- Implementing the fixes (semantics, focus management, forms) goes to `web-development`. Visual critique that is not about accessibility goes to `design-critique` (static designs) or the `ui-critic` agent (rendered pages).
+- Manual testing with a real screen reader (NVDA, JAWS, VoiceOver, Orca, TalkBack) is out of scope. Recommend it for anything this audit can only infer, such as what a custom widget actually announces.
+- Implementing the fixes (semantics, focus management, forms) is out of scope. Visual critique that is not about accessibility goes to `design-critique`.
 - Work from what the user shares: screenshots, exported frames, specs, files or a URL. If a design lives in a tool you can't read, ask for an export or the relevant values (colors, sizes, focus styles) instead of guessing.
 
 ## WCAG 2.2 AA: what to check first
@@ -35,7 +35,7 @@ WCAG 2.2 became a W3C Recommendation on 5 October 2023. It keeps every 2.1 crite
 - **2.4.7** Focus indicator is visible
 - **2.4.11 Focus Not Obscured (Minimum)** *(new in 2.2)*: a focused element is not entirely hidden by author content such as sticky headers, footers, cookie banners or non-modal panels
 - **2.5.7 Dragging Movements** *(new in 2.2)*: anything done by dragging (reorder, slider, drag-and-drop, map pan) also works with a single pointer without dragging, unless dragging is essential
-- **2.5.8 Target Size (Minimum)** *(new in 2.2)*: pointer targets are at least 24x24 CSS px, or have enough spacing that a 24 px circle centered on each doesn't overlap another target or its circle. Exceptions: an equivalent control elsewhere on the page, inline targets in text, user-agent default controls, and essential presentation. 44x44 is the AAA criterion 2.5.5 and a good platform target, not the AA requirement.
+- **2.5.8 Target Size (Minimum)** *(new in 2.2)*: pointer targets are at least 24x24 CSS px, or have enough spacing that a 24 px circle centered on each doesn't overlap another target or its circle. For a row of equal undersized targets this means centre-to-centre distance >= 24 px (20x20 with a 4 px gap passes, 20x20 with a 2 px gap fails). Exceptions: an equivalent control elsewhere on the page, inline targets in text, user-agent default controls, and essential presentation. 44x44 is the AAA criterion 2.5.5 and a good platform target, not the AA requirement.
 
 ### Understandable
 - **3.2.1 / 3.2.2** No unexpected context change on focus or input
@@ -100,13 +100,15 @@ Read [references/wcag-22-aa.md](references/wcag-22-aa.md) for the full list of 5
 |---------|------------------------|---------|
 
 ### Not Verifiable From This Material
-- [Item] — verify with [screen-reader-testing / a rendered check / the spec]
+- [Item] — verify with [manual screen reader testing / a rendered check / the spec]
 
 ### Priority Fixes
 1. **[Critical fix]** — affects [who], blocks [what]
 2. **[Major fix]** — improves [what] for [who]
 3. **[Minor fix]**
 ```
+
+Omit a section that has no rows for this material; for a quick question about one criterion answer directly without the template.
 
 When the user wants tickets, give each finding as a self-contained item with its criterion, severity, location and fix so it can be pasted into a tracker.
 

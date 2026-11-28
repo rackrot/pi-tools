@@ -1,11 +1,11 @@
 ---
 name: api-webhooks
-description: Designs outbound webhooks (provider side) and reviews receiving third-party ones (Stripe, GitHub). Use when adding webhooks to an API, defining the event catalog and payloads, implementing Standard Webhooks signing and secret rotation, reviewing a sender's retry, dead-letter or SSRF defenses, writing the delivery contract, delivery log, replay and test-event surface customers see, or verifying and acknowledging a webhook your app receives.
+description: "Designs outbound webhooks (provider side) and fixes or reviews handlers that receive events from a third party (Stripe, GitHub, Slack). Use when adding webhooks to an API, defining the event catalog and payloads, implementing Standard Webhooks signing and secret rotation, reviewing a sender's retry, dead-letter or SSRF defenses, writing the delivery contract, delivery log, replay and test-event surface customers see, or when an endpoint that receives provider events fails signature verification or times out and needs raw-body verification and a fast acknowledgement. Not for deduplicating redelivered events by ID (api-idempotency)."
 ---
 
 # Webhook design: sending and receiving
 
-Not for deduplicating received events by event ID (`api-idempotency`), REST error design (`api-rest-design`), or API key issuance (`api-oauth-provider`), each if installed. Sections 1 to 6 are the provider side. For a webhook your own app receives, read [Receiving webhooks](#receiving-third-party-webhooks) below.
+Not for deduplicating received events by event ID (`api-idempotency`), REST error design (`api-rest-design`), or API key issuance (`api-keys`), each if installed. Sections 1 to 6 are the provider side. For a webhook your own app receives, read [Receiving webhooks](#receiving-third-party-webhooks) below.
 
 Sending an HTTP POST is easy. Doing it reliably, safely, and debuggably at scale is the work: isolating slow consumers, retrying with backoff, dead-lettering, signing, and giving customers a way to see what happened.
 
@@ -39,7 +39,7 @@ Adopt Standard Webhooks (standardwebhooks.com, spec 1.0.0) instead of a bespoke 
 - Send three headers on every delivery: `webhook-id`, `webhook-timestamp` (integer Unix seconds), `webhook-signature`.
 - Sign `{id}.{timestamp}.{raw_body}` with HMAC-SHA256, base64-encode, and prefix with the version (`v1,`). Signing the timestamp is what gives replay protection, because a body-only signature is valid forever.
 - Send several space-separated signatures during rotation so old and new secrets verify at once.
-- Use one secret per endpoint. Prefix secrets (`whsec_`) so scanners can find leaks. Offer asymmetric ed25519 (`v1a`, `whsk_` and `whpk_`) for customers who should not hold a shared secret. Key storage follows `api-oauth-provider`'s `references/api-key-storage.md`, if installed.
+- Use one secret per endpoint. Prefix secrets (`whsec_`) so scanners can find leaks. Offer asymmetric ed25519 (`v2a`, `whsk_` and `whpk_`; `v1a` is deprecated) for customers who should not hold a shared secret. Store symmetric signing secrets encrypted (KMS or envelope encryption) and retrievable, never hash-only, because the sender needs the plaintext to sign. Rotate them with the overlapping-signature procedure in references/signing.md.
 - Your docs must say that consumers verify every request, verify against the raw body before any JSON parser, use a constant-time compare, check the timestamp tolerance, and exempt the webhook route from session auth and CSRF middleware.
 
 ## 4. Delivery contract
@@ -51,7 +51,7 @@ State the contract in findable sentences: the guarantee, the ordering position, 
 - Ordering is best-effort. Retries and parallel workers reorder events, and strict ordering lets one failing delivery block a whole endpoint queue. Offer FIFO only as an opt-in, and tell consumers not to infer order from timestamps.
 - Deliver from a durable queue with per-endpoint isolation, so a slow endpoint never delays others.
 - Retry with exponential backoff and jitter over a span that covers real customer incidents, such as hours to a few days. The spec's example schedule runs 10 attempts over about 75 hours. Linear or constant intervals hammer an endpoint that is already struggling.
-- Classify responses. `2xx` is success. Treat `3xx` as failure and tell the customer to update the URL. `410 Gone` means disable the endpoint. Honor `Retry-After` on `429` and `503`. Throttle on `502` and `504`. A persistent `4xx` other than `408` and `429` goes to the dead-letter queue. `5xx`, timeouts, and connection resets retry on the schedule.
+- Classify responses. `2xx` is success. Treat `3xx` as a failed attempt: never follow the redirect, retry on the schedule, and tell the customer to update the URL. `410 Gone` means disable the endpoint. Honor `Retry-After` on `429` and `503`. Throttle on `502` and `504`. Any other `4xx` (not `408` or `429`) goes to the dead-letter queue on the first response; this is this skill's rule, since the spec only says to treat other codes as failure. `5xx`, timeouts, and connection resets retry on the schedule.
 - Use a request timeout of about 15 to 30 seconds. Tell consumers to queue the work and acknowledge quickly.
 - Dead-letter on retry exhaustion or a non-retriable error. Keep dead-lettered events 7 to 30 days with headers, so they can be investigated and replayed.
 - After sustained failure, disable the endpoint and notify the customer by email or dashboard, since the webhook channel is the broken one.
@@ -102,4 +102,4 @@ Use this when your app is the consumer. The sender's docs define the header name
 - [references/signing.md](references/signing.md) - read when implementing or documenting signatures and rotation.
 - [references/delivery-and-lifecycle.md](references/delivery-and-lifecycle.md) - read when designing the retry schedule, SSRF protection, or the portal.
 
-Sources checked: Standard Webhooks specification 1.0.0 (github.com/standard-webhooks/standard-webhooks, spec/standard-webhooks.md, rechecked 2026-10-17), RFC 9110 for `Retry-After`, OWASP API Security Top 10 2023 API7 (SSRF).
+Sources checked: Standard Webhooks specification 1.0.0 (github.com/standard-webhooks/standard-webhooks, spec/standard-webhooks.md, rechecked 2026-10-17; asymmetric `v2a` scheme taken from the main branch, where `v1a` is deprecated), RFC 9110 for `Retry-After`, OWASP API Security Top 10 2023 API7 (SSRF).

@@ -1,6 +1,6 @@
 ---
 name: goff-relay-proxy
-description: Configures, runs and debugs the GO Feature Flag (GOFF) relay proxy, covering goff-proxy.yaml keys (server.*, swagger.*, authorizedKeys), retrievers, exporters, notifiers, API keys including admin, flagsets, OFREP and /v1/allflags endpoints, admin retriever refresh, pollingInterval, Docker, Kubernetes and Helm deployment, health and metrics. Use when asked to set up or fix "go-feature-flag" relay proxy, "goff-proxy.yaml", "relay proxy", a GOFF retriever (file, github, s3, http, configmap, postgresql), exporter or notifier, authorizedKeys or X-API-Key 401/403, flagSets, flags not refreshing, or the GOFF Helm chart. Not for writing flag files and targeting rules (goff-flags), app code and OpenFeature providers (goff-sdk), or generic flag practice (feature-flags).
+description: "Configures, runs and debugs the GO Feature Flag (GOFF) relay proxy: goff-proxy.yaml (server.*, authorizedKeys, admin keys), retrievers (file, github, s3, http, configmap, postgresql), exporters, notifiers, flagSets, pollingInterval and admin refresh, OFREP endpoints, Docker, Kubernetes and Helm, health and metrics. Use when a go-feature-flag container exits at start, flags are not refreshing, X-API-Key gets 401 or 403, or a relay proxy or the GOFF Helm chart needs setting up or securing. Not for flag files and targeting rules (goff-flags), app code and OpenFeature providers (goff-sdk), or generic flag practice (feature-flags); goff is the umbrella that points proxy work here."
 ---
 
 # GOFF relay proxy
@@ -65,8 +65,8 @@ The docs prose also shows `/v1/admin/retriever/refresh`; its curl and the OpenAP
 
 ## Gotchas
 
-- With flagSets, top-level `retrievers`, `exporters` and `notifiers` are ignored; each set needs an explicit `name` and at least one `apiKeys` entry. Set it up in the `flagSets` block, not both.
-- Only `authorizedKeys` (default mode) and flagset names and `apiKeys` (flagsets mode) hot-reload; every other change needs a restart.
+- With flagSets, top-level `retrievers`, `exporters` and `notifiers` are ignored; each set needs at least one `apiKeys` entry. Give every set an explicit `name`: without one a UUID is generated and the set's keys cannot be changed at runtime, and the postgresql retriever matches on it. Set it up in the `flagSets` block, not both.
+- Only `authorizedKeys` (default mode) and flagset names and `apiKeys` (flagsets mode) hot-reload (v1.50.0 and later; older proxies need a restart for these too); every other change needs a restart.
 - `ofrepEventStream.baseUrl` makes the proxy append the caller's API key to the advertised SSE URL as a query param, so keep it on trusted networks.
 - `enableBulkMetricFlagNames` adds a high-cardinality label.
 - Each proxy instance notifies separately, so N replicas send N notifications.

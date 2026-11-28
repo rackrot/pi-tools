@@ -1,13 +1,13 @@
 ---
 name: api-rest-design
-description: Designs and reviews REST/HTTP API contracts for external consumers, and writes versioning and deprecation policy. Use when designing a new API surface, reviewing an OpenAPI spec or endpoints, standardizing error responses (RFC 9457), adding pagination or rate-limit headers, planning a /v2 or sunset, or changing a contract others depend on.
+description: Designs and reviews REST/HTTP API contracts that partners, other teams or the public call, and writes versioning and deprecation policy. Use when designing a new API surface, reviewing an OpenAPI spec or a list of endpoints, making status codes, error bodies (RFC 9457), pagination or field naming consistent across endpoints, adding rate-limit headers, deciding whether renaming or removing a response field or changing its type breaks existing callers, choosing a version scheme, or writing the versioning and deprecation policy (notice windows, Deprecation/Sunset headers).
 ---
 
 # REST contract design and review
 
 Design or review an HTTP API as a contract that consumers depend on. The goal is one consistent surface: the same casing, pagination, error shape, and status meaning on every endpoint, so it reads as if one team built it. Repo conventions beat the defaults below. If the repo already uses `/v1` paths, a `data` envelope, or snake_case, keep them and apply this skill to what is inconsistent or missing.
 
-Not for GraphQL (`api-graphql`), gRPC (`api-grpc`), idempotency keys and retries (`api-idempotency`), or webhooks (`api-webhooks`), each if installed. The browser side of an API contract is out of scope.
+Not for GraphQL (`api-graphql`), gRPC (`api-grpc`), idempotency keys and retries (`api-idempotency`), or webhooks (`api-webhooks`), each if installed. The browser side of an API contract is out of scope. Not for the plan that moves consumers off an old API version, service or library, from the keep-or-sunset decision through per-consumer migration to removal (`deprecation-migration`, if installed). This skill decides what is breaking, the version scheme, the notice window and the headers.
 
 ## Set the scope first
 

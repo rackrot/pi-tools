@@ -1,6 +1,6 @@
 ---
 name: devils-advocate
-description: 'Challenges an idea, decision, proposal or claim with structured critical reasoning in one of five modes: Socratic questioning, dialectic, pre-mortem, red team or evidence audit. Use for "play devil''s advocate", "poke holes in this", "challenge this", "what could go wrong", "red team this idea", "run a pre-mortem" or "test my assumptions".'
+description: 'Challenges an idea, decision or claim the user already holds, before they commit to it: steelmans it, attacks it in one of five modes (Socratic, dialectic, pre-mortem, red team, evidence audit), then builds a stronger position. Use when asked for the case against their own decision, even with no files involved: "play devil''s advocate", "poke holes in this", "argue the other side", "what am I missing", "talk me out of it", "what could go wrong", "run a pre-mortem", "test my assumptions". Not for an incident postmortem, a threat model, or an in-flight artifact or code claim (a diff, migration, auth change, ''this is thread-safe'') needing a fresh-context review before commit (doubt-review).'
 ---
 
 # Devil's Advocate
@@ -10,21 +10,21 @@ Be like the court jester who alone could speak truth to the king: not naive, but
 ## Boundaries
 
 - The target is an idea, a choice or a claim: a technology or vendor pick, a strategy, a business proposal, an architecture direction, a conclusion drawn from data.
-- An implementation plan to stress-test or "grill" goes to the `planning` skill (its stress-test reference), if installed.
-- A concrete in-flight artifact (a diff, a migration, a "this is thread-safe" claim) that needs a fresh-context adversarial reviewer goes to `fresh-eyes`, if installed.
-- Another model's opinion goes to `second-opinion`, if installed. A security threat model of a system goes to `threat-model`, if installed; red-team mode here covers adversaries in the broad sense (competitors, gamed incentives, abuse) rather than a full STRIDE pass.
+- An implementation plan to stress-test or "grill" is out of scope here.
+- A concrete in-flight artifact or code-level claim (a diff, a migration, an auth change, a "this is thread-safe" claim) that needs a fresh-context adversarial reviewer before commit goes to `doubt-review`, if installed; `fresh-eyes` is the manual command for the same job.
+- Another model's opinion goes to the `second_opinion` tool, if available. A security threat model of a system goes to `threat-model`, if installed; red-team mode here covers adversaries in the broad sense (competitors, gamed incentives, abuse) rather than a full STRIDE pass.
 
 ## Workflow
 
 1. **Identify.** Extract the user's position from the conversation. Restate it as a steelmanned thesis and ask the user to confirm it.
-2. **Select.** Use `AskUserQuestion` for the two-step mode selection below. Never assume the mode.
-3. **Challenge.** Load the mode's reference file and apply its method.
-4. **Engage.** Present the 3-5 strongest challenges. Ask the user to respond before going further. Socratic mode differs: it runs as an isolated critic that asks one question at a time (see its reference), not a batch. The critic gets the bare decision, not the steelman or its rationale.
+2. **Select.** Use `ask_user` (or the host's question tool) for the two-step mode selection below. Never assume the mode, with one exception: when no question tool exists, or the user's wording already names the mode ("question what I'm assuming", "run a pre-mortem"), state the chosen mode in one line and proceed.
+3. **Challenge.** Read the mode's reference file and apply its method. Write no challenge, question or assumption list before that reference has been read.
+4. **Engage.** Socratic mode: read [references/socratic-questioning.md](references/socratic-questioning.md) first, then ask exactly one question and stop; do not list assumptions or challenges in that turn. The question comes from an isolated critic that gets the bare decision, not the steelman or its rationale (see the reference). Every other mode: present the 3-5 strongest challenges, then ask the user to respond before going further.
 5. **Synthesize.** Integrate what held up into a strengthened position. Offer a second pass with a different mode when it would add something.
 
 ## Mode selection
 
-**Step 1, pick a category** (one `AskUserQuestion`, four options):
+**Step 1, pick a category** (one `ask_user` question, four options):
 
 | Option | Description |
 |--------|-------------|
@@ -46,10 +46,10 @@ Be like the court jester who alone could speak truth to the king: not naive, but
 |------|--------|-------------|------|
 | Expose my assumptions | Socratic questioning, run by an isolated critic one question at a time | Assumption inventory, the questions asked and how each answer held, suggested experiments | [references/socratic-questioning.md](references/socratic-questioning.md) |
 | Argue the other side | Hegelian dialectic and steelmanning | Thesis, antithesis, synthesis, confidence rating | [references/dialectic-synthesis.md](references/dialectic-synthesis.md) |
-| Find the failure modes | Pre-mortem and second-order thinking | Ranked failure narratives, early warning signs, mitigations, inversion check | [references/pre-mortem-analysis.md](references/pre-mortem-analysis.md) |
+| Find failure modes | Pre-mortem and second-order thinking | Ranked failure narratives, early warning signs, mitigations, inversion check | [references/pre-mortem-analysis.md](references/pre-mortem-analysis.md) |
 | Attack this | Red teaming | Adversary profiles, ranked attack vectors, perverse incentives, defenses | [references/red-team-adversarial.md](references/red-team-adversarial.md) |
 | Test the evidence | Falsificationism and evidence weighting | Claims, falsification criteria, evidence grades, competing explanations | [references/evidence-audit.md](references/evidence-audit.md) |
-| (You choose) | Signal-to-mode mapping | A recommended mode, confirmed with `AskUserQuestion` | [references/mode-selection-guide.md](references/mode-selection-guide.md) |
+| (You choose) | Signal-to-mode mapping | A recommended mode, confirmed with `ask_user` | [references/mode-selection-guide.md](references/mode-selection-guide.md) |
 
 ## Rules
 
@@ -58,11 +58,11 @@ Be like the court jester who alone could speak truth to the king: not naive, but
 - Keep to the 3-5 strongest points: depth over breadth. In Socratic mode that means 3-5 questions asked one per turn over the whole exchange, never at once.
 - Concede points that hold up. Don't override real domain expertise with generic skepticism.
 - Ask the user to engage with the challenges before synthesizing, and always reach a synthesis or actionable output, never just a pile of problems.
-- Offer choices through `AskUserQuestion` rather than as plain-text lists whenever structured options fit.
+- Offer choices through `ask_user` rather than as plain-text lists whenever structured options fit.
 
 ## Final output
 
-Whatever the mode, end with:
+Whatever the mode, end with the following (in Socratic mode, only after the question exchange has ended):
 
 1. **Steelmanned thesis**: the position in its strongest form.
 2. **Challenges**: the 3-5 strongest points from the mode.

@@ -1,6 +1,6 @@
 ---
 name: dotnet-template-authoring
-description: Authors, validates and packages custom `dotnet new` templates, covering template.json from an existing project, symbols and conditional content, post-actions, constraints and template packs. Use for "turn this project into a template", a template missing from `dotnet new list` after install, or reviewing a template.json before publishing.
+description: Authors, fixes and packages custom `dotnet new` templates (.template.config/template.json). Use when turning a project into a reusable `dotnet new` template, adding template parameters or choices (symbols), conditional content, post-actions or constraints, building a NuGet template pack (PackageType Template) for `dotnet new install`, when a template installs but `dotnet new <shortName>` or `dotnet new list` does not find it or its parameters, or when reviewing a template.json before publishing. Read this before answering, even when the template.json is pasted in the prompt. Not for scaffolding a project from an existing template.
 ---
 
 # dotnet new template authoring
@@ -87,7 +87,7 @@ Then check every category in [references/validation-rules.md](references/validat
 
 ## Gotchas
 
-- Reserved shortNames are the `dotnet new` subcommands (`install`, `uninstall`, `update`, `list`, `search`, `details`, `create` on current SDKs). Read the live set from the `Commands:` section of `dotnet new --help`. Top-level verbs (`build`, `test`, `run`, `publish`) do not conflict.
+- Reserved shortNames are the `dotnet new` subcommands, read live from the `Commands:` section of `dotnet new --help`; the current list is in [references/validation-rules.md](references/validation-rules.md) section 3. Top-level verbs (`build`, `test`, `run`, `publish`) do not conflict.
 - A template that installs but doesn't show in `dotnet new list` usually has invalid JSON, a missing `identity`/`name`/`shortName`, or a `.template.config` folder not at the root that was installed. `dotnet new install` prints warnings for templates it skipped; read them.
 - `args.files` on a restore action matches paths in the source template, before `sourceName` renames.
 - A parameter whose name is a prefix of another (`Auth`, `AuthMode`) makes expression parsing ambiguous; rename one.

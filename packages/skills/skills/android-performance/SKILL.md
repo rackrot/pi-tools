@@ -1,13 +1,13 @@
 ---
 name: android-performance
-description: 'Sets up Android Macrobenchmark and Baseline Profile work and app size reduction. Use for "add a baseline profile for startup", "cold start regressed between two CI runs", writing a startup benchmark, checking the profile is installed, or "why is the release APK so big". Covers StartupTimingMetric, CompilationMode, the androidx.baselineprofile plugin, BaselineProfileRule, reportFullyDrawn and APK Analyzer.'
+description: 'Sets up and interprets Android Macrobenchmark and Baseline Profile work and reduces app size. Use for "add a baseline profile for startup", "cold start regressed between two CI runs", "the startup median rose 40 ms, do we block the merge", writing a startup benchmark or the results note for a PR, checking the profile is installed, or "the release APK or AAB got bigger, what takes the space and what can we cut" (abiFilters, ABI splits, compressed native libraries, locales, resource shrinking). Covers StartupTimingMetric, CompilationMode, the androidx.baselineprofile plugin, BaselineProfileRule, reportFullyDrawn, APK Analyzer, and download size versus install size.'
 ---
 
 # Android performance
 
 Measure on a build that matches what ships, change one thing, measure again, and report what was and was not measured.
 
-Not for (the `android-skills:` names are the third-party `android-skills` plugin, if installed): Perfetto and system traces, heap and memory, startup trace analysis (`android-skills:android-profiler`), ANRs (`android-skills:anr-audit-and-fix`), Compose recomposition and stability (`android-skills:jetpack-compose-performance`), R8 keep rules and code shrinking (`android-skills:r8-analyzer`), and unit or UI test setup (`android-testing`).
+Not for (the `android-skills:` names are the third-party `android-skills` plugin, if installed; no skill in this package covers Perfetto, heap or ANRs): Perfetto and system traces, heap and memory, startup trace analysis (`android-skills:android-profiler`), ANRs (`android-skills:anr-audit-and-fix`), Compose recomposition and stability (`jetpack-compose`, or `android-skills:jetpack-compose-performance` if installed), release-only crashes and keep rules for a failing build (`android-build`), keep-rule audits and code shrinking (`android-skills:r8-analyzer`, if installed), and unit or UI test setup (`android-testing`).
 
 ## Orient
 
@@ -21,7 +21,7 @@ Not for (the `android-skills:` names are the third-party `android-skills` plugin
 
 1. Measure a build that is not debuggable and matches the shipped minification and resource shrinking. A debug build can be several times slower and shows different bottlenecks.
 2. Record, with every result: build type, whether R8 ran, compilation mode, device model and API level, iteration count, and the metric names.
-3. Run at least 10 iterations per scenario; compare medians and look at the min to max spread. A difference smaller than the spread within one run is noise, not a result.
+3. Run at least 10 iterations per scenario; compare medians and the min-to-max ranges. If the two ranges mostly overlap, report "not enough evidence"; call it a change only when the ranges overlap little or not at all.
 4. Never turn on `androidx.benchmark.suppressErrors` to get a number. Macrobenchmark refuses debuggable apps, emulators and low battery for a reason; fix the setup instead.
 5. End the report with a "Not measured" line: for example warm and hot start, other devices, low-memory conditions, or a run on the CI hardware.
 
@@ -52,4 +52,10 @@ Not for (the `android-skills:` names are the third-party `android-skills` plugin
 
 ## App size
 
-Measure first, then cut the largest contributor: `references/size.md` covers APK Analyzer and `apkanalyzer`, download size vs install size, resource shrinking, native libraries and ABIs, and the order to attack them. Code shrinking itself goes to `android-skills:r8-analyzer`.
+Measure first, then cut the largest contributor. Read `references/size.md` before ruling on any size proposal: it covers APK Analyzer and `apkanalyzer`, download size vs install size, resource shrinking, native libraries and ABIs, and the order to attack them. Rulings that are easy to get wrong:
+
+- Keep native libraries uncompressed (`useLegacyPackaging = false`): the uploaded artifact is larger, but the Play download and the install are smaller. Do not compress them to save size.
+- For an AAB, Play already splits by ABI, density and language, so `abiFilters` and locale filters barely change a user's download; they shrink the universal or sideloaded APK.
+- Never combine `splits { abi }` with a bundle upload.
+
+A release build broken by R8 (release-only crash, missing keep rule) goes to `android-build`. DEX-size reduction goes to `android-skills:r8-analyzer`, if installed; this skill records whether R8 ran and the size before and after.

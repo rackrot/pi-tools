@@ -1,7 +1,7 @@
 ---
 name: nuget-template-from-project
-description: "Turning a project into a dotnet new template should load nuget."
-tags: [trigger]
+description: "Turning a project into a dotnet new template is dotnet-template-authoring work, even when it mentions Central Package Management."
+tags: [negative]
 runs: 1
 max_turns: 6
 model: claude-sonnet-5-5

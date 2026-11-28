@@ -6,7 +6,7 @@ Contents: Contact (C1-C9), Fixed-value (F1-F7), Motion-step (M1-M7), Removed dev
 
 ## Contact: can the wrong thing fit?
 
-**C1. Adjacent same-type parameters.** Signal: `transfer(from: string, to: string)`, `slice(start, end)`. A swap compiles and gives a plausible wrong result. Device: distinct types per concept (Control), or required keyword arguments so the call site names each one (Warning, nearly free).
+**C1. Adjacent same-type parameters.** Signal: `transfer(from: string, to: string)`, `slice(start, end)`. A swap compiles and gives a plausible wrong result. Device: distinct types per concept (Control), or required keyword arguments so the call site names each one (nearly free, but docs-only for the swap itself: nothing fires when the names are swapped, the swap is only visible to a reader).
 
 **C2. Boolean flag parameters.** Signal: `createUser(name, true, false)`, `save(data, force=True)`. The call site is unreadable, and a second flag squares the confusion. Device: an enum per axis, an options object, or two functions (Control). One boolean that reads correctly as a keyword argument is fine.
 
@@ -54,7 +54,7 @@ Contents: Contact (C1-C9), Fixed-value (F1-F7), Motion-step (M1-M7), Removed dev
 
 **M6. Fire-and-forget async.** Signal: an unawaited promise, a goroutine with no error path, `asyncio.create_task` with no kept reference. Errors vanish and the process may exit before the work completes. Device: a no-floating-promises lint rule (Warning), an errgroup, structured concurrency, or holding and awaiting the task. Rust's `#[must_use]` on futures warns for free, and `#![deny(unused_must_use)]` makes it Control.
 
-**M7. Order-dependent migrations and deploys.** Signal: a column drop or rename in the same deploy as the code change. Old code runs against the new schema during the rollout, which is an outage. Device: expand and contract (add, backfill, dual-write, switch, drop in a later deploy) with a CI gate against co-deploying destructive DDL and code (Control via the gate).
+**M7. Order-dependent migrations and deploys.** Signal: a column drop or rename in the same deploy as the code change. Old code runs against the new schema during the rollout, which is an outage. Device: expand and contract (add, backfill, dual-write, switch, drop in a later deploy) with a CI gate against co-deploying destructive DDL and code (Warning via the gate).
 
 ## Removed devices: someone installed one and someone else took it out
 

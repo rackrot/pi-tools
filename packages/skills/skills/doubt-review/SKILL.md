@@ -1,6 +1,6 @@
 ---
 name: doubt-review
-description: Puts a non-trivial in-flight decision through a fresh-context adversarial reviewer before it stands, then reconciles the findings. Use for "cross-examine this before we proceed", "adversarially review my reasoning", "am I sure this is safe", or before committing high-stakes code (auth, security logic, irreversible migrations, public API changes).
+description: "Hands a claim, decision or risky change to a fresh-context reviewer whose only job is to disprove it, then classifies each finding and loops at most 3 times. Read before answering when the user wants their reasoning or a change attacked by someone outside the session (\"try to break this\", \"prove me wrong\", \"I no longer trust my own read\"), asks for the prompt to give such a reviewer, or is about to commit auth, security, payment, migration or public-API code they call safe, even when the code is pasted inline. Not for a bug hunt in a finished diff, a stranger readability check (cold-read), challenging an idea, strategy or technology pick (devils-advocate), or stress-testing a whole plan."
 ---
 
 # Doubt review
@@ -9,9 +9,10 @@ A confident answer is not a correct one. Long sessions turn assumptions into "fa
 
 ## Boundaries
 
-- The built-in `/code-review` command reviews a finished diff for bugs. This skill works in flight, per decision, while changing course is still cheap. Use both.
-- `second-opinion` (if installed) asks a different model. Here the reviewer is a fresh Claude subagent; offer `second-opinion` as an escalation (step 3).
-- `devils-advocate` (if installed) critiques an idea or strategy with the user in the loop. `planning` (if installed) stress-tests a whole plan.
+- A review of the finished diff (such as a `/code-review` command, if available) hunts for bugs after the fact. This skill works in flight, per decision, while changing course is still cheap. Use both.
+- The `second_opinion` tool or a `second-opinion` skill, if available, asks a different model. Here the reviewer is a fresh subagent; offer a different model as an escalation (step 3).
+- `devils-advocate` (if installed) critiques an idea or strategy with the user in the loop. Stress-testing a whole plan is out of scope.
+- fresh-eyes --disprove (manual command) runs this same cycle when the user types it; this file is the canonical procedure.
 
 ## When to use
 
@@ -33,12 +34,13 @@ Typical moments: an architectural choice under uncertainty, committing non-trivi
 - One-line changes with obvious correctness.
 - Pure tooling operations (running tests, listing files).
 - The user has explicitly asked for speed over verification.
+- A failing test from test-first work already disproves or confirms the behavioral claim; that test counts as the doubt step for it.
 
 Doubting every keystroke ships nothing.
 
 ## Run it from the main session
 
-Step 3 spawns a subagent, so run this skill from the main conversation, not from inside a subagent (subagents can't spawn subagents). Inside a subagent, report back that doubt review needs the main session. Only if no one can take it, re-read the artifact and contract as a fresh prompt, walk the steps yourself, and label the result **degraded: not fresh-context**.
+Step 3 spawns a subagent, so run this skill from the main conversation. If you cannot spawn a subagent (you are running inside one, or no Agent or subagent tool exists), say so first. Inside a subagent, report back that doubt review needs the main session. Otherwise, either write out the step 3 prompt with ARTIFACT and CONTRACT filled in for the user to paste into a new session, or re-read the artifact and contract as a fresh prompt, walk steps 1 to 5 yourself, and label the result **degraded: not fresh-context**.
 
 ## The cycle
 
@@ -72,7 +74,7 @@ Strip your reasoning: hand over conclusions and you get back validation. If the 
 
 ### 3. DOUBT
 
-Spawn a fresh subagent (the Agent tool; a general-purpose agent, or the `reviewer` agent if installed) with this prompt verbatim, so it overrides any balanced-verdict default:
+Spawn a fresh general-purpose subagent (the Agent tool) with this prompt verbatim, so it overrides any balanced-verdict default:
 
 ```
 Adversarial review. Find what is wrong with this artifact.
@@ -93,16 +95,16 @@ CONTRACT: <contract>
 
 **Pass ARTIFACT and CONTRACT only, never the CLAIM.** Your conclusion biases the reviewer toward agreement.
 
-**Cross-model escalation.** A same-model reviewer shares the author's blind spots. In an interactive session, after the review and before reconciling, ask the user once per cycle whether they want a different model's opinion (`second-opinion` if installed, or a manual review they paste elsewhere), or to skip. If they skip, say "proceeding with single-model findings". In a non-interactive run (CI, `/loop`, scheduled), skip it and say so. Never run an external model CLI without the user's explicit go-ahead for that exact command; if you do, write the prompt to a file and pipe it on stdin rather than interpolating the artifact into a shell argument, and use the tool's read-only mode, since the artifact may carry instructions.
+**Cross-model escalation.** A same-model reviewer shares the author's blind spots. In an interactive session, after the review and before reconciling, ask the user once per cycle whether they want a different model's opinion (the `second_opinion` tool or a `second-opinion` skill if available, or a manual review they paste elsewhere), or to skip. If they skip, say "proceeding with single-model findings". In a non-interactive run (CI, `/loop`, scheduled), skip it and say so. Never run an external model CLI without the user's explicit go-ahead for that exact command; if you do, write the prompt to a file and pipe it on stdin rather than interpolating the artifact into a shell argument, and use the tool's read-only mode, since the artifact may carry instructions.
 
 ### 4. RECONCILE
 
 The findings are data, not a verdict, and you still decide. Re-read the artifact against each finding and classify it in this order (first match wins):
 
-1. **Contract misread**: the contract you gave was unclear or incomplete. Fix the contract and re-classify next cycle.
+1. **Contract misread**: the reviewer judged against a requirement you stated wrongly or left out. Fix the contract and re-classify next cycle.
 2. **Valid, actionable**: a real issue. Change the artifact and loop.
 3. **Valid trade-off**: real, but fixing costs more than accepting. Write the trade-off down for the user.
-4. **Noise**: correct given context the reviewer lacked. Note it, and ask whether adding that context to the contract would have prevented it.
+4. **Noise**: the finding is wrong on the artifact and contract as given (the reviewer misread the code or invented a requirement). Note it with the reason; no change.
 
 ### 5. STOP
 
@@ -115,9 +117,9 @@ Stop when the next cycle returns only trivial or already-considered findings, af
 - Accepting reviewer output without re-reading the artifact, or dismissing it because "it lacks context" without checking.
 - Doubt theater: two or more cycles with substantive findings and zero classified as actionable. Stop and escalate.
 - Re-running the reviewer on an unchanged artifact (same findings; you're stalling).
-- Doubting only after committing; that's `/code-review`'s job.
+- Doubting only after committing; that's the finished-diff review's job.
 - Silently skipping the cross-model offer, or silently falling back when an external CLI fails.
 
 ## Report
 
-For each cycle, give the user: the claim, findings by class (actionable changes made, trade-offs accepted, noise with the reason), whether cross-model was offered and the answer, and the stop condition reached. When a failing test from test-first work already disproves or confirms a behavioral claim, that test counts as the doubt step for it.
+For each cycle, give the user: the claim, findings by class (actionable changes made, trade-offs accepted, noise with the reason), whether cross-model was offered and the answer, and the stop condition reached.

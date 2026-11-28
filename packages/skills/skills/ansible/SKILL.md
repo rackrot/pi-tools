@@ -1,6 +1,6 @@
 ---
 name: ansible
-description: 'Writes, reviews and runs Ansible playbooks, roles and inventories safely: idempotency proof, check mode limits, validate hooks, handlers, vault or sops secrets, FQCN and become. Use when editing a playbook, role or inventory, running ansible-playbook or ansible-lint, using --check or --limit, or fixing a task that reports changed every run.'
+description: 'Writes, reviews, debugs and runs Ansible playbooks, roles, tasks, handlers and inventories (roles/*/tasks/main.yml, group_vars, hosts.yml) safely. Use when editing or reviewing a playbook, role, task or inventory, running ansible-playbook or ansible-lint, using --check, --diff or --limit, or when a shell/command task or a play recap shows changed on every run, a handler did not fire, or a variable is undefined. Covers idempotency proof, check mode limits, validate hooks, vault or sops secrets, FQCN and become.'
 ---
 
 # Ansible
@@ -67,12 +67,12 @@ A correct task changes the host once and reports `ok` on every later run.
       creates: /var/lib/app/.initialised
   ```
 - `changed_when: false` is right for read-only probes. Do not use it to hide a task that does change something.
-- Handlers run only when a task that notifies them reports `changed`, and once at the end of the play. Restart or reload services from handlers, not from a plain task. Use `meta: flush_handlers` if a later task needs the restart first. A handler does not run if the play fails before it, so a failed run can leave a changed file with an unrestarted service, and a plain rerun won't fix it: the task now reports `ok` and never notifies. Run with `--force-handlers` (or set `force_handlers: true`) so notified handlers still run on failure, or restart the service explicitly after fixing.
+- Handlers run only when a task that notifies them reports `changed`, and once at the end of the play. Restart or reload services from handlers, not from a plain task. Use `meta: flush_handlers` if a later task needs the restart first. A handler does not run if the play fails before it, so a failed run can leave a changed file with an unrestarted service, and a plain rerun won't fix it: the task now reports `ok` and never notifies. To recover, restart the service explicitly. To prevent it next time, run with `--force-handlers` or set `force_handlers: true`, so handlers already notified still run when a later task fails.
 - Do not template timestamps, random values, or `ansible_managed` with dates into files, because the content changes every run.
 
 ## Check mode and its limits
 
-`--check` simulates, except tasks with `check_mode: false`, which run for real. Modules that do not support it report nothing and do nothing, and tasks that depend on registered results of skipped tasks can misreport. Most importantly, check mode renders a template but never asks the service whether the file is valid. A haproxy config with a bad ACL passed `--check` and broke the service on the real run.
+`--check` simulates, except the `check_mode: false` tasks covered in the Safety contract. Modules that do not support it report nothing and do nothing, and tasks that depend on registered results of skipped tasks can misreport. Most importantly, check mode renders a template but never asks the service whether the file is valid. A haproxy config with a bad ACL passed `--check` and broke the service on the real run.
 
 - Add `validate:` to `template` and `copy` for any config the service can check. The command gets the candidate file as `%s`, and the file is installed only if it exits 0. This works on real runs, so a bad file never lands.
   ```yaml
@@ -83,10 +83,10 @@ A correct task changes the host once and reports `ok` on every later run.
       validate: haproxy -c -f %s
     notify: Reload haproxy
   ```
-  Others: `nginx -t -c %s`, `visudo -cf %s` for sudoers, `sshd -t -f %s`, `named-checkconf %s`. The command runs without a shell, so pipes and expansions do not work.
-- Use `check_mode: false` only on a read-only task whose result later tasks need, because it makes that task execute on the host even under `--check`, and `when: not ansible_check_mode` to skip a task that cannot be simulated. Never put it on a task that writes, and never on a `command` or `shell` that changes state.
+  Others: `nginx -t -c %s`, `visudo -cf %s` for sudoers, `sshd -t -f %s`, `named-checkconf %s`. `nginx -t -c %s` works only when the templated file is the main nginx.conf; for an included site file, validate through a wrapper config or run `nginx -t` in a handler before reload. The command runs without a shell, so pipes and expansions do not work.
+- Use `check_mode: false` only on a read-only task whose result later tasks need, and `when: not ansible_check_mode` to skip a task that cannot be simulated. Never put it on a task that writes, and never on a `command` or `shell` that changes state.
 - `--diff` shows file changes. It can leak secrets, so set `diff: false` on tasks that write credentials.
-- Treat a clean `--check` as "no obvious error", not "safe", and a `--check` run as possibly not read-only until the grep in the Safety contract is done. Prove behavior with a real run on one host (`--limit`) and an idempotent rerun, on instruction.
+- Treat a clean `--check` as "no obvious error", not "safe". Prove behavior with a real run on one host (`--limit`) and an idempotent rerun, on instruction.
 
 ## Secrets
 

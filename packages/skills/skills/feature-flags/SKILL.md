@@ -1,6 +1,6 @@
 ---
 name: feature-flags
-description: 'Adds, uses, tests and removes feature flags (kill switches) in code with the repo''s existing flag tool, or OpenFeature when there is none, and audits a codebase for stale flags and flag debt. Use when asked to put a change behind a flag, dark launch, test both flag paths, remove a stale flag, audit flags or build a flag registry, or when code mentions LaunchDarkly, Unleash, GrowthBook, flagd or OpenFeature. Not for rollout plans (rollout-plan) or API deprecation (deprecation-migration).'
+description: 'Puts a code change behind a feature flag or kill switch so it can ship dark, reach some users first, or be turned off in production without a redeploy; tests both paths and removes it once decided. Uses the repo''s flag tool (LaunchDarkly, Unleash, GrowthBook, flagd, OpenFeature, home-grown); with none, suggests OpenFeature and installs nothing without a go-ahead. Use even if the request never says "flag": gating a feature, dark launch, gradual enable, emergency off switch, testing both paths, removing a stale flag. Not for rollout plans (rollout-plan), API deprecation (deprecation-migration) or a whole-codebase flag audit, stale-flag or flag-debt inventory, or flag registry (flag-hygiene).'
 ---
 
 # Feature flags
@@ -28,7 +28,7 @@ If several tools appear (a migration in progress), use the one the newest flags 
 4. Define the flag where the repo defines flags (flag file, code registry, or instructions for the dashboard per rule 3).
 5. Evaluate at one decision point close to where behaviour diverges, and pass the result down instead of re-evaluating inside loops or deep helpers. For a flag that touches many places, branch once at the top and select an implementation (strategy or branch by abstraction) rather than scattering `if`.
 6. Supply evaluation context (user or tenant key, plan, environment) only with fields already used by the repo; do not send personal data the targeting does not need. Server-side evaluation stays on the server; send the browser only the result.
-7. Keep the old path working and unchanged. Do not couple the flag to a schema change that cannot run with the flag off; use expand/contract migrations (`db-schema-design`).
+7. Keep the old path working and unchanged. Do not couple the flag to a schema change that cannot run with the flag off; use expand/contract migrations (`deprecation-migration`).
 
 Done when: the flag key is defined once, the default is the safe path, and the old behaviour is untouched when the flag is off.
 
@@ -42,7 +42,7 @@ Done when: the flag key is defined once, the default is the safe path, and the o
 
 ## 4. Remove a flag
 
-Do this when the rollout is finished, the experiment is decided, or the flag is expired. Find stale flags by owner/expiry in the registry, by git age, or when the user names one.
+Do this when the rollout is finished, the experiment is decided, or the flag is expired, and when the user names the flag or a flag-hygiene audit lists it.
 
 1. Confirm with the user (or the dashboard state they report) which branch won and that the flag is fully on or off in every environment. Never assume from code alone.
 2. Search the whole repo for the key, its constant and wrappers: code, tests, flag files, config, IaC, docs, dashboards-as-code.
@@ -53,11 +53,11 @@ Do this when the rollout is finished, the experiment is decided, or the flag is 
 
 ## 5. Audit flag debt
 
-For "which flags can we remove", a stale-flag or flag-debt audit, or a flag registry across the whole codebase, read [references/flag-hygiene.md](references/flag-hygiene.md). The audit is read-only: inventory, classify, a registry diff and a ranked removal list, with each removal then done as section 4, one flag per change.
+For a whole-codebase audit, a flag registry or "which flags can we remove", use the flag-hygiene skill; each removal it proposes is done as section 4, one flag per change.
 
 ## Which platform
 
-Only when the user asks for a recommendation and the repo has none: prefer OpenFeature in code, with flagd (open source, file-based) or an env-var provider for a start, so a hosted platform can be added later through a provider without touching call sites. Platform status, licences, SDK packages and OpenFeature providers are in [references/platforms.md](references/platforms.md). Several vendors changed hands recently (Split is now Harness FME; OpenAI announced a Statsig acquisition in 2025, closing unconfirmed), so check a platform's current docs before relying on a detail.
+Only when the user asks for a recommendation and the repo has none: prefer OpenFeature in code, with flagd (open source, file-based) or an env-var provider for a start, so a hosted platform can be added later through a provider without touching call sites. Platform status, licences, SDK packages and OpenFeature providers are in [references/platforms.md](references/platforms.md). Check a platform's current docs before relying on a detail; several vendors changed hands recently (see platforms.md).
 
 ## Gotchas
 
@@ -71,4 +71,3 @@ Only when the user asks for a recommendation and the repo has none: prefer OpenF
 
 - [references/platforms.md](references/platforms.md): platform table, per-platform SDK packages, OpenFeature providers, detection hints, self-hosting. Read when detecting a tool, choosing one, or handling keys.
 - [references/openfeature-and-testing.md](references/openfeature-and-testing.md): OpenFeature concepts, setup, in-memory provider tests, hooks, flagd. Read when adding OpenFeature or writing flag tests.
-- [references/flag-hygiene.md](references/flag-hygiene.md): whole-codebase flag audit, search recipe, finding classes, registry template, removal ranking. Read for a stale-flag or flag-debt audit.

@@ -13,7 +13,7 @@ Check `libraryDependencies` and imports. Never introduce a second effect system 
 | only `scala.concurrent` | `Future` with an explicit `ExecutionContext` |
 | Ox, Kyo or `scala.util.boundary` code | direct style; no monadic wrappers |
 
-For repos built around ZIO, the ZIO project's own `zio-skills` plugin has deeper ZIO guidance; it is not part of this marketplace.
+For repos built around ZIO, the ZIO project's own documentation has deeper guidance.
 
 ## Cats Effect
 

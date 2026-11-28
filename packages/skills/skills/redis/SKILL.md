@@ -1,11 +1,11 @@
 ---
 name: redis
-description: "Designs and reviews Redis and Valkey usage: data structures, cache-aside and write-through caching, TTL and key design, eviction policy, SCAN over KEYS, stampede control, rate limits, token-checked locks, Streams vs Pub/Sub, and connections. Use when adding or reviewing caching, rate limiting, a lock, a queue, or sessions on Redis."
+description: "Redis and Valkey rules that are easy to get wrong from memory: cache TTLs with jitter, stampede control when cached entries expire together, eviction policy, SCAN over KEYS, fixed and sliding-window rate limits, token-checked locks (SET NX) and what they cannot guarantee, Streams vs Pub/Sub, connections. Use whenever a question or code touches Redis, Valkey, ElastiCache or a Redis client (ioredis, redis-py, go-redis): adding or reviewing a cache, rate limiter, lock, queue or sessions on Redis, or diagnosing latency spikes on cache expiry, memory growth or lost keys. Not for configuring an auth library's session store (better-auth) or for queues and locks kept in Postgres or MySQL."
 ---
 
 # Redis
 
-Not for relational stores (`postgres`, `mysql`, if installed) or an auth library's secondary-storage settings.
+Not for relational stores (`mysql`) or an auth library's secondary-storage settings (`better-auth`).
 
 Choose and review Redis usage from what the data is, how long it may be stale, and what loss it can survive. Redis is fast and simple, so its failure modes are quiet: unbounded memory, stale data, and locks or queues that fail under failover.
 

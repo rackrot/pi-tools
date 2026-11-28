@@ -1,7 +1,7 @@
 # Tells — the dated registry
 
-Read each status against the ui-critic inspector, and treat the owner-taste
-group as warned, not banned.
+Read each status against the ui-critic inspector, and treat the gallery-fashion
+group (section 4) as warned, not banned.
 
 A tell is a device that makes a page read as generated. Tells are not bad design in themselves; most
 began as good ideas on good sites. They became tells by being produced by default, everywhere, without
@@ -9,7 +9,7 @@ a reason. That is why this registry is dated, and why it never names a replaceme
 component: every published "use this instead" list has become the next wave of tells within months.
 Replacements here are procedures (draw from the library, derive from the subject), not products.
 
-The ui-critic agent's `inspect.mjs` and `lint.mjs` detect most entries. Status: **banned** means the
+If the ui-critic agent is installed, its `inspect.mjs` and `lint.mjs` detect most entries; otherwise check the screenshots against this table yourself. Status: **banned** means the
 inspector reports FAIL; **warned** means it reports WARN and you need a reason. Every entry yields to the
 brief: when the brief asks for one of these looks, follow it and pass `--allow <rule>` to the inspector.
 
@@ -69,8 +69,8 @@ the remedy wholesale and it is now the most recognisable generated look of all.
 
 These are common on award sites right now. In the study they appear *more* often on the top-scored
 sites than on the weak ones (panel observations: monospace labels 44% against 24%, index numbering 38%
-against 21%; measured thin rules 61% against 52%). The original skill banned them by its author's
-taste; here they are warnings: they are the first things a generator copies from the gallery and often
+against 21%; measured thin rules 61% against 52%). They are warnings, not bans:
+they are the first things a generator copies from the gallery and often
 carry no information, so keep one only when the content calls for it (real sequence, real data, a
 real table).
 

@@ -46,7 +46,7 @@ CLI workspaces share one backend configuration and one config, with separate sta
 
 ## Locking
 
-- Never bypass locks with `-lock=false` in CI or routine work.
+- Never bypass locks with `-lock=false` in CI or routine work, except in a plan-only CI job that never applies (see `references/security-scanning.md`).
 - A stuck lock after a crashed run: confirm no run is active, then `terraform force-unlock <LOCK_ID>`. Ask the user first, since unlocking during a live apply corrupts state.
 
 ## State surgery

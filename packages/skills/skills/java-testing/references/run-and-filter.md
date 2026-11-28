@@ -56,4 +56,4 @@ In Gradle: `tasks.test { useJUnitPlatform { includeTags("fast"); excludeTags("in
 
 - Failsafe runs `**/IT*.java`, `**/*IT.java` and `**/*ITCase.java` at `integration-test`; the build fails at `verify`. `mvn test` never runs them, so "my IT passes locally but CI is green without it" usually means `mvn test` was run.
 - Run one: `./mvnw verify -Dit.test=OrderRepositoryIT -Dfailsafe.failIfNoSpecifiedTests=false`.
-- Both plugins need `<goal>integration-test</goal>` and `<goal>verify</goal>` bound; without the `verify` goal failures are swallowed.
+- Failsafe needs both of its goals bound, `<goal>integration-test</goal>` and `<goal>verify</goal>`; without the `verify` goal failures are swallowed.

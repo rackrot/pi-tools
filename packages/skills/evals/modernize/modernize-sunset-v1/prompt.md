@@ -1,7 +1,7 @@
 ---
 name: modernize-sunset-v1
-description: "Planning an API sunset with many external consumers routes to modernize."
-tags: [routing]
+description: "Near miss: planning an API sunset with external consumers routes to deprecation-migration, not modernize."
+tags: [trigger]
 runs: 1
 max_turns: 6
 model: claude-sonnet-5-5

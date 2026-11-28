@@ -1,6 +1,6 @@
 ---
 name: csharp
-description: Writes, reviews, refactors and debugs C# and .NET code (types, nullable references, async and cancellation, exceptions, DI, options and logging in the generic host, file-based apps). Use for work in *.cs or *.csx files, "review this C# class", CS86xx nullable warnings, CA or IDE warnings and .editorconfig severity, a deadlock or sync-over-async bug, or a rename across a solution. Not for Godot C# (godot-csharp).
+description: Writes, reviews, refactors and debugs C# and .NET code (types, nullable references, async and cancellation, exceptions, DI, options and logging in the generic host, System.CommandLine CLIs, file-based apps, APIs new in .NET 11 such as Process.Run and JsonNamingPolicy.PascalCase). Use for any C# question and for work in *.cs or *.csx files - "review this C# class", "why does this hang", CS86xx nullable warnings, CA or IDE warnings and .editorconfig severity, a deadlock or sync-over-async bug, a rename across a solution, or replacing helper code after retargeting to net10.0 or net11.0. Not for Godot C# (godot-csharp), P/Invoke (dotnet-native-interop) or performance tuning (dotnet-performance).
 license: MIT
 ---
 
@@ -8,13 +8,13 @@ license: MIT
 
 Keep the observable contract (public API, exceptions, nullability annotations, threading and cancellation behavior, serialized names) unless the request changes it.
 
-Not for: MSBuild and build failures (`msbuild`), package versions (`nuget`), tests and `dotnet test` (`dotnet-testing`), TFM upgrades, SDK-style conversion and AOT readiness (`dotnet-upgrade-guide`), ASP.NET Core endpoints (`aspnet-core`), Blazor (`blazor`), EF Core (`ef-core`), hot-path tuning and benchmarks (`dotnet-diagnostics`), analyzers and source generators (`roslyn-analyzers`).
+Not for: MSBuild and build failures (`msbuild`), package versions (`nuget`), tests and `dotnet test` (`dotnet-testing`), TFM upgrades, SDK-style conversion and AOT readiness (`dotnet-upgrade-guide`), ASP.NET Core endpoints (`aspnet-core`), Blazor (`blazor`), EF Core (`ef-core`), hot-path tuning, allocation reduction, benchmarks and SIMD (`dotnet-performance`), traces, dumps and hangs in a running process (`dotnet-diagnostics`), P/Invoke, LibraryImport and native interop (`dotnet-native-interop`), Aspire AppHost, service defaults and `aspire run`/deploy (`aspire`), analyzers and source generators (`roslyn-analyzers`).
 
 ## Orient
 
 - Read `global.json`, `Directory.Build.props`/`.targets`, the project file (`TargetFramework(s)`, `LangVersion`, `Nullable`, `ImplicitUsings`, `TreatWarningsAsErrors`, `AnalysisLevel`), and `.editorconfig`. Run `dotnet --version` from the repo root.
 - Use only language features the project's language version allows: the default follows the TFM (net8.0 is C# 12, net9.0 C# 13, net10.0 C# 14, net11.0 C# 15). Don't raise `LangVersion`, the TFM or the SDK unless asked. A multi-targeted project is limited by its oldest TFM; `netstandard2.0` and .NET Framework also lack newer BCL APIs.
-- Find definitions, callers and implementations with codebase-memory when the repo is indexed (`search_graph`, `trace_path`, `get_code_snippet`), then the C# language server (csharp-ls) through the LSP tool, then Grep. Before changing a member, list its references; include every `partial` declaration and edit generator inputs, never `*.g.cs` output.
+- Find definitions, callers and implementations with a code-graph or language-server tool when one is available (find references, go to definition, rename), otherwise Grep. Before changing a member, list its references; include every `partial` declaration and edit generator inputs, never `*.g.cs` output.
 - For a library API, check the docs for the referenced version (Context7 `resolve-library-id` then `query-docs`, or Microsoft Learn).
 - Use the repo's build and test commands when it documents them (README, `build.sh`, CI). Reproduce with the narrowest one.
 - Read [references/sdk-setup.md](references/sdk-setup.md) when the required SDK isn't installed or `global.json` doesn't resolve.

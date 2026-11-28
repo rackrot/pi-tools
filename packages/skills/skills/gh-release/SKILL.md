@@ -1,11 +1,11 @@
 ---
 name: gh-release
-description: 'Cuts a manual GitHub release for a single-package repo: defers to release-please, semantic-release or changesets when present, proposes a SemVer bump from the public-API diff, drafts a Keep a Changelog entry, opens a release PR, then tags and publishes with gh after approval. Use when asked to cut or prepare a release or changelog entry by hand. Not for Forgejo or Codeberg (`forgejo-release`).'
+description: 'Cuts a manual GitHub release for a single-package repo: defers to release-please, semantic-release or changesets when present, proposes a SemVer bump from the public-API diff, drafts a Keep a Changelog entry, opens a release PR, then tags and publishes with gh after approval. Use when asked to cut or prepare a release or changelog entry by hand, and before answering any question about one: which version number to tag (also for a first release or a 0.x project), which tag is the previous release, what belongs in the changelog entry, or which gh release commands to run. It says when to ask the maintainer instead of picking. Not for Forgejo or Codeberg (`forgejo-release`).'
 ---
 
 # GitHub Release
 
-Release by hand only when no tool owns the release. Not for the Conventional Commit contract that drives release-please (`git-commit`) or release workflow files (`gh-actions`).
+Release by hand only when no tool owns the release. Not for the Conventional Commit contract that drives release-please or for release workflow files.
 
 Each tag, push, and published release is irreversible or public, so ask for explicit approval of the exact command before running it. Steps 1 to 4 are read-only.
 
@@ -17,8 +17,9 @@ Look for any of these before proposing anything:
 
 ```bash
 ls release-please-config.json .release-please-manifest.json .releaserc* release.config.* \
-   .changeset cliff.toml .goreleaser.y*ml .versionrc* towncrier.toml pyproject.toml 2>/dev/null
+   .changeset cliff.toml .goreleaser.y*ml .versionrc* towncrier.toml 2>/dev/null
 grep -rEil 'release-please|semantic-release|changesets/action|goreleaser|git-cliff' .github/workflows package.json 2>/dev/null
+grep -El 'tool\.(towncrier|semantic_release|commitizen|bumpversion)' pyproject.toml 2>/dev/null
 cat .github/release.yml 2>/dev/null
 ```
 
@@ -26,10 +27,11 @@ A hit means that tool already writes the changelog, bumps the version, or tags. 
 
 | Found | Do instead |
 | --- | --- |
-| release-please | Land Conventional Commits (`git-commit`) and merge its release PR. Don't edit the changelog or tag |
+| release-please | Land Conventional Commits and merge its release PR. Don't edit the changelog or tag |
 | semantic-release | Merge to the release branch with correct commit messages. It tags and publishes from CI |
 | changesets | Add a changeset (`npx changeset`, using the repo's installed version) and merge the "Version Packages" PR |
 | GoReleaser, git-cliff, towncrier | Run the configured command or push the tag the config expects. Read its docs, and don't also hand-edit generated output |
+| `.versionrc` (standard-version / commit-and-tag-version) | Run the repo's configured release script. Don't hand-edit the changelog or tag |
 | `.github/release.yml` only | It configures GitHub's generated release notes. Use `gh release create --generate-notes` and skip a hand-written changelog |
 
 Tell the user which tool you found and stop the manual flow unless they still want it. If nothing is found, continue.
@@ -72,7 +74,7 @@ If the codebase-memory MCP tools are available, `detect_changes` and `search_gra
 | New backward-compatible feature or export, deprecation | MINOR |
 | Bug fix, performance, security fix, internal change | PATCH |
 
-The highest wins. When the code and a commit message disagree (`fix: typo` that removes a public method), trust the diff and flag the conflict to the user. Below `1.0.0`, apply the project's own stated convention.
+The highest wins. When the code and a commit message disagree (`fix: typo` that removes a public method), trust the diff and flag the conflict to the user. Below `1.0.0`, apply the project's own stated convention; if it states none, ask the maintainer instead of assuming breaking changes bump the minor.
 
 Propose the version with the specific findings behind it, and wait for the user to confirm or change it.
 
@@ -82,7 +84,7 @@ Edit `CHANGELOG.md` in [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 
 ## 6. Release PR
 
-Branch `release/<version>` from the default branch, commit the changelog (and the version file if the repo keeps one) following `git-commit`, push, and open the PR through `gh-pr`. Each of those steps needs approval. If the repo allows releasing directly from the default branch, ask whether to skip the PR.
+Branch `release/<version>` from the default branch, commit the changelog (and the version file if the repo keeps one) following the repo's commit convention, push, and open the PR through `gh-pr`. Each of those steps needs approval. If the repo allows releasing directly from the default branch, ask whether to skip the PR.
 
 ## 7. Tag and publish
 

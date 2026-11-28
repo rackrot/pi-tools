@@ -14,7 +14,7 @@ Read when a `mvn` command fails. Match the first `[ERROR]` line, then check the 
 | `release version X not supported` or `invalid target release` | `maven.compiler.release` newer than the JDK running the build | Use `./mvnw` with the intended JDK; align `JAVA_HOME` |
 | `package X does not exist` or `cannot find symbol` for generated code | Annotation processor not on `annotationProcessorPaths` | See `plugins.md` |
 | `Plugin X or one of its dependencies could not be resolved` | Plugin repository unreachable, or plugin version missing | Check the mirror and pin the version in `pluginManagement` |
-| `Failed to execute goal ... Tests run ... FAILURES` | A real test failure | Hand it to the test skill; do not change the build |
+| `Failed to execute goal ... Tests run ... FAILURES` | A real test failure | Hand it to `java-testing` (or `spring-boot-testing` for context and slice tests); do not change the build |
 | `Some problems were encountered while building the effective model` | Deprecated or malformed pom element, or a missing version | Read the warnings list; fix the named element |
 | `Unknown lifecycle phase` or `No plugin found for prefix` | Typo in the goal or a plugin not declared | Use `prefix:goal` with the plugin declared in the build |
 | `The project X has cycles` | Modules depend on each other | Break the cycle; move the shared type to a lower module |

@@ -26,7 +26,7 @@ These are frequently overlooked issues that make UI look unprofessional.
 
 | Rule | Do | Don't |
 |------|----|----- |
-| **Tap feedback** | Provide clear pressed feedback (ripple/opacity/elevation) within 80-150ms | No visual response on tap |
+| **Tap feedback** | Provide clear pressed feedback (ripple/opacity/elevation) within 100ms | No visual response on tap |
 | **Animation timing** | Use shared tokens chosen for distance, complexity, platform, and user context | One duration/easing copied to every transition |
 | **Accessibility focus** | Ensure screen reader focus order matches visual order and labels are descriptive | Unlabeled controls or confusing focus traversal |
 | **Disabled state clarity** | Use disabled semantics (`disabled`/native disabled props), reduced emphasis, and no tap action | Controls that look tappable but do nothing |
@@ -71,7 +71,7 @@ Before delivering app UI code, verify every item below. Start with the process s
 - [ ] Tested on 375px (small phone) and in landscape orientation
 - [ ] Verified behavior with **reduced-motion** enabled and **Dynamic Type**/largest system text size
 - [ ] Checked dark mode contrast independently (never assume light-mode values carry over)
-- [ ] Confirmed all touch targets ≥44pt and no content hidden behind safe areas
+- [ ] Confirmed touch targets >=44x44pt iOS / >=48x48dp Android and no content hidden behind safe areas
 
 ### Visual Quality
 - [ ] No emojis used as icons (use SVG instead)
@@ -89,7 +89,6 @@ Before delivering app UI code, verify every item below. Start with the process s
 - [ ] Gesture regions avoid nested/conflicting interactions (tap/drag/back-swipe conflicts)
 
 ### Light/Dark Mode
-- [ ] Primary text contrast >=4.5:1 in both light and dark mode
 - [ ] Normal primary and secondary text contrast >=4.5:1 in both light and dark mode
 - [ ] Dividers/borders and interaction states are distinguishable in both modes
 - [ ] Modal/drawer scrim is measured against the real background and preserves foreground legibility

@@ -1,13 +1,13 @@
 ---
 name: api-grpc
-description: Designs and reviews gRPC and protobuf contracts. Use when adding or changing .proto files or RPC methods, reviewing a proto diff for rollout safety, setting up buf lint and breaking checks, choosing streaming or error models, or exposing gRPC through Envoy, grpc-gateway or Connect.
+description: Designs, reviews and troubleshoots gRPC services and protobuf contracts. Use when a .proto field, enum, message or RPC is added, renamed, retyped or removed while old clients or stored data are still around; when setting up buf lint or buf breaking; when choosing or debugging streaming RPCs (load balancing, keepalive, connections pinned to one backend); when picking status codes, error details, deadlines or retries; or when exposing gRPC through Envoy, grpc-gateway or Connect. Applies even when the .proto file is not in the workspace.
 ---
 
 # gRPC and protobuf contracts
 
 A `.proto` file is a long-lived contract. Wire format, JSON names, generated client code, and runtime behavior each break independently, so judge every change on all four.
 
-Not for Go server code (`golang`), REST contracts or version-sunset policy (`api-rest-design`), or retry and backoff policy (`api-idempotency`). Each named skill applies if installed.
+Not for Go server implementation (interceptors, `status.Error`, context cancellation), REST contracts or version-sunset policy (`api-rest-design`), or retry and backoff policy (`api-idempotency`). Each named skill applies if installed.
 
 ## Decide whether gRPC belongs here
 
@@ -89,8 +89,4 @@ Expose unary RPCs by default and record every streaming method as a decision. Se
 
 ## Report
 
-State the verdict or design decisions, the buf commands you ran with their results, and which risks stayed unverified. Go server mechanics (interceptors, `status.Error`, context cancellation) belong to `golang`, if installed.
-
-## Sources checked
-
-Primary sources: buf.build/docs (breaking, lint rules), google.aip.dev (121, 127, 185, 191, 193, 194, 215), grpc.io guides (deadlines, retry), github.com/grpc/grpc `doc/http-grpc-status-mapping.md`, googleapis `google/rpc/status.proto`, and protobuf.dev (updating a message type, ProtoJSON). Buf defaults (STANDARD lint, FILE breaking, the UNARY_RPC category) rechecked at buf.build/docs in October 2026.
+State the verdict or design decisions, the buf commands you ran with their results, and which risks stayed unverified.

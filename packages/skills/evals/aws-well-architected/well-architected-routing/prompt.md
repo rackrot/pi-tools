@@ -2,9 +2,8 @@
 name: well-architected-routing
 description: A Well-Architected and cost review request routes to aws-well-architected.
 tags: [routing]
-runs: 1
+runs: 3
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

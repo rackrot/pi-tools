@@ -1,18 +1,18 @@
 ---
 name: git-history
-description: 'Edits and repairs Git history safely without opening an editor: fixup and autosquash, rebasing onto the default branch or a new base, splitting commits, cherry-pick backports, bisect, and reflog recovery. Use when asked to squash or reorder commits, update a branch with main, backport a fix, find a regression, or undo a bad rebase or reset.'
+description: "Read before running or recommending any Git command that rewrites or recovers history: rebase, fixup and autosquash, squashing, reordering or splitting commits, cherry-pick backports, reset, force push, bisect, reflog. Gives the editor-free command forms and the safety steps a model skips (backup ref first, no automatic stash, no reset --hard to undo, lease pinned to a sha). Use when asked to fold or squash commits, update a branch with main, backport a fix, find which commit broke something, or get back commits lost to a bad rebase or reset. Not for Jujutsu repos (jj), or for which branch a fix belongs on or a repo's release/hotfix workflow (branching-models, trunk-based, git-flow)."
 ---
 
 # Git history
 
-Rewriting history replaces commits with new ones. That is safe on a private branch and harmful on a shared one, so decide which case you are in before running anything. Creating commits and naming branches belong to `git-commit`.
+Rewriting history replaces commits with new ones. That is safe on a private branch and harmful on a shared one, so decide which case you are in before running anything. Defer commit messages and branch names to the `git-commit` skill when it is installed.
 
 ## Safety rules
 
 - Rewrite only commits that exist solely on the user's local or personal branch. Check with `git branch --remotes --contains <oldest-commit>` and `git rev-list --count @{u}..HEAD`. Never rewrite the default branch, a release branch, or anything others may have pulled. Use `git revert` there.
 - Check for an operation already in progress before starting one: `git status` reports it, or test for `.git/rebase-merge`, `.git/rebase-apply`, `.git/MERGE_HEAD`, `.git/CHERRY_PICK_HEAD` and `.git/BISECT_LOG` (use `git rev-parse --git-path <name>` so worktrees resolve). If one exists, show its state and ask whether to continue or abort. Never start a second one.
 - Never stash automatically. If the tree is dirty, stop and ask whether to commit, stash, or leave the operation.
-- Never run `git reset --hard` to finish or undo a rewrite; restore through a backup or rescue branch instead. If the user explicitly asks for a hard reset, first show what it discards (`git status --short`, `git log --oneline <target>..HEAD`) and get approval.
+- Never run `git reset --hard` to finish or undo a rewrite; restore through a rescue branch instead: `git branch rescue/<name> <pre-rewrite-sha>` (sha from the backup ref, `ORIG_HEAD` or `git reflog`), which moves nothing. If the user explicitly asks for a hard reset, first show what it discards (`git status --short`, `git log --oneline <target>..HEAD`) and get approval.
 - Never push as part of a history operation. When the user separately asks to push rewritten commits, use `git push --force-with-lease=<branch>:<expected-sha>` with the sha you last saw on the remote, never bare `--force`. The lease fails if the remote moved, which is the point.
 - These need explicit approval, asked with AskUserQuestion showing the exact command and what would be lost: `git clean`, `git checkout -- <path>` or `git restore` over changes, `git branch -D`, any force push, `git reflog expire`, `git gc --prune`, and a rebase that rewrites already-pushed commits.
 - Never open an editor; an interactive command that waits for one hangs the session. Every section below gives an editor-free form.
@@ -84,6 +84,7 @@ git cherry-pick --abort              # leave a conflicted pick without changes
 
 - Use `-x` for backports so the origin stays traceable. Cherry-pick onto a branch made for the backport, not onto the release branch directly, unless told otherwise. For a merge commit, pass `-m 1`.
 - To take only some files from a commit: `git restore --source=<sha> -- <paths>`, then commit with a message naming the source sha.
+- Where the fix lands first and which release branches get it follow the repo's branching model (branching-models).
 
 ## Find a regression or recover lost work
 

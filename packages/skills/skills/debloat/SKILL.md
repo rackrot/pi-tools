@@ -1,6 +1,6 @@
 ---
 name: debloat
-description: Manual command that compresses correct but accreted prose (padding, stacked qualifiers, fused sentences, walls of enumeration) to its load-bearing density, cutting words and never rules.
+description: "Manual command (/skill:debloat) that tightens prose that is correct and current but has grown wordy: padding, stacked qualifiers and asides, fused sentences, walls of enumeration, a point restated nearby. Cuts words, never a rule, fact or constraint. Use when a doc, section or paragraph should keep the same rules in fewer words. Not for docs that contradict themselves or read like a changelog (v0-rewrite), or one fact repeated across files (docs-audit)."
 disable-model-invocation: true
 ---
 
@@ -12,7 +12,6 @@ Cut a bloated artifact to its load-bearing minimum: same meaning, fewer words. P
 
 - Rewriting a drifted doc: use `v0-rewrite`.
 - Merging copies of one fact scattered across files: use `docs-audit`.
-- Removing AI-sounding tells: use `avoid-ai-writing`.
 
 ## Workflow
 
@@ -23,10 +22,10 @@ Cut a bloated artifact to its load-bearing minimum: same meaning, fewer words. P
    - a fused sentence carrying three ideas;
    - a wall of enumeration where a rule plus a short list would do;
    - a point restated within reach of itself;
-   - decision history where the rule alone suffices.
+   - decision history where the rule alone suffices. History is bloat only when removing it leaves one consistent statement; if two statements disagree about what is true now, it is drift (step 5).
 3. Compress in place: cut the padding, split the fused sentence or drop its dead clause, collapse the wall, keep a repeated point once. Move nothing to another artifact and re-derive nothing.
 4. Keep every load-bearing claim. If cutting a word would lose a rule, fact, constraint or example, keep the word.
-5. When the problem is really duplication across artifacts or stale content, stop and name it: hand duplication to `docs-audit` and drift to `v0-rewrite`. This skill only tightens.
+5. When the problem is really duplication across artifacts or stale content, stop and name it: hand duplication to `docs-audit` and drift to `v0-rewrite`. This skill only tightens. This holds even when the user asks for the move or merge directly: do not make it under this command, name the skill that does it, and leave that text unchanged.
 6. Re-read cold and cut again; the first pass always leaves some.
 
 ## Rules

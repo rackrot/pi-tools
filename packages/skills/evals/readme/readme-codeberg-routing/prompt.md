@@ -1,6 +1,6 @@
 ---
 name: readme-codeberg-routing
-description: "Rewriting a README for a Codeberg-hosted repo routes to readme:readme."
+description: "Codeberg-hosted README routes to forgejo-readme, not readme."
 tags: [routing]
 runs: 3
 max_turns: 6

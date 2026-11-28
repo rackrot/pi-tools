@@ -2,9 +2,8 @@
 name: bash-vs-coding
 description: Writing a defensive shell script routes to bash.
 tags: [routing]
-runs: 1
+runs: 3
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

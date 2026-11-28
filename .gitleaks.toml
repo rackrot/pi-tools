@@ -10,3 +10,12 @@ paths = [
   '''packages/skills/skills/goff-flags/references/fields\.md''',
   '''packages/memory/test/memory\.test\.ts''',
 ]
+
+[[allowlists]]
+description = "made-up token and Slack webhook in eval prompts that test secret handling, quoted again in the review docs; 'CharacterBody2D/3D' in a skill description is not a key"
+paths = [
+  '''packages/skills/evals/handoff/value-bg-document-and-launch/prompt\.md''',
+  '''packages/skills/evals/promql/value-alertmanager-webhook-secret/prompt\.md''',
+  '''packages/skills/skills/godot-physics/SKILL\.md''',
+  '''docs/reviews/2026-11-28-skills-(review|fix-plan)\.md''',
+]

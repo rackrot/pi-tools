@@ -20,7 +20,7 @@ npx @modelcontextprotocol/inspector@2.11.0 --cli --config ./.mcp.json --server n
   --method tools/list --format json > tools.json
 ```
 
-Also list `prompts/list` and `resources/list` (same flags, different `--method`): prompt and resource text reaches the model too, and the bundled checker reads any JSON with a `tools` array, so check those by eye. Pass env vars with `-e NAME=value` only for a test credential.
+Also list `prompts/list` and `resources/list` (same flags, different `--method`): prompt and resource text reaches the model too, and the bundled checker only reads a `tools` array, so read prompts/list and resources/list output by eye. Pass env vars with `-e NAME=value` only for a test credential.
 
 Exit codes worth branching on: 3 authentication required, 4 unreachable. On a non-zero exit the CLI writes one JSON error line to stderr.
 

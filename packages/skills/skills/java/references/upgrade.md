@@ -22,7 +22,7 @@
 ## 11 to 17
 
 - Strong encapsulation (JEP 403): `--illegal-access` is gone. Reflection into `java.*` internals fails with `InaccessibleObjectException`. Fix by upgrading the library; use `--add-opens` only as a stopgap, listed in the build.
-- Removed: Nashorn, the RMI activation system, the Applet API (deprecated). Java EE modules were already gone in 11.
+- Removed: Nashorn, the RMI activation system. Deprecated for removal: the Applet API. Java EE modules were already gone in 11.
 - Seed code for new features: records, sealed classes, `instanceof` patterns, text blocks, switch expressions all arrive as standard by 17.
 - Container and GC defaults changed; re-check heap flags and removed options. The JVM exits on an unrecognized `-XX` flag.
 
@@ -41,6 +41,7 @@
 - Virtual threads no longer pin in `synchronized` (JEP 491, delivered in 24).
 - Removed since 21: the Security Manager as an enforcement mechanism (24), the 32-bit x86 port (25). Check agents, tests and code that call `System.setSecurityManager`.
 - Structured concurrency is still preview in 25 (fifth preview, JEP 505); keep it out of production code.
+- String templates, a preview in 21 and 22, were withdrawn in 23 and are not in 25 (JEP 465). Remove any `STR.` template code before upgrading.
 - Build tools: Gradle, Maven plugins and bytecode libraries must support class file version 69. A `Unsupported class file major version` error means a tool needs upgrading, not the code.
 
 ## Build tool and framework gates

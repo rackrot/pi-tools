@@ -1,6 +1,6 @@
 ---
 name: game-genres
-description: Genre playbooks for any engine - core systems, data model, feel targets, balancing norms and pitfalls for platformers, roguelikes, deckbuilders and card games, puzzles, RPGs, FPS, tower defense, survival-crafting and visual novels, plus branching dialogue. Use for "make a roguelike/platformer/deckbuilder..." or genre-specific tuning.
+description: "Genre reference numbers and rules: build order, data model, formulas, starting values and pitfalls for platformers, roguelikes, deckbuilders and card games, puzzles, RPGs, FPS, tower defense, survival-crafting and visual novels, plus branching dialogue runners. Read it before answering any question about building, tuning or checking the math of a game of one of these kinds, even when the genre is only described and no project files exist: \"make a roguelike\", what to build first, jump numbers, TTK and damage falloff, damage formulas and stat modifier stacking, wave HP and income scaling, hunger drain and day length, dialogue variables and conditions. Its numbers replace answers from memory."
 ---
 
 # Game genres

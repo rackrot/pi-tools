@@ -1,11 +1,11 @@
 ---
 name: bash
-description: Writes, reviews and tests defensive Bash scripts, covering strict mode and its holes, quoting, arrays, trap cleanup, temp files, argument parsing, ShellCheck and Bats tests. Use when writing or changing *.sh, *.bash or *.bats files, CI, cron or hook scripts, or fixing ShellCheck warnings and shell failures.
+description: "Writes, fixes and reviews Bash and POSIX sh scripts so that a failure stops the script: strict mode (set -e, pipefail) and the places it does not apply, quoting, arrays, trap cleanup, temp files, argument parsing, ShellCheck findings and Bats tests. Use whenever the task has a shell script in it: a *.sh, *.bash or *.bats file, a #!/bin/bash or #!/bin/sh script pasted into the chat, a cron job, CI step, git hook or deploy script, including when a script carried on after a command failed, deleted the wrong thing or breaks on filenames with spaces. Read it before writing or changing the script, even a short one. Not for adding a shellcheck hook to .pre-commit-config.yaml (pre-commit)."
 ---
 
 # Bash
 
-Not for generic code changes (the `coding` skill), generic test strategy (`unit-testing`), or wiring the shellcheck pre-commit hook (`pre-commit`).
+Covers shell scripts only, not general code changes or test strategy. Not for wiring the shellcheck pre-commit hook (see `pre-commit` if installed).
 
 Keep the script's observable contract (arguments, exit codes, output, side effects) unless the request changes it. Shell fails quietly, so the work is making failure loud and the behavior checkable.
 

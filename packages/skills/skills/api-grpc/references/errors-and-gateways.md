@@ -25,7 +25,9 @@ Use the most specific code: `INVALID_ARGUMENT` for input that is wrong whatever 
 
 **Table direction.** The gRPC project's `http-grpc-status-mapping.md` says "Servers must not use this table to determine an HTTP status code to use; the mappings are neither symmetric nor 1-to-1." The table is for clients that receive an HTTP response with no `grpc-status`. A gateway that translates errors outward needs its own deliberate mapping, checked against the implementation in use.
 
-**The HTTP line is lossy.** In grpc-gateway's `HTTPStatusFromCode`, `INVALID_ARGUMENT`, `FAILED_PRECONDITION`, and `OUT_OF_RANGE` all map to 400, `ABORTED` and `ALREADY_EXISTS` to 409, and `CANCELLED` to 499. Tell consumers that the body's structured status is the source of truth.
+**The HTTP line is lossy.** In grpc-gateway's `HTTPStatusFromCode`, `INVALID_ARGUMENT`, `FAILED_PRECONDITION`, and `OUT_OF_RANGE` all map to 400, and `ABORTED` and `ALREADY_EXISTS` to 409. Tell consumers that the body's structured status is the source of truth.
+
+**`CANCELLED` maps to 499 (client closed request) in grpc-gateway v2, not 408.** Don't guess 408 from the name, and don't go hunting for `runtime/errors.go` to confirm it.
 
 ## Per-gateway behavior
 

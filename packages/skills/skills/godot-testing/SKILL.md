@@ -1,11 +1,11 @@
 ---
 name: godot-testing
-description: Writes and runs Godot 4 tests with GUT, gdUnit4 or a bare SceneTree runner, picking from what the project has. Covers test layout and naming, doubles and signals, headless runs with exit codes, hangs and timeouts, and a CI job. Use for `test_*.gd`, `addons/gut`, `addons/gdUnit4`, "test this Godot script" or Godot CI.
+description: "Writes, runs and debugs Godot 4 tests with GUT, gdUnit4 or an addon-free `extends SceneTree` runner, picking from what the project has. Covers test layout, doubles and signals, headless runs, exit codes, runs that hang, never exit or exit 0 despite failures, and CI that fails when game logic breaks. Read it before answering any question about Godot tests or a `godot --headless --script` run, also when the workspace has no project files, because GUT, gdUnit4 and engine behaviour changes by version and is easy to misremember. Use for `test_*.gd`, `addons/gut`, `addons/gdUnit4`, \"test this Godot script\", \"block a push that breaks this\" or Godot test CI. Not for export builds (godot-export)."
 ---
 
 # Godot testing
 
-Pick the test framework the project already uses, write tests in its conventions, and run them headless with an exit code CI can gate on. General TDD discipline stays in `unit-testing`; GDScript language and scene work stay in `godot`; export builds in `godot-export`.
+Pick the test framework the project already uses, write tests in its conventions, and run them headless with an exit code CI can gate on. General TDD discipline is out of scope here; GDScript language and scene work stay in `godot`; export builds in `godot-export`.
 
 ## 1. Detect what the project has
 
@@ -101,7 +101,7 @@ func run_tests() -> void:
 2. On a fresh checkout import first: `godot --headless --path . --import`. `.godot/` is not committed, so without it `class_name` types fail with `Identifier "X" not declared in the current scope` and imported assets fail to load.
 3. Run the framework's command (references), or the bare runner above, under a timeout: `timeout 300 godot --headless ...`.
 4. Read the process exit code, not only the output. Redirect stdout and stderr to files when a wrapper shell might reorder or drop them.
-5. With the editor MCP connected (`godot-editor` tools), `run_headless` from the project's `godot-mcp` skill runs the same commands and returns diagnostics; save open scenes first.
+5. If an editor MCP server with a `run_headless` tool is connected, it runs the same commands and returns diagnostics; save open scenes first.
 
 ## 6. CI
 

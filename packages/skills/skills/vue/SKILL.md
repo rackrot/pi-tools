@@ -1,11 +1,15 @@
 ---
 name: vue
-description: "Builds and debugs Vue 3 components with the Composition API, Pinia stores and Nuxt 4 data fetching: props, emits, defineModel, composables, reactivity, watchers, SSR safety and tests. Use when adding, changing or debugging .vue files, Pinia stores or a Nuxt app, such as lost reactivity, stale state, hydration mismatches or duplicate fetches."
+description: "Vue 3 Composition API, Pinia and Nuxt 4 rules, including what changed in Vue 3.5, Nuxt 4 and Pinia 4: props, emits, defineModel, composables, reactivity, watchers, storeToRefs, useFetch defaults, SSR safety and tests. Read before answering about or editing a .vue file, `<script setup>` code, a Pinia store or a Nuxt app, also when the code is only a pasted snippet and the fix looks obvious: a value that does not update, stale state, a hydration mismatch or a request that runs twice."
 ---
 
 # Vue
 
-This skill owns Vue component structure and local state, Pinia stores, and Nuxt page data and hydration. It does not own React (`react`), bundler configuration (`vite`), visual direction (`web-design`, if installed), language-level concerns (`typescript`), or TanStack Query, Router, and Form, including their Vue adapters.
+This skill owns Vue component structure and local state, Pinia stores, and Nuxt page data and hydration. It does not own React (`react`, if installed), bundler configuration (`vite`), visual direction (`web-design`, if installed), language-level concerns (`typescript`, if installed), or TanStack Query, Router, and Form, including their Vue adapters. A control whose handler, store actions and watchers each look correct but together reset or race the result goes to `click-path-audit`.
+
+Read the matching reference before answering:
+- [references/nuxt.md](references/nuxt.md) when the project uses Nuxt or the code runs on the server: `useFetch` and `useAsyncData` keys and defaults, hydration safety, `useState`, runtime config, route rules, and lazy hydration.
+- [references/vue-component-testing.md](references/vue-component-testing.md) when writing or revising a Vue, Pinia, or Nuxt test. It uses full mounts by default.
 
 ## Before editing
 
@@ -61,17 +65,9 @@ Classify each value, then place it:
 - Use `useId()` (3.5) for ids that must match between server and client.
 - Start with native elements, labels, and keyboard behavior. Apply the same accessibility rules as for any web UI.
 
-## Nuxt and SSR
-
-Read [references/nuxt.md](references/nuxt.md) when the project uses Nuxt, or the code runs on the server. It covers `useFetch` and `useAsyncData` keys and defaults, hydration safety, `useState`, runtime config, route rules, and lazy hydration.
-
 ## Performance
 
 Reproduce a symptom and measure it first, with Vue devtools, the browser Performance panel, or the build report. Then fix the cause: misplaced state, an over-broad watcher, or a large reactive structure. `shallowRef`, `v-memo`, `<KeepAlive>`, and async components are tools for a measured problem. `v-once` and `v-memo` add invalidation risk when used by default. In an SSR app, `defineAsyncComponent` with a `hydrate` strategy (`hydrateOnVisible`, `hydrateOnIdle`) can defer below-the-fold interactivity.
-
-## Tests
-
-Read [references/vue-component-testing.md](references/vue-component-testing.md) when writing or revising a Vue, Pinia, or Nuxt test. It uses full mounts by default.
 
 ## Report
 

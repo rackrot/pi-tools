@@ -11,7 +11,7 @@ Not for: Scala language code (`scala`), Play applications (`play-framework`), Gr
 
 ## Orient
 
-1. Read `project/build.properties`. `sbt.version` decides the rules: 1.x or 2.x. If the file is missing, say so and ask before assuming a version.
+1. Read `project/build.properties`. `sbt.version` decides the rules: 1.x, 2.0.x or 2.1+ (test caching after `clean` differs between 2.0.x and 2.1). If the file is missing, say so and ask before assuming a version.
 2. Read `build.sbt`, `project/*.sbt` and `project/*.scala` (the meta-build). Map the subprojects from `lazy val` declarations, `.aggregate(...)` and `.dependsOn(...)`.
 3. Read `scalaVersion`, `crossScalaVersions` and `libraryDependencySchemes` before changing any dependency.
 4. Reproduce with the narrowest task, such as `sbt "core/testOnly com.example.FooSuite"`, before editing.
@@ -32,14 +32,14 @@ Pick the form by the version. Verified on 2026-10-20 against scala-sbt.org; deta
 
 - Write a setting in the scope it belongs to with slash syntax: `Test / fork := true`, `core / Compile / scalacOptions += "-deprecation"`.
 - On sbt 2, bare settings in `build.sbt` apply as common settings to every subproject. Scope them when only one project needs them.
-- Add plugins in `project/plugins.sbt` with `addSbtPlugin(...)`. Before adding a plugin to an sbt 2 build, check that it publishes an sbt 2 artifact.
+- Add plugins in `project/plugins.sbt` with `addSbtPlugin(...)`. Before adding a plugin to an sbt 2 build, check that it publishes an artifact with the `_sbt2_3` suffix.
 - sbt 2 reloads automatically after a `build.sbt` or `project/` change. On sbt 1 run `reload` after editing those files.
 
 ## Dependencies
 
 Read `references/dependencies.md` when adding, upgrading, excluding or resolving a library, or when `update` fails. Essentials:
 
-- `%%` appends the binary Scala version (`_2.13`, `_3`); `%` does not; `%%%` covers Scala.js and Native.
+- `%%` appends the binary Scala version (`_2.13`, `_3`); `%` does not. For Scala.js and Native use `%%%` on sbt 1; on sbt 2 `%%` covers them through the `platform` setting.
 - Diagnose conflicts with `evicted` and `dependencyTree`, not by reading the edited line. On sbt 1.4+, `dependencyTree` needs `addDependencyTreePlugin` in `project/plugins.sbt`; see `references/dependencies.md` for sbt 2.
 - Don't disable checksums or insecure-protocol checks to get past a resolver error. Report it.
 
@@ -57,8 +57,8 @@ Read `references/cross-build.md` when a build targets more than one Scala versio
 
 ## Gotchas
 
-- sbt 2 caches machine-wide. After `clean`, `compile` can finish in `0 s` with no `compiling` lines because the classfiles were restored. Check `find target/out -name '*.class'` before calling it a bug.
-- A green test stays skipped after `clean` on sbt 2. Use `testFull`.
+- sbt 2 caches machine-wide. On 2.0.x, after `clean`, `compile` can finish in `0 s` with no `compiling` lines because the classfiles were restored. Check `find target/out -name '*.class'` before calling it a bug.
+- On sbt 2.0.x a green test stays skipped after `clean`; use `testFull`. From 2.1.0 `clean` invalidates the cache for the next command, and `sbt test --cache_test_result=false` or `Test / test / cacheStores := Nil` turns test caching off.
 - The sbt 2 server keeps the environment it started with. A later `SBT_OPTS` does nothing until `shutdown`.
 - `IntegrationTest` and `it:test` are removed on sbt 2. Move those tests to a subproject.
 - sbt 2 puts output under `target/out/jvm/scala-<ver>/<subproject>/`. Update CI artifact paths to `target/out/**/test-reports/*.xml`.

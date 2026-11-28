@@ -1,6 +1,6 @@
 ---
 name: tilt
-description: Writes, debugs and runs Tilt (tilt.dev) local Kubernetes dev loops. Use when a task touches a Tiltfile or tilt_config.json, uses Starlark calls such as docker_build, k8s_yaml, k8s_resource, live_update, local_resource, allow_k8s_contexts or config.define_*, or runs tilt commands (up, ci, logs, get, wait, down, args). Not for plain Kubernetes manifests (the `kubernetes` skill), Helm chart authoring (the `helm` skill) or Dockerfiles and Compose (the `docker` skill) when no Tiltfile is involved.
+description: Writes, debugs and runs Tilt (tilt.dev) local Kubernetes dev loops. Read it before answering any question about a Tiltfile, tilt_config.json or the tilt CLI (up, ci, logs, get, wait, down, args), also when the Tiltfile is only quoted or described in the request and there is no file to open, and when the request shows Tiltfile calls such as docker_build, k8s_yaml, k8s_resource, live_update, local_resource, allow_k8s_contexts or config.define_* without naming Tilt. Not for plain Kubernetes manifests (the `kubernetes` skill), Helm chart authoring (the `helm` skill) or Dockerfiles and Compose (the `docker` skill) when no Tiltfile is involved.
 ---
 
 # Tilt
@@ -36,7 +36,7 @@ Not for editing manifests, charts or Dockerfiles on their own; those skills own 
 ## Configuration and extensions
 
 - `load('ext://name', 'symbol')` fetches from the tilt-extensions repo on first use, so it needs network and runs third-party Starlark. Vet an extension before adding it and tell the user which ones the Tiltfile loads.
-- Declare options with `config.define_string_list('services')`, `config.define_bool('flag')`, then `cfg = config.parse()`. Defined settings are absent from the dict when unset, so use `cfg.get('services', [])`. Pass them after `--` (`tilt up -- --flag`), or put them in `tilt_config.json`; flags override the file.
+- Declare options with `config.define_string_list('services', args=True)`, `config.define_bool('flag')`, then `cfg = config.parse()`. `args=True` is what routes positional args (`tilt up api web`) into that setting; without it the setting is filled only by `--services`. Defined settings are absent from the dict when unset, so use `cfg.get('services', [])`. Pass them after `--` (`tilt up -- --flag`), or put them in `tilt_config.json`; flags override the file.
 - After `config.parse()`, positional args are no longer treated as resource names. Restore that with `config.set_enabled_resources(cfg.get('services', []))`. An empty list enables all resources, not none.
 - `config.define_*` works only in the main Tiltfile, not in files pulled in by `load` or `include`.
 
@@ -45,7 +45,7 @@ Not for editing manifests, charts or Dockerfiles on their own; those skills own 
 `tilt up` opens a TUI that blocks and garbles output. Use one of:
 
 - `tilt ci`: build, deploy, wait for all resources to be healthy, then exit; nonzero on a build failure or crashed server. `--timeout` defaults to 30m, so pass a bound such as `--timeout 10m`. Use this for verification and CI.
-- `tilt up --stream` in the background, with `run_in_background`, for a long-lived loop. Stop it with `tilt down` (also removes cluster objects) or by ending the process.
+- `tilt up --stream` as a background process for a long-lived loop (the harness's background option, or `nohup tilt up --stream > tilt.log 2>&1 &`), then read the log file. Stop it with `tilt down` (also removes cluster objects) or by ending the process.
 - Against a running Tilt: `tilt get uiresource` (status of each resource, `-o json` for scripts), `tilt logs <resource> --since 5m --level error`, `tilt wait --for=condition=Ready uiresource/<name> --timeout 120s`, `tilt trigger <name>`, `tilt args -- --flag` to change Tiltfile args live. `tilt wait` is experimental and its default timeout is 30s.
 - The Tiltfile's own errors appear under the `(Tiltfile)` resource; read `tilt logs '(Tiltfile)'` before editing code when nothing deploys.
 - Tilt serves on port 10350. A second instance needs `--port`, and later commands need the same `--port`.

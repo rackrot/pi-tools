@@ -1,6 +1,6 @@
 ---
 name: mcp-server-audit
-description: Audits MCP servers configured for Claude Code or other agents for tool poisoning, shadowing, rug pulls, SSRF and unauthenticated exposure, reading raw tool descriptions offline and pinning their hashes. Use before approving a new or third-party MCP server, to check that approved tools haven't changed, or when an agent acted strangely after a tool call.
+description: Audits MCP servers configured for Claude Code, Cursor or other agents for tool poisoning, shadowing, rug pulls, SSRF and unauthenticated exposure. Carries the verified MCP Inspector CLI and Snyk Agent Scan commands (flags, exit codes, what each uploads) for saving a server's tools/list, plus a bundled offline script that scans the descriptions and pins their hashes. Use before approving a new or third-party MCP server, when reviewing an .mcp.json or other MCP config, to check or schedule a re-check that approved tools haven't changed, or when an agent acted strangely after a tool call.
 ---
 
 # Audit MCP servers for tool poisoning
@@ -20,7 +20,7 @@ A tool's name, description and schema go into the model's context before it deci
 ## Procedure
 
 1. **Inventory the servers.** List every MCP server the agent can load and where each is defined. For Claude Code that is `~/.claude.json` (user and per-project local scope), the project's `.mcp.json`, each installed plugin's `.mcp.json` or `plugin.json` `mcpServers`, and managed config. [Claude Code config](references/claude-code-config.md) has the paths and `jq` one-liners. Other clients: Cursor `~/.cursor/mcp.json`, VS Code `.vscode/mcp.json` and user settings, Claude Desktop `claude_desktop_config.json`.
-2. **Review each entry statically, without running it.** For stdio: what the command executes (a `curl | sh` or a shell `-c` wrapper hides what runs), and which env vars and secrets it is handed. Whether a launcher is pinned (`npx`, `uvx`, `@latest`, image digests) is not reviewed here; leave it to `agent-config-audit` (if installed). For remote: `https` only, who operates the host, whether literal tokens sit in `headers` rather than `${VAR}` references, and what OAuth scopes it asks for. Note servers that share a name or tool names with another server (shadowing).
+2. **Review each entry statically, without running it.** For stdio: what the command executes (a `curl | sh` or a shell `-c` wrapper hides what runs), and which env vars and secrets it is handed. Note a floating launcher (`npx pkg`, `uvx`, `@latest`, `image:latest`) as a rug-pull risk; if `agent-config-audit` is installed, leave classifying and fixing pins to it. For remote: `https` only, who operates the host, whether literal tokens sit in `headers` rather than `${VAR}` references, and what OAuth scopes it asks for. Note servers that share a name or tool names with another server (shadowing).
 3. **Read the raw tool surface.** With consent, fetch `tools/list` into a file with the MCP Inspector CLI or `snyk-agent-scan inspect` (commands in [scanning](references/scanning.md)). Then run the bundled checker on the file, which never contacts anything:
 
    ```bash

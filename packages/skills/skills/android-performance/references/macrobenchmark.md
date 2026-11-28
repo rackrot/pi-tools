@@ -57,7 +57,7 @@ Use `FrameTimingMetric()`, `StartupMode.WARM` or no startup mode, a `setupBlock`
 - `./gradlew :macrobenchmark:connectedBenchmarkAndroidTest`, where the task name follows the `benchmark` build type. Filter with `-Pandroid.testInstrumentationRunnerArguments.class=com.example.StartupBenchmark`.
 - With more than one device attached, prefix the command with `ANDROID_SERIAL=<serial>` so the run uses one device.
 - Plug in the device, keep the screen unlocked and battery above the threshold, and run on the charger. Close other apps.
-- Results land in the module's `build/outputs/connected_android_test_additional_output/`, as `*-benchmarkData.json` with per-metric `minimum`, `maximum`, `median` and `runs`, next to Perfetto traces for each iteration. Open a trace through `android-skills:android-profiler`.
+- Results land in the module's `build/outputs/connected_android_test_additional_output/`, as `*-benchmarkData.json` with per-metric `minimum`, `maximum`, `median` and `runs`, next to Perfetto traces for each iteration. Open a trace in Perfetto or the Android Studio profiler (`android-skills:android-profiler`, if installed).
 
 ## Comparing two runs
 

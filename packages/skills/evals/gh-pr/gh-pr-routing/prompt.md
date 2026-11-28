@@ -1,11 +1,10 @@
 ---
 name: gh-pr-routing
-description: Opening a PR routes to gh-pr:gh-pr.
+description: Explicit trigger. Opening a pull request for a finished branch on a github.com remote should read gh-pr.
 tags: [routing]
 runs: 1
 max_turns: 6
 allowed_tools: [Read, Glob, Grep, Skill]
-model: claude-sonnet-5-5
 ---
 
-My branch feature/rate-limit is ready. Open a pull request for it with a reviewer-ready description.
+My branch feature/rate-limit is finished and the remote is github.com/acme/gateway. Open a pull request for it against main, and write the description so whoever reviews it can get through it fast.

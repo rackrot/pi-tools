@@ -100,7 +100,7 @@ The examples cover Node, Python, Go, and Postgres, and the classes apply to any 
 
 **Probe.** After any topology change, compare the change against every document that describes topology.
 
-**Action.** Update `CLAUDE.md`, the README, and module or service lists in the same change as the topology change, and treat them as part of the phase's exit criteria.
+**Action.** Update the instruction files (AGENTS.md, CLAUDE.md), the README, and module or service lists in the same change as the topology change, and treat them as part of the phase's exit criteria.
 
 ## Pre-flight checklist (per phase)
 

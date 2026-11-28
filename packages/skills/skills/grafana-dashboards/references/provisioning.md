@@ -11,7 +11,6 @@ apiVersion: 1
 providers:
   - name: services
     orgId: 1
-    folder: Services
     type: file
     disableDeletion: true
     allowUiUpdates: false
@@ -21,8 +20,8 @@ providers:
       foldersFromFilesStructure: true
 ```
 
-- `allowUiUpdates: false` makes the file the source of truth; edits in the UI are lost or refused.
-- `foldersFromFilesStructure` maps directories to folders; do not combine it with `folder`.
+- `allowUiUpdates: false` makes the file the source of truth: Grafana refuses to save UI edits. With `true`, UI saves go to the database and are overwritten the next time the file changes.
+- `foldersFromFilesStructure` maps directories to folders; `folder` and `folderUid` must be unset.
 - Give each dashboard a stable `uid` so links survive reprovisioning.
 - Classic dashboard JSON works in the provisioned folder as is. V2 (dynamic) dashboards must be provisioned in the Kubernetes resource format (`apiVersion: dashboard.grafana.app/...`, `kind: Dashboard`, `metadata.name` as the uid, the dashboard in `spec`). Match whatever the target instance exports.
 
@@ -37,7 +36,7 @@ datasources:
     url: http://prometheus:9090
 ```
 
-Never put credentials in the file; use `secureJsonData` populated from environment variables (`$__env{...}` expansion, see Grafana's provisioning docs) or a secret manager.
+Never put credentials in the file; use `secureJsonData` populated from environment variables (`${ENV_VAR}` expansion, see Grafana's provisioning docs) or a secret manager.
 
 ## Terraform
 

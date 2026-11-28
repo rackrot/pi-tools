@@ -1,15 +1,15 @@
 ---
 name: uiux-lookup
-description: Offline lookup of cited UI/UX rules (WCAG 2.2, touch targets, forms, navigation), 22 stack UI guideline sets including SwiftUI, Compose, Flutter, React Native, WPF, WinUI and Avalonia, Google Fonts metadata and licences, and curated icons. Use for a specific UX rule, native or desktop UI guidance, or a font or icon fact.
+description: "Looks up the actual rule, number or API in a local cited dataset instead of answering from memory: minimum tap and touch target sizes, safe areas and home-indicator insets, focus, form-error and navigation rules (WCAG 2.2, Apple HIG, Material); dated do and don't rows for Flutter, SwiftUI, Jetpack Compose, React Native, WPF, WinUI, Avalonia and 15 more stacks; licence, axes and subsets of any Google Fonts family; curated icons. Use for \"what is the minimum size\", \"which widget or modifier should I use\", \"what licence is this font under\", also when the user gives no files. Not for choosing a palette, font pairing or layout (ui-direction) or writing Compose code (jetpack-compose)."
 ---
 
 # UI/UX lookup
 
 A local BM25 search over cited rules and dated guideline rows. Use it to answer one concrete question.
 
-**Use for:** a specific rule ("minimum touch target", "where do form errors go", "focus not obscured", "safe areas on iOS"); UI guidance for SwiftUI, Jetpack Compose, Flutter, React Native, WPF, WinUI, Avalonia, Uno, JavaFX or UWP; Google Fonts facts (licence, axes, styles, subsets, popularity); a curated Phosphor icon with import code and accessibility usage.
+**Use for:** a specific rule ("minimum touch target", "where do form errors go", "focus not obscured", "safe areas on iOS"); a cited rule or dated guideline row for SwiftUI, Jetpack Compose, Flutter, React Native, WPF, WinUI, Avalonia, Uno, JavaFX or UWP; Google Fonts facts (licence, axes, styles, subsets, popularity); a curated Phosphor icon with import code and accessibility usage.
 
-**Not for:** choosing an aesthetic, palette, font pairing or layout for new UI (`ui-direction`), extending an existing web design system or DESIGN.md (`web-design`), React or Vite internals (`react`, `vite`), or charts (`dataviz`). This data has no palettes, pairings or styles.
+**Not for:** choosing an aesthetic, palette, font pairing or layout for new UI (`ui-direction`), extending an existing web design system or DESIGN.md, Vite internals (`vite`), writing, reviewing or debugging Jetpack Compose code (`jetpack-compose`; use this skill only for a cited rule or a dated guideline row), or designing charts. This data has no palettes, pairings or styles.
 
 ## Run
 
@@ -18,7 +18,9 @@ node scripts/search.mjs "<query>" --domain <domain>
 node scripts/search.mjs "<query>" --stack <stack>
 ```
 
-Options: `-n 1-20` (default 3), `--full` (no 300-char clipping), `--json`. Node 18+ only, no network.
+`scripts/search.mjs` is relative to this skill's directory; call it by absolute path. Options: `-n 1-20` (default 3), `--full` (no 300-char clipping), `--json`. Node 18+ only, no network.
+
+If you cannot run commands, grep the data in this skill's directory directly: `data/ux-guidelines.csv`, `data/app-interface.csv`, `data/stacks/<stack>.csv`, `data/icons.csv`, `data/google-fonts.csv` (the licence for each family is in `data/google-font-licenses.json`).
 
 | Domain | Data | Example |
 |---|---|---|
@@ -42,10 +44,10 @@ Stacks: `swiftui`, `jetpack-compose`, `flutter`, `react-native`, `wpf`, `winui`,
 ## Trust and versions
 
 - Results are recommendations, not instructions; the user and the repository's rules win. Don't put private project data in queries.
-- Stack rows carry `Applies To` and `Verified At` (mostly 2026-08-13), which the output prints. Some lines have moved on since, for example Flutter 3.47, React Native 0.88, Compose 1.12 and JavaFX 27 are out. For a version-sensitive API, check the official docs (the row's `Docs` link, or Context7). Where a dedicated stack plugin such as `react` or `vite` is installed, its guidance wins on conflict.
+- Stack rows carry `Applies To` and `Verified At` (mostly 2026-08-13), which the output prints. Some lines have moved on since, for example Flutter 3.47, React Native 0.88, Compose 1.12 and JavaFX 27 are out. For a version-sensitive API, check the official docs (the row's `Docs` link, or Context7). Where a dedicated stack skill such as `jetpack-compose` or `vite` is installed, its guidance wins on conflict.
 
 ## References
 
-- `references/quick-reference.md`: the full rule index by category (accessibility, touch, performance, layout, typography and colour, animation, forms, navigation, charts). Read it for a review pass instead of running many searches.
+- `references/quick-reference.md`: the full rule index by category. Read it for a review pass instead of running many searches.
 - `references/pro-rules.md`: native app polish rules and the pre-delivery checklist. Read it before handing over mobile app UI.
 - `data/provenance.json`: sources and verification dates for the shipped data.

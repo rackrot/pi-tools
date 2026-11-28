@@ -1,18 +1,16 @@
 ---
 name: design-handoff
-description: "Writes a developer handoff spec from a finished design: layout, tokens, component props, states and interactions, responsive breakpoints, content limits, edge cases, motion and accessibility notes. Use when a design is ready for engineering, or for \"write handoff specs\", \"spec this screen for developers\"."
+description: "Writes the build spec developers work from when a design is finished: layout, tokens, component props, every state and interaction, responsive breakpoints, content limits, edge cases, motion and accessibility notes, plus the open questions the design leaves unanswered. Use whenever an approved or signed-off screen, mockup or set of designer values has to be written up for the developers who build it, even when the user already lists the measurements, and for \"write handoff specs\", \"spec this screen for developers\". Not for handing unfinished work to the next person or session (`handoff`) or for feedback on a design (`design-critique`)."
 ---
 
 # Design handoff
 
 Turn a finished design into a spec engineers can build from without guessing.
 
-Design: the arguments given with the command
-
 ## Scope
 
 - Owns the design-to-engineering spec sheet for a screen, flow or component.
-- Acceptance criteria for a visual change to an existing product in this codebase, judged against its own system and DESIGN.md, go to `web-design`. Building it goes to the framework skill (`react`, `vue` and similar), if installed.
+- Acceptance criteria for a visual change to an existing product in this codebase, judged against its own system and DESIGN.md, go to `web-design`, if installed. Building it goes to the framework skill (`vue`, or `react` and similar if installed).
 - A component's standing documentation in a design system is out of scope. Wording goes to `ux-copy`.
 - Work from what the user shares: screenshots, exported frames, spec values, token files, or source. If the design lives in a tool you can't read (a Figma link), ask for an export plus the values you can't measure from an image (exact spacing, token names, easing). Mark every value you estimated from a screenshot as an estimate.
 - If the codebase is available, read its tokens and existing components and reference them by name instead of raw values.

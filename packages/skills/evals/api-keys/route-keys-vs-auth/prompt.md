@@ -1,6 +1,6 @@
 ---
 name: route-keys-vs-auth
-description: Issuing and storing customer API keys goes to api-keys, not app-auth, if installed.
+description: Issuing and storing customer API keys goes to api-keys, not api-oauth-provider.
 tags: [routing]
 runs: 1
 max_turns: 6

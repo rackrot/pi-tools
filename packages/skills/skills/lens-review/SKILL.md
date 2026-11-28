@@ -12,14 +12,15 @@ Split one artifact across independent lenses and return where they converge and 
 
 - Pressure-testing a plan in one chosen mode: use `devils-advocate`.
 - Repeating one read for robustness against session framing: use `tunnel-check`.
+- Fresh-context review of an artifact without the session's framing (refute a claim, a stranger's cold read, a tunnel check): use `fresh-eyes`.
 
 ## Workflow
 
 1. Read the artifact end to end before choosing lenses.
-2. Choose one lens per distinct failure mode, such as correctness, security, readability, cost or adversarial user. Two candidates that share a failure mode are one lens. This lands between 2 and 5, and there is no default count: the artifact's failure modes set it.
+2. Choose one lens per distinct failure mode, such as correctness, security, readability, cost or adversarial user. Two candidates that share a failure mode are one lens. This lands between 2 and 5, and there is no default count: the artifact's failure modes set it. If only one failure mode exists, say so and give a single read instead of a lens review; if more than five, keep the five whose failure would cost most and name the ones dropped.
 3. Through each lens, give a one-line verdict (pass, fail or unclear) with its single most load-bearing reason. A reason that is not load-bearing is dropped.
 4. Group the verdicts: full agreement, agreement for different reasons, or disagreement.
-5. On disagreement, name the single next question whose answer would move the lenses into agreement or a clean split with owners. That question is the output.
+5. On disagreement, name the single next question whose answer would move the lenses into agreement or a clean split with owners. That question is the headline of the output, placed after the per-lens verdicts.
 6. On full agreement, return the shared verdict with the reasons that were load-bearing for at least two lenses.
 
 Run the lenses inline by default. Use subagents only when the user asks for isolation.

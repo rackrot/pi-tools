@@ -1,6 +1,6 @@
 # GitHub Codespaces efficiency
 
-Read this when the user wants faster Codespaces startup, lower Codespaces spend, right-sized machines, idle-timeout tuning or prebuild scoping, or is creating a `.devcontainer/` for Codespaces from scratch. The thresholds below (2 GB image, 10 Features, 5 codespaces a week, 30-minute idle) are upstream's heuristics, not GitHub limits.
+Read this when the user wants faster Codespaces startup, lower Codespaces spend, right-sized machines, idle-timeout tuning or prebuild scoping, or is creating a `.devcontainer/` for Codespaces from scratch. The thresholds below (2 GB image, 10 Features, 5 codespaces a week, 30-minute idle) are rules of thumb, not GitHub limits.
 
 ## 1. Measure first
 

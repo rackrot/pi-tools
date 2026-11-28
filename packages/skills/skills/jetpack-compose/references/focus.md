@@ -1,6 +1,6 @@
 # Focus, keyboard and D-pad
 
-Read when a screen must work with a keyboard, D-pad, remote or accessibility focus. TV UI proper goes to the `android-skills` TV skills.
+Read when a screen must work with a keyboard, D-pad, remote or accessibility focus. TV UI proper is out of scope here (use an `android-skills` TV skill if installed).
 
 Focus is stateful behavior: make targets and exceptional edges explicit, and drive them through the user's input.
 

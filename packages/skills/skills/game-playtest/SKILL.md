@@ -1,13 +1,13 @@
 ---
 name: game-playtest
-description: Plans, runs and analyses game playtests, covering research questions, recruiting, session scripts, observer notes, think-aloud, first-time-user tests, surveys, lightweight telemetry, ranked fixes and keep-or-kill criteria. Use for "playtest", "feedback from testers", "is it fun", "where do players quit" or "what should we fix first".
+description: Plans, runs and analyses game playtests, demos and betas with real players. Covers research questions, recruiting, session scripts, observer notes, surveys, what to log to see where and why players stop (telemetry events, funnels, quit points), and turning tester notes or feedback into a ranked fix list with keep-or-kill criteria. Use whenever testers or players have played or will play a build, even if the word "playtest" is not used, such as "notes from testers", "is it fun", "players drop off before level 3", "what should I record in the build" or "what do we fix first".
 ---
 
 # Game playtest
 
 A playtest is an experiment: the design is a hypothesis, and the session collects evidence for or against it. This skill turns "let's get some people to play it" into a plan, a run sheet, data and a ranked change list.
 
-Not for: automated tests and code QA (`godot-testing` or the engine's test skill, `unit-testing`), bug triage of crash reports (`gh-triage`), or deciding the design itself (`game-design`). Use each one if installed.
+Not for: automated tests and code QA (`godot-testing`, `dotnet-testing`, `java-testing` or the engine's test skill), bug triage of crash reports (`gh-triage`), or deciding the design itself (`game-design`). Use each one if installed.
 
 ## Workflow
 
@@ -27,8 +27,8 @@ Not for: automated tests and code QA (`godot-testing` or the engine's test skill
 4. **Prepare the build and the kit.** A stable build with a known build id, telemetry on, debug overlays off, saves reset. A facilitator script with tasks phrased as goals, an observer sheet, the survey, and recording set up. Run a pilot session with a colleague and fix the kit. See [references/session-kit.md](references/session-kit.md).
 5. **Run the session without helping.** Brief the player that the game is being tested, not them. Then stay quiet. Answer questions with questions ("What would you try?"). Note timestamped behaviour, quotes and emotional reactions on the observer sheet. Step in only when the player is stuck past the agreed time limit, and record that you did.
 6. **Debrief and survey straight after.** Open questions first (what they remember, what confused them, what they wanted to do next), then the survey. Ask about specific moments you saw rather than "did you like it?".
-7. **Synthesise the same day.** Turn notes into one issue per row: what happened, how many players, severity, and evidence (timestamps, clips, metrics). Keep observed behaviour separate from opinions. Treat player suggestions as symptoms of a problem, not as the fix.
-8. **Rank and decide.** Score each issue (players affected x severity), map it to the research question, and pick fixes. Check keep-or-kill criteria set in step 1, not new ones invented after seeing the data.
+7. **Synthesise the same day.** Turn notes into one issue per row: what happened, how many players, severity (4 blocker, 3 major, 2 minor, 1 cosmetic), and evidence (timestamps, clips, metrics). Keep observed behaviour separate from opinions. Treat player suggestions as symptoms of a problem, not as the fix.
+8. **Rank and decide.** Score each issue (players affected x severity), map it to the research question, and pick fixes. Check keep-or-kill criteria set in step 1, not new ones invented after seeing the data. Scale, tie-break and triage table: [references/session-kit.md](references/session-kit.md) sections 8 and 9.
 9. **Retest the fixes** in the next round with fresh players, and report what changed.
 
 ## Keep, change or kill

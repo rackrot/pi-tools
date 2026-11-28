@@ -15,7 +15,7 @@ Read this when the diff touches `.github/workflows/`, other CI config, Dockerfil
 - **Cache poisoning.** A job that runs untrusted code and also saves a cache key that privileged or release workflows restore.
 - **`curl | sh` and unpinned tool downloads** in workflow steps or Dockerfiles, without a checksum or signature check.
 
-If installed, `zizmor` and `actionlint` find most of these statically. Run them read-only: no `zizmor --fix` (it edits files in place), and `zizmor --offline` if a `GH_TOKEN` in the environment should not be sent to the GitHub API. Never install them during an audit. The `gh-actions` skill, if installed, covers fixing workflows.
+If installed, `zizmor` and `actionlint` find most of these statically. Run them read-only: no `zizmor --fix` (it edits files in place), and `zizmor --offline` if a `GH_TOKEN` in the environment should not be sent to the GitHub API. Never install them during an audit. The `forgejo-actions` skill covers fixing Forgejo workflows, and the `gh-actions` skill, if installed, covers GitHub ones.
 
 ## Cloud identity (OIDC federation)
 

@@ -1,8 +1,8 @@
-# Tool scripts and small editor plugins
+# Tool scripts
 
-`@tool` scripts that run in the editor, configuration warnings, one-off `EditorScript`s, and the basics of an `EditorPlugin` (custom types, menu items, docks). Inspector plugins, gizmos and larger editor tooling are beyond this reference; read the `EditorPlugin`, `EditorInspectorPlugin` and `EditorNode3DGizmoPlugin` class docs for the project's version.
+`@tool` scripts that run in the editor, configuration warnings and one-off `EditorScript`s. Any EditorPlugin or addon (plugin.cfg, docks, menus, inspector plugins, gizmos, undo/redo scene edits) -> `godot-editor-tools`.
 
-Contents: `@tool` basics; One-off editor actions: `EditorScript`; EditorPlugin skeleton; C# note.
+Contents: `@tool` basics; One-off editor actions: `EditorScript`; C# note.
 
 ## `@tool` basics
 
@@ -63,58 +63,6 @@ func _run() -> void:
 - Open it in the script editor and use File > Run. Changes are applied to the open scene; save the scene afterwards.
 - `EditorInterface` (a singleton in 4.2+) reaches the selection, open scenes and the file system.
 
-## EditorPlugin skeleton
-
-```
-addons/my_tool/
-  plugin.cfg
-  plugin.gd
-```
-
-```ini
-[plugin]
-name="My Tool"
-description="Adds MyNode and a Project menu action."
-author="Me"
-version="0.1.0"
-script="plugin.gd"
-```
-
-The dock lines need Godot 4.6+ (`EditorDock`); on 4.5 and older replace them with `add_control_to_dock()` / `remove_control_from_docks()`.
-
-```gdscript
-@tool
-extends EditorPlugin
-
-var _dock: EditorDock
-
-func _enter_tree() -> void:
-	add_custom_type("MyNode", "Node2D", preload("my_node.gd"), preload("icon.svg"))
-	add_tool_menu_item("My Tool: rebuild", _rebuild)
-	_dock = EditorDock.new()
-	_dock.title = "My Tool"
-	_dock.default_slot = EditorDock.DOCK_SLOT_RIGHT_UL
-	_dock.add_child(preload("dock.tscn").instantiate())
-	add_dock(_dock)
-
-func _exit_tree() -> void:             # undo everything from _enter_tree
-	remove_dock(_dock)
-	_dock.queue_free()
-	remove_tool_menu_item("My Tool: rebuild")
-	remove_custom_type("MyNode")
-
-func _rebuild() -> void:
-	pass
-```
-
-- `script` in `plugin.cfg` is relative to the plugin folder. Enable the plugin in Project Settings > Plugins, which adds it to `[editor_plugins] enabled` in `project.godot`.
-- Everything added in `_enter_tree()` must be removed in `_exit_tree()`, or disabling the plugin leaves orphaned docks and duplicate menu items.
-- Docks: `add_dock(EditorDock)` / `remove_dock()` arrived in 4.6, which deprecated `add_control_to_dock()` / `remove_control_from_docks()`. The `EditorDock` sample above needs 4.6+; on 4.5 and older use `add_control_to_dock(DOCK_SLOT_..., control)`.
-- `add_custom_type` registers a type in the Add Node dialog; a `class_name` script with an `@icon("res://...svg")` annotation does the same with no plugin.
-- Use `get_undo_redo()` (an `EditorUndoRedoManager`) for edits a plugin makes to the scene so Ctrl+Z works.
-- Structural changes (new custom types, docks) need the plugin toggled off and on; script edits hot-reload.
-- If the project has the godot-mcp editor addon, leave its `addons/godot_mcp/` alone; it manages its own plugin.
-
 ## C# note
 
-- In C#, `[Tool]` replaces `@tool`. Wrap only editor-only classes (`EditorPlugin` subclasses, inspector plugins) in `#if TOOLS`. Wrapping a runtime `[Tool]` node class strips it from exports and breaks every scene that uses it. More in `godot-csharp`.
+- In C#, `[Tool]` replaces `@tool`. Do not wrap a runtime `[Tool]` node class in `#if TOOLS`: that strips it from exports and breaks every scene that uses it. More in `godot-csharp`.

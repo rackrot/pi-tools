@@ -1,7 +1,7 @@
 ---
 name: dotnet-diagnostics-benchmark
-description: A BenchmarkDotNet comparison request routes to dotnet-diagnostics.
-tags: [routing]
+description: A BenchmarkDotNet comparison request routes to dotnet-performance, not dotnet-diagnostics.
+tags: [routing, negative]
 runs: 1
 max_turns: 6
 model: claude-sonnet-5-5

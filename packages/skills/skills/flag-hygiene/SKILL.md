@@ -1,6 +1,6 @@
 ---
 name: flag-hygiene
-description: 'Audits a whole codebase for feature flag debt (stale, orphaned, duplicate, ownerless, nested flags), builds a flag registry, and proposes a prioritized removal list. Use for "flag debt", "stale flags", "flag audit", "flag inventory", "which flags can we remove", or a flag cleanup across LaunchDarkly, Unleash, flagd or home-grown flags. Not for adding or removing one flag (feature-flags), rollout plans (rollout-plan) or deprecating an API (modernize).'
+description: 'Audits feature flag debt in a codebase (stale, orphaned, duplicate, ownerless, nested, long-lived flags), builds the flag registry and ranks flags for removal. Use for "flag debt", "stale flags", "flag audit", "flag inventory", "which flags can we remove and in what order", or cleanup of LaunchDarkly, Unleash, flagd, env-var or home-grown toggles. Also use when the findings are already in hand and the task is to classify them, fill a registry row or order the removals: the finding classes, registry fields and removal ranking are defined here and differ from common practice. Not for adding or removing one flag (feature-flags), rollout plans (rollout-plan) or deprecating an API (modernize).'
 ---
 
 # Flag hygiene
@@ -17,7 +17,7 @@ Audit every flag in the codebase, record each in one registry, and hand removals
 ## Principles (after GO Feature Flag's best-practice post)
 
 - Keep flags simple and scoped: one flag, one purpose. Flag a flag that gates several unrelated behaviors.
-- Treat flags as temporary. Release and experiment flags get an expiry; only ops and entitlement flags may live on (this repo's own extension, not from the post).
+- Treat flags as temporary. Release and experiment flags get an expiry; only ops and permission/entitlement flags may live on (this repo's own extension, not from the post).
 - Test and monitor: each live flag has tests for both paths and some production signal (evaluation counts, errors).
 - Centralize: one source of truth for definitions and one registry, shared across apps and environments.
 - Document the purpose, intended use and removal condition of every flag.
@@ -37,7 +37,7 @@ Search recipe is in [references/search-recipe.md](references/search-recipe.md).
 
 For each flag, check:
 
-- Stale: untouched in git for a long time, or the same value in every environment (always on or always off), so one branch is dead.
+- Stale: untouched in git for a long time, or the same value in every environment (always on or always off), so one branch is dead. A release or experiment flag past its expiry is long-lived temporary, not stale.
 - Orphaned: key in code but not in config or platform (falls back to default), or in config but not in code.
 - Duplicate key: same key defined twice, near-identical keys, or one key with different meanings or defaults at different call sites.
 - Undocumented: no purpose, no description, no registry row.

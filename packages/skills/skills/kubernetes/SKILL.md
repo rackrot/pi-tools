@@ -1,6 +1,6 @@
 ---
 name: kubernetes
-description: Writes and reviews Kubernetes manifests (Deployments, probes, resources, RBAC, NetworkPolicy, Pod Security Standards and admission labels, Jobs, HPA, PDB, Kustomize) and triages failing workloads with read-only kubectl. Use when creating or hardening a workload or namespace, or diagnosing CrashLoopBackOff, OOMKilled, ImagePullBackOff or Pending pods.
+description: 'Writes, reviews and hardens Kubernetes manifests (Deployments, probes, resources, RBAC, NetworkPolicy, Jobs, HPA, PDB, Kustomize), says what Pod Security Admission admits or rejects at baseline and restricted, and triages failing workloads with read-only kubectl. Read it before answering anything about a pod, Deployment, namespace or kubectl output, also when the YAML or output is pasted and no files exist, for example a workload that keeps restarting, is OOMKilled, Pending or cannot pull its image, a pod the cluster rejects, or a manifest that must pass a production cluster''s admission rules. The Pod Security control lists changed in 1.34 and 1.37, so do not answer those from memory.'
 ---
 
 # Kubernetes manifests and triage
@@ -11,7 +11,7 @@ Write manifests that pass the cluster's admission rules and fail safely, and dia
 
 ## Safety contract
 
-- Inspection is read-only by default. Allowed without asking: `kubectl get`, `describe`, `logs`, `events`, `top`, `explain`, `api-resources`, `auth can-i`, `diff`, and `apply --dry-run=server`.
+- Inspection is read-only by default. Allowed without asking: `kubectl get`, `describe`, `logs`, `events`, `top`, `explain`, `api-resources`, `auth can-i`, `diff`, and any command with `--dry-run=server` (for example `apply` or `label`).
 - Ask before any command that changes the cluster: `apply`, `create`, `patch`, `delete`, `scale`, `rollout undo|restart`, `drain`, `cordon`, `label`, and `exec` into a production pod.
 - State the context and namespace (`kubectl config current-context`, `-n <ns>`) before the first command. Pass `-n` and `--context` explicitly so a command can't land on the wrong cluster.
 - Don't print Secret values. `kubectl get secret -o yaml` and `-o jsonpath` on a Secret dump credentials into the transcript. Check that a Secret exists and has the expected keys (`kubectl describe secret`) instead.
@@ -57,7 +57,7 @@ Use Kustomize (built into `kubectl`) for per-environment variation of plain mani
 
 - A Secret's values are base64-encoded, not encrypted. Enable encryption at rest on the cluster, and keep Secret manifests out of Git unless they are sealed or sourced from an external store (the `gitops` skill).
 - Put non-sensitive settings in a ConfigMap, and mount files with `readOnly: true`. Never put credentials in a ConfigMap.
-- Env vars from `secretKeyRef` are easy but visible to anything that can read the pod spec's environment. Mount a Secret as a file for sensitive values.
+- Env vars from `secretKeyRef` are easy, but the value sits in the process environment, where child processes, crash dumps and anyone who can `exec` into the pod can read it. Mount a Secret as a file for sensitive values.
 
 ## Triage
 

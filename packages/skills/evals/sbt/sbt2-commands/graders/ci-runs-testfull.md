@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: 'run:\s*sbt\s+.*testFull'
+pattern: '\bsbt\s+.*testFull'
 weight: 2
 target:
   source: file

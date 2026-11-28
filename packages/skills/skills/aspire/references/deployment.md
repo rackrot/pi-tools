@@ -53,4 +53,4 @@ k8s.AddIngress("ingress")
 
 ## CI
 
-Install the CLI in CI as a pinned tool (`dotnet tool install -g Aspire.Cli --version <x.y.z>`) rather than piping an install script to a shell, then run `aspire publish` and hand the artifacts to the deploy job, or `aspire deploy --non-interactive` with parameters supplied as environment variables or configuration. Workflow hardening belongs to `gh-actions`.
+Install the CLI in CI as a pinned tool (`dotnet tool install -g Aspire.Cli --version <x.y.z>`) rather than piping an install script to a shell, then run `aspire publish` and hand the artifacts to the deploy job, or `aspire deploy --non-interactive` with parameters supplied as environment variables or configuration. Workflow hardening belongs to `forgejo-actions` (Forgejo runners) or `gh-code-security` (GitHub workflows).

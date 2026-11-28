@@ -1,6 +1,6 @@
 ---
 name: hubflow
-description: Works in a repo that already uses HubFlow, the archived DataSift fork of git-flow (`git hf`, `[hubflow]` in .git/config, master + develop, feature branches pushed to origin and merged by GitHub PR). Use when asked for "hubflow", "git hf", "git hf feature start", "git hf release finish", "hf hotfix", or when `.git/config` has a `[hubflow]` section. Not for plain git-flow repos (git-flow), trunk-based repos (trunk-based), commit messages or branch names (git-commit), history spelunking (git-history) or GitHub releases (gh-release).
+description: "Works in a repo that already uses HubFlow, the archived DataSift fork of git-flow (`git hf`, `[hubflow]` in .git/config, master + develop, feature branches pushed to origin and merged by GitHub PR). Use when asked for \"hubflow\", \"git hf\", \"git hf feature start\", \"git hf release finish\", \"hf hotfix\", or when `.git/config` has a `[hubflow]` section. Not for plain git-flow or trunk-based repos or choosing a branching model (branching-models), commit messages or branch names, history spelunking (git-history) or GitHub releases (gh-release)."
 ---
 
 # HubFlow
@@ -11,17 +11,17 @@ HubFlow is git-flow plus automatic pushing to origin and GitHub pull requests fo
 
 - The datasift/gitflow repo is archived (last release v1.5.4, last commit 2022-05-01) and its docs site (datasift.github.io/gitflow) returns 404. Docs survive in the repo's `gh-pages` branch.
 - There is no package-manager install. Only: `git clone https://github.com/datasift/gitflow && cd gitflow && sudo ./install.sh`. Do not run it without asking.
-- Use this skill only for a repo already set up with `git hf`. For a new repo suggest git-flow (git-flow-next) or trunk-based instead.
+- Use this skill only for a repo already set up with `git hf`. For a new repo, or to choose a model, defer to the `branching-models` skill.
 
 ## Safety rules
 
 - Run `git status` first.
-- **HubFlow pushes to origin on its own.** `feature start`, `feature finish`, `release start`/`finish` and `hotfix start`/`finish` push (and finish deletes remote branches). Tell the user exactly what a command will push or delete and get a go-ahead before running it. Never run a push, force-push, remote-branch delete or tag push unasked. Also ask first before `git hf push`, `feature push`, `release push`, `hotfix push`, `update -p` (assume it pushes unless checked), any `cancel` (may delete the remote branch; unverified), and `gh pr create`.
+- **HubFlow pushes to origin on its own.** `feature start`, `feature finish`, `release start`/`finish` and `hotfix start`/`finish` push (and finish deletes remote branches). Tell the user exactly what a command will push or delete and get a go-ahead before running it. Never run a push, force-push, remote-branch delete or tag push unasked. Also ask first before `git hf push`, `feature push`, `release push`, `hotfix push`, `git hf update` (pushes the current branch, and master and develop after merging origin into them; `-p` only toggles pruning), any `cancel` (`feature cancel` is refused without `-f`; with it, it pushes the branch, deletes it on origin and force-deletes it locally; `-k` keeps the local branch), and `gh pr create`.
 - Branch naming and commit messages: defer to the `git-commit` skill when it is installed.
 
 ## When to use this model
 
-Same release shape as git-flow (versioned software, batched releases), for a team in one GitHub organisation sharing a repo, who want every branch on origin and every feature PR-reviewed. Do not adopt it for a new project: it is archived and has the risks below. If the repo is continuously deployed, git-flow's author suggests something simpler such as GitHub flow, and trunk-based is the stricter alternative.
+Do not adopt HubFlow for a new project: it is archived and has the risks below. Which model to use instead is a question for the `branching-models` skill.
 
 ## Detect first
 
@@ -32,8 +32,8 @@ git branch -a | grep -E 'develop|feature/|release/|hotfix/'
 ```
 
 - `[hubflow]` present: proceed. The docs say to run `git hf init` after every clone; it is non-interactive by default (`-a` asks for names, `-f` forces). Offer it if the config is missing but the branch layout and `git hf version` say HubFlow.
-- `[gitflow]` only: plain git-flow. Say so and defer to the `git-flow` skill when installed.
-- Neither, and no `develop`: probably trunk-based or GitHub flow. Defer to `trunk-based` when installed. Do not impose HubFlow.
+- `[gitflow]` only: plain git-flow. Say so and defer to the `branching-models` skill.
+- Neither, and no `develop`: probably trunk-based or GitHub flow. Defer to the `branching-models` skill. Do not impose HubFlow.
 
 More signals: [references/detection.md](references/detection.md).
 
@@ -50,8 +50,8 @@ More signals: [references/detection.md](references/detection.md).
 | Start release | `git hf release start X.Y.Z` | Fetches and pushes by default | `git switch -c release/X.Y.Z develop` |
 | Finish release | `git hf release finish X.Y.Z` | Merges to master, tags, merges the tag into develop, **pushes develop, master and tags, deletes the remote branch** | `--no-ff` merge to master, `git tag -a`, merge into develop |
 | Start/finish hotfix | `git hf hotfix start X.Y.Z` / `git hf hotfix finish X.Y.Z` | Same push behaviour as release | as git-flow |
-| Abandon | `git hf feature cancel [-f] NAME` (also `release`, `hotfix`) | May delete the remote branch (unverified) | `git branch -D` (ask first) |
-| Refresh | `git hf update` | merges origin/master and origin/develop into local ones, prunes | `git fetch --prune` and merge |
+| Abandon | `git hf feature cancel -f [-k] NAME` (also `release`, `hotfix`) | Refused without `-f`; pushes the branch, deletes it on origin, then `git branch -D` locally (`-k` keeps it) | `git branch -D` (ask first) |
+| Refresh | `git hf update` | merges origin/master and origin/develop into local ones, prunes, **pushes the current branch, master and develop** | `git fetch --prune` and merge |
 
 Daily loop from the docs: `feature start`, `git hf push` while working, `git hf update && git merge develop` on the feature each morning, PR on GitHub merged by a colleague ("Don't accept your own pull requests!"), `feature finish`.
 
@@ -60,7 +60,7 @@ Daily loop from the docs: `feature start`, `git hf push` while working, `git hf 
 - **`feature finish` expects the PR already merged.** If `git rev-list develop..feature/x` is non-empty it stops with "Please raise a pull-request via GitHub first, or use the -f flag." `-f` does a real local merge, then pushes the merged develop and deletes the remote branch, bypassing PR review. Ask first.
 - **`-Xtheirs` on release and hotfix finish.** Finish merges into master with `git merge --no-ff -srecursive -Xtheirs`, silently resolving conflicts in favour of the release/hotfix branch. Before finishing, preview conflicts with `git merge-tree --write-tree master release/X.Y.Z` (exit 1 means conflicts that finish would auto-resolve toward the release branch), and tell the user.
 - Release and hotfix finish merge the tag into develop (`-b` merges the branch instead).
-- AVH and git-flow-next do not handle a hotfix while a release branch is open (HubFlow's source wasn't checked, so assume it doesn't either). Driessen's rule: merge the hotfix into the release branch instead of develop. Do it by hand before finishing: `git switch release/X.Y && git merge --no-ff hotfix/X.Y.Z`.
+- AVH and git-flow-next do not handle a hotfix while a release branch is open and neither does HubFlow: its hotfix finish merges only into master and develop, never into an open release branch. Driessen's rule: merge the hotfix into the release branch instead of develop. Do it by hand before finishing: `git switch release/X.Y && git merge --no-ff hotfix/X.Y.Z`.
 - `hotfix start <ver> <older-tag>` still finishes into the latest master, which per the docs can leave master with the wrong version number. Do not use it for old lines.
 - Docs say not to fork repos on GitHub; clone the shared repo directly.
 

@@ -2,7 +2,7 @@
 name: trigger-godot-testing-1
 description: "Writing GUT tests for a GDScript class loads godot-testing."
 tags: [trigger]
-runs: 1
+runs: 3
 max_turns: 6
 model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]

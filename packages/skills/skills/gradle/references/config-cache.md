@@ -17,10 +17,10 @@ Gradle serializes the task graph after configuration. A later run skips configur
 | Code in a task or `doLast`/`doFirst` | Fix |
 | --- | --- |
 | `project.version`, `project.name`, `project.file(...)` | Read it into a `val` at configuration time, outside the action, or pass a `Property`/`Provider` as an input |
-| `providers.provider { project.version }` read in the action | Still fails: the lambda runs when the action calls `.get()`, which is execution time. Read `project` into a `val` in the `register` block instead |
+| `providers.provider { project.version }` created inside the action | Fails with "cannot serialize object of type DefaultProject". Create the provider in the `register` block (`val v = providers.provider { project.version }`) and call `v.get()` in the action; Gradle evaluates it when it stores the entry |
 | `project.exec { }` or `project.copy { }` | Use the injected `ExecOperations` or `FileSystemOperations` service |
 | Referencing another task object's fields (`other.someTask.outputs`) | Wire the output as an input with `dependsOn` or a provider |
-| `System.getenv("X")` inside the action | `providers.environmentVariable("X")` at configuration, captured as an input |
+| `System.getenv("X")` in the `register` block (configuration time) | Allowed inside an action. At configuration time it becomes a cache input and invalidates the entry when it changes; use `providers.environmentVariable("X")` and pass it as a task input |
 | A lambda that captures `this` script object | Capture only the values the action needs |
 
 Example that fails only with the cache on:

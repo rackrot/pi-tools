@@ -1,13 +1,13 @@
 ---
 name: prototype
-description: Builds a throwaway prototype that answers one design question, either a single-file HTML demo that drives a state model through hard cases or several structurally different UI variants on one route. Use to sanity-check a state model, data shape or API feel, or to compare layouts before committing.
+description: Builds a throwaway prototype that settles one design question before the real code is written, either a single-file HTML demo for clicking a state model or business rules through hard cases, or several structurally different UI variants of a page on one route to flip between. Use when the user wants to click through cases, try out behavior, or compare page layouts side by side to decide before committing, even if they never say prototype. Not for game mechanics (`game-prototype`).
 ---
 
 # Prototype
 
 A prototype is throwaway code that answers a question. The question decides its shape, so pin it down before writing anything.
 
-Not for production UI work (`react`), extending an existing design system (`web-design`), a design review of existing screens (`ui-critic`), or planning the real implementation once the question is answered (`planning`). Use each one if installed.
+Not for production UI work, setting a considered visual look (`ui-direction`), a design review of existing screens (`design-critique`), a game mechanic spike or jam (`game-prototype`), or building the real thing once the question is answered (`implement-plan`).
 
 ## Pick the branch
 
@@ -18,8 +18,8 @@ The two produce different artifacts, so a wrong pick wastes the whole prototype.
 
 ## Rules for both
 
-1. **Mark it as throwaway.** Place it near the code it explores so the context is obvious, and name it so a casual reader can tell it isn't production. Follow the project's routing and naming conventions for throwaway routes rather than inventing a new top-level structure.
-2. **Make it trivial to run.** A UI prototype starts from one command in the project's task runner (`pnpm <name>`, `bun <path>`, `python <path>`). A logic demo is a single HTML file that opens by double-click. If starting it takes thought, it won't get used.
+1. **Mark it as throwaway.** Place it near the code it explores so the context is obvious, and name it so a casual reader can tell it isn't production. Follow the project's routing and naming conventions when a throwaway route is unavoidable (see references/ui.md) rather than inventing a new top-level structure.
+2. **Make it trivial to run.** A UI prototype runs under the project's normal dev command and is reached at the existing page's URL plus `?variant=`. A logic demo is a single HTML file that opens by double-click. If starting it takes thought, it won't get used.
 3. **Keep state in memory.** Persistence is usually what the prototype is checking, not something it should depend on. If the question involves a database, use a scratch database or a local file with an obvious "PROTOTYPE, wipe me" name, and never the real data.
 4. **Skip the polish.** No tests, no error handling beyond what keeps it runnable, and no abstractions, because the point is to learn something fast. A prototype that needs tests has stopped being one.
 5. **Show the state.** After every action (logic) or variant switch (UI), render the full relevant state so the user sees what changed.

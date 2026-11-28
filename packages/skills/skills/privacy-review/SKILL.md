@@ -1,13 +1,13 @@
 ---
 name: privacy-review
-description: Reviews how a codebase or change handles personal data. Inventories PII across models, logs, telemetry and third-party calls, traces where it flows and rests, and checks minimization, retention, erasure, export, and PII in URLs and logs. Use before a launch or data-protection review, or when asked where personal data goes. Not legal advice.
+description: "Read this first, before answering, for any question about what happens to user or customer data in code, pasted code too: account deletion or closure, a deleted user who still gets email or shows in search, where personal data (PII) ends up and how long it is kept, a data map, GDPR, CCPA or DPIA review before launch, customer data in fixtures, or quoting GDPR articles against code. It carries rules a plain answer breaks: never reproduce the personal data found, cite articles without reciting them, leave legal calls to the owner. Checks minimization, retention, erasure and export across logs, URLs, caches, search, analytics, vendors, backups. Not for attacker threat models (threat-model)."
 ---
 
 # Privacy Review
 
 Answer two questions with evidence: where does personal data go, and does every copy get minimized, expired, and erased on request. The review is read-only and reports findings; it does not decide legal basis or fix code unless asked.
 
-Not for authorization bugs (`app-auth`, if installed), PII scrubbing in Sentry (`sentry-sdk`, if installed), or threat modeling (`threat-model`).
+Not for authorization bugs, configuring PII scrubbing in an error reporter, or attacker-centred threat modeling (`threat-model`).
 
 Personal data means anything that identifies a person directly or in combination: name, email, phone, address, IP address, device and account ids, location, free text a user typed, and special categories such as health, biometrics, or beliefs. A pseudonymous id is still personal data while a mapping to the person exists.
 

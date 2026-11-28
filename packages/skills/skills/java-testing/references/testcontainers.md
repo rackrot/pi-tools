@@ -4,7 +4,7 @@ Contents: one container per JVM, reuse, waiting, isolation between tests, CI.
 
 ## Slow suite: a container per class
 
-A `@Container` on a non-static field, or a new `PostgreSQLContainer` in each test class, starts a container per test (or per class). Nine-minute suites usually come from this. Share one:
+A non-static `@Container` field starts one container per test method; a static `@Container` (or a new container in each test class) starts one per class; a static singleton started in an initializer starts one per JVM. Nine-minute suites usually come from the first two. Share one:
 
 ```java
 abstract class PostgresIT {

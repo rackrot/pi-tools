@@ -1,6 +1,6 @@
 ---
 name: godot-export
-description: Godot 4 export and builds. Export templates, export_presets.cfg, headless CLI exports (--export-release, --export-pack), Web threads and COOP/COEP, Android keystores and AAB, iOS and macOS signing, dedicated-server builds, PCK patches, CI export jobs. Use for "build for Windows/Web/Android/iOS" or export errors.
+description: 'Exports and ships builds of a Godot 4 game, and fixes builds that break after export. Use when a Godot game runs in the editor but the exported or downloaded build does not (black Web page, "SharedArrayBuffer is not defined", a res:// file that cannot be opened, "No export template found", keystore or signing not configured), and for "build for Windows/Linux/macOS/Web/Android/iOS", export_presets.cfg, headless --export-release in CI, AAB and keystores, the dedicated-server export preset (running, configuring and deploying the server is godot-multiplayer) and PCK patches.'
 license: Apache-2.0 AND MIT
 ---
 
@@ -8,7 +8,7 @@ license: Apache-2.0 AND MIT
 
 Turn a Godot project into platform builds from the editor, the CLI or CI. Written for Godot 4.x, checked against 4.7. Version-gated facts are tagged inline (`4.5+`); per-minor changes live in the `godot` skill's version notes.
 
-Not for: uploading to Steam or itch.io (steamcmd, butler, depots, store pages; `game-publish`); the networking code of a server (`godot-multiplayer`); C# project and `.csproj` setup (`godot-csharp`); writing shaders (`godot-shaders`); running tests in CI (`godot-testing`).
+Not for: uploading to Steam or itch.io (steamcmd, butler, depots, store pages; `game-publish`); networking code, and running, configuring or deploying a dedicated server: choosing server or client at boot, command-line arguments, Docker, systemd (`godot-multiplayer`); C# project and `.csproj` setup (`godot-csharp`); writing shaders (`godot-shaders`); running tests in CI (`godot-testing`).
 
 ## Orient first
 
@@ -40,7 +40,7 @@ Full flag list, preset structure, feature tags, PCK patches, encryption and desk
 - **macOS:** unsigned or un-notarized apps are blocked by Gatekeeper when downloaded. Sign with Xcode `codesign` on a Mac or `rcodesign` from Linux and Windows, notarize with `notarytool` or `rcodesign`, then staple. "Built-in (ad-hoc only)" signing helps local testing only. A `.app` exported from Windows loses its executable bit; finish it on macOS or Linux.
 - **Linux:** the 4.x platform is `Linux` (the old `Linux/X11` name is 3.x; some docs examples still show it). `chmod +x` the binary when the archive step loses permissions.
 - **Web:** since 4.3 the default export is single-threaded and needs no special headers; that's the choice for itch.io, Poki and CrazyGames. Turning on the preset's Thread Support (`variant/thread_support`) or Extensions Support requires cross-origin isolation: `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`. If the host can't send them, the PWA option Ensure Cross Origin Isolation Headers injects them through a service worker. Serve over HTTP(S), never `file://`; keep `index.html` and don't rename exported files. Web audio defaults to Sample playback (no audio effects).
-- **Dedicated server:** a separate preset with Resources > Export Mode = Export as dedicated server strips textures and materials, adds the `dedicated_server` feature tag and forces headless. Run it on an export template binary, not the editor. Detect at runtime with `OS.has_feature("dedicated_server")`, or `DisplayServer.get_name() == "headless"` when started with `--headless`.
+- **Dedicated server:** a separate preset with Resources > Export Mode = Export as dedicated server strips textures and materials, adds the `dedicated_server` feature tag and forces headless. Run it on an export template binary, not the editor. Choosing server or client code at boot and deploying the server: `godot-multiplayer`.
 - **Android and iOS:** keystores, AAB, Gradle builds, signing, Team ID, lifecycle and permissions are in [references/mobile.md](references/mobile.md).
 
 ## Runtime checks

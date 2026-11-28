@@ -33,7 +33,6 @@ JUnit Jupiter is 6.x (Java 17 baseline). Remove JUnit 4 rules and runners, or mi
 ## 7. Framework 7 behaviors
 
 - A mocked prototype or scoped bean is replaced by a singleton mock; do not assume per-injection mocks.
-- Nested test classes and extension context scope: if `@Nested` classes lose injected state, set the extension context to test-class scope per the Spring Framework 7 testing docs (verify the annotation name against the Framework version in use before adding it).
 - Unused cached contexts may be paused. See [context-caching.md](context-caching.md).
 
 ## Checklist

@@ -1,6 +1,6 @@
 ---
 name: homelab-network
-description: 'Plans and stages home or homelab network changes read-only first: inventory, VLANs and trust zones, default-deny rules, Pi-hole or AdGuard DNS cutover, WireGuard and interface errors. Use when splitting a flat network into VLANs, moving DHCP clients to a local resolver, adding VPN access, or reviewing a change that could lock the operator out.'
+description: "Plans and stages home or homelab network changes read-only first: inventory, VLANs and trust zones, default-deny firewall rules, Pi-hole or AdGuard DNS cutover, WireGuard or overlay VPN remote access, port forwarding, and interface errors. Use when splitting a flat home network into VLANs, isolating IoT or guest devices, moving DHCP clients to a local resolver, reaching a NAS or home server from outside the house (port forward, VPN, CGNAT), reviewing home router or OPNsense/pfSense firewall rules, or planning any change that could lock the operator out."
 ---
 
 # Homelab network changes

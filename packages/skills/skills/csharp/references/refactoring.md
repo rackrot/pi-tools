@@ -20,10 +20,9 @@ For a mixed request, do the separable structural part, leave the rest undone, an
 
 Text search hits comments, strings and unrelated overloads, and misses `nameof`, aliases and partial declarations. Use the strongest tool available:
 
-1. The C# language server (csharp-ls) through the LSP tool: find references, go to definition, incoming calls, rename.
-2. codebase-memory (`trace_path` for callers and callees, `search_graph` for symbols) to scope the change.
-3. Analyzer code fixes through `dotnet format` (`dotnet format analyzers --diagnostics IDE0xxx`).
-4. Compiler-validated edits: change the definition, rebuild, and fix every error the compiler reports.
+1. A language-server or code-graph tool, when one is available: find references, go to definition, incoming calls, rename.
+2. Analyzer code fixes through `dotnet format` (`dotnet format analyzers --diagnostics IDE0xxx`).
+3. Compiler-validated edits: change the definition, rebuild, and fix every error the compiler reports.
 
 Plain find-and-replace only when every hit has been checked. Include every `partial` declaration; edit generator inputs, never `*.g.cs`. Stay inside the current repository; never edit a similarly named clone or build output.
 
@@ -41,7 +40,7 @@ Plain find-and-replace only when every hit has been checked. Include every `part
 
 ## Contracts the compiler can't see
 
-Before renaming or moving a type or member, check whether its name is observed by serialization, reflection, DI registration by name, configuration binding, source generators, P/Invoke, `dynamic`, or `InternalsVisibleTo` friends. Keep the external name and run a focused round-trip test, or stop and report the unverified runtime boundary.
+Before renaming or moving a type or member, check whether its name is observed by serialization, reflection, DI registration by name, configuration binding, source generators, P/Invoke (renaming a managed declaration stays here; changing its signature or marshalling belongs to `dotnet-native-interop`), `dynamic`, or `InternalsVisibleTo` friends. Keep the external name and run a focused round-trip test, or stop and report the unverified runtime boundary.
 
 Public surface:
 

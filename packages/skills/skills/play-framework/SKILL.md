@@ -1,6 +1,6 @@
 ---
 name: play-framework
-description: 'Builds, debugs, tests and upgrades Play Framework 2.9/3.x web apps in Java or Scala. Use for conf/routes and reverse routes, app/controllers (play.mvc, CompletionStage, Action.async), Twirl templates, Guice DI, play-json or Jackson, WSClient, evolutions, CSRF and AllowedHosts filters, sbt stage/dist packaging, blocking JDBC stalling a Play server, a "not found: value controllers" routes error, and the Play 2.8/2.9 to 3.0 upgrade (Akka to Pekko, com.typesafe.play to org.playframework).'
+description: 'Builds, debugs, tests and upgrades Play Framework 2.8/2.9/3.x web apps in Java or Scala. Use for any Play question, even with no files to inspect, because version facts are easy to get wrong from memory: which Java, Scala and sbt each Play line supports, javax vs jakarta.inject, com.typesafe.play vs org.playframework, Akka vs Pekko. Covers conf/routes and a "not found: value controllers" error, play.mvc or play.api.mvc controllers (CompletionStage<Result>, Action.async), endpoints that hang with idle CPU because JDBC runs in CompletableFuture.supplyAsync, Twirl, Guice DI, play-json, WSClient, evolutions, CSRF and AllowedHosts filters, sbt stage/dist, and the 2.8/2.9 to 3.0 upgrade.'
 ---
 
 # Play Framework
@@ -19,9 +19,10 @@ Read `project/plugins.sbt`, `project/build.properties` and `build.sbt` before su
 | 2.9 | `com.typesafe.play` `sbt-plugin` 2.9.x (last on this groupId) | Akka | 11+ | 2.13, 3.3 |
 | 3.0 | `org.playframework` `sbt-plugin` 3.0.x | Apache Pekko | 11, 17 or 21 (docs: 11 is going away; prefer 17+) | 2.13, 3.3 |
 
-- sbt is the only supported build tool; the docs name no official Gradle or Maven plugin. For a Gradle or Maven repo with Play dependencies, treat the build as unsupported and say so.
+- Play 2.9 needs sbt 1.9 or newer (`sbt.version` in `project/build.properties`). Check it before moving a 2.8 build to 2.9.
+- sbt is the primary build tool and the one the docs assume. Play is plain JARs on Maven Central, so any Java or Scala build tool can build it, but routes and Twirl compilation and auto-reload come from the build plugin (the main-branch docs also show Gradle; check that it covers the project's Play line). For a Gradle or Maven Play build, say which of these the build provides instead of calling it unsupported.
 - Java vs Scala: `enablePlugins(PlayJava)` or `PlayScala`, and `app/` holds `.java` or `.scala` controllers.
-- 3.1 is still in milestones (3.1.0-M9 at last check). Don't target it unless the build already does. It moves to Guice 7, which drops `javax.inject`.
+- 3.1 was pre-release when this was verified; check playframework.com. Don't target it unless the build already does. It moves to Guice 7, which drops `javax.inject`.
 - Play 3.0 docs and examples still use `javax.inject.Inject` (Guice 6 also accepts `jakarta.inject`). Match what the existing code imports, and don't mix both in one class.
 
 ## Core model
@@ -56,6 +57,6 @@ Read `project/plugins.sbt`, `project/build.properties` and `build.sbt` before su
 
 - [references/java-api.md](references/java-api.md) when writing or fixing Java controllers, actions, forms, JSON, WSClient or async code.
 - [references/scala-api.md](references/scala-api.md) when writing or fixing Scala controllers, play-json, `Action.async`, or compile-time DI.
-- [references/migration.md](references/migration.md) when upgrading 2.8 or 2.9 to 3.0, or any build still on `com.typesafe.play` or `akka`.
+- [references/migration.md](references/migration.md) when upgrading between Play lines (2.8 to 2.9, 2.9 to 3.0), or for any build still on `com.typesafe.play` or `akka`.
 - [references/testing.md](references/testing.md) when adding or fixing controller, service or integration tests.
 - [references/production.md](references/production.md) when packaging, configuring secrets and hosts, logging, evolutions or thread pools for a deployment.

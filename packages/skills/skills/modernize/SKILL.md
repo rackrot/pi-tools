@@ -1,17 +1,17 @@
 ---
 name: modernize
-description: Plans the modernization of a legacy system (runtime, framework or dependency upgrade, migration or rewrite) with a feasibility spike, testability milestone, safety ladder, hazard red-team and phased exit criteria. Also plans a sunset (deprecate or keep an API, service or feature, and move its consumers off it). Use for "modernize this", "plan the migration", "how do we get off this stack", "sunset the v1 API", or a major version upgrade plan.
+description: "Plans how to get a legacy or inherited system onto a supported stack: an end-of-life runtime or framework, a major-version upgrade, a migration or rewrite, or an app that no longer installs, builds or runs its tests. Sets the order of work (feasibility spike, testability milestone, safety ladder, hazard red-team, phases with exit criteria) and settles questions about a draft upgrade plan: phase order, test and CI gates, branching between phases, upgrade or rewrite. Use for \"how do we get off Python 2 / Node 8 / AngularJS\", \"where do I start with this old codebase\", \"cut the upgrade into phases\". Read it before answering, also when the system is only described in the prompt."
 ---
 
 # Modernize
 
 Produce a phased plan to upgrade, migrate, or rewrite a legacy system. This skill plans and does not execute. Legacy systems are often hard to run at all (end-of-life runtimes, native modules that no longer compile, retired package mirrors), so the plan can't assume the old stack is alive. It measures how alive the system is first, then picks a strategy and a level of regression safety to match.
 
-Not for general implementation plans (`planning`), executing the migration (`coding`), or recording a single decision (`adr-writing`). Use each one if installed. For a guided, agent-driven modernization with assessments, business-rule mining and a dashboard, Anthropic's `code-modernization` plugin (claude-plugins-official) is a heavier alternative installed directly; don't run both on the same request.
+Not for sunsetting or removing an API, service or feature (`deprecation-migration`), executing the migration, or recording a single decision (`adr-writing`). Use each one if installed.
 
 ## Sunsets
 
-Read `references/sunset.md` when the request is deprecating or removing an API, service or feature, or moving its consumers to a replacement, rather than upgrading a stack: it has the sunset-or-keep decision, the advisory-versus-compulsory call, the process and the zombie-code rule. For a legacy system the same reference covers any component you decide to retire in step 6.
+For deprecating or removing an API, service or feature, moving its consumers, or retiring a component picked in step 6, use `deprecation-migration` if installed.
 
 ## Workflow
 
@@ -33,12 +33,11 @@ Read `references/sunset.md` when the request is deprecating or removing an API, 
 
 5. **Pick the highest reachable rung of the safety ladder** and name the risk that remains. Read `references/safety-ladder.md` for the rungs, the sources of safety other than tests, and how to choose an oracle. Weigh regression cost: an abandoned app with no users doesn't justify an expensive gate, and a production system with users does.
 
-6. **Pick the least disruptive approach per component.** Stop at the first one that solves the problem.
+6. **Pick the least disruptive approach per component.** First remove dead code and features with no use. Then, for what remains, stop at the first approach that solves the problem.
    1. Upgrade in place. Bump the major version and fix the breakage. This is the default, and it is rejected only when no upgrade path is supported, the breakage costs more than a rewrite, or the framework is abandoned.
    2. Swap the dependency for a maintained one with the same shape.
    3. Wrap and strangle. Put a clean interface in front and replace the internals behind it, with old and new running together.
    4. Rewrite. Require an explicit reason for each, because "it's old" is not one.
-   5. Remove dead code and features with no use.
 
    Record each choice and why. Use `adr-writing`, if installed, for decisions that need a durable record.
 
@@ -50,6 +49,6 @@ Read `references/sunset.md` when the request is deprecating or removing an API, 
 
 ## Output
 
-Before presenting the plan, run the closing review from the `planning` skill, if installed (its `references/closing-review.md`): gap review, blocking decisions through AskUserQuestion, then save. Without it, do the same three steps by hand. Return the plan in the conversation as well. Include the spike results, the milestone and strategy per component, the target rung, the approach per component, the hazard checks, the phases, and the open decisions that need the user. Keep the plan proportionate to the system. A small service needs a few phases and a short hazard pass.
+Before presenting the plan, run a closing review: check the plan for gaps, ask the user about blocking decisions, then save it. Return the plan in the conversation as well. Include the spike results, the milestone and strategy per component, the target rung, the approach per component, the hazard checks, the phases, and the open decisions that need the user. Keep the plan proportionate to the system. A small service needs a few phases and a short hazard pass.
 
-For the work itself, hand each phase to `coding` and the tests it needs to `unit-testing`, or a whole approved plan to `implement-plan`. For a Postgres major upgrade, `postgres` covers the database side. Use each one if installed.
+For the work itself, hand a whole approved plan to `implement-plan`. For a Postgres major upgrade, use `postgres`, if installed, for the database side.

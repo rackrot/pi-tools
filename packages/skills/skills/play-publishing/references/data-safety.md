@@ -1,6 +1,6 @@
 # Data safety form drafts
 
-The data safety form (Play Console > App content) declares what the app and its SDKs collect or share. The account owner submits it. This skill drafts answers from evidence; the draft is not a policy audit (`android-skills:play-policy-insights`).
+The data safety form (Play Console > App content) declares what the app and its SDKs collect or share. The account owner submits it. This skill drafts answers from evidence; the draft is not a policy audit, which is out of scope; tell the user so, and point to `android-skills:play-policy-insights` only if it is installed.
 
 ## Collect evidence
 

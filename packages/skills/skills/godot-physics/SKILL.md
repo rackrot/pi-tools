@@ -1,6 +1,6 @@
 ---
 name: godot-physics
-description: Godot 4 movement and collision in 2D and 3D. CharacterBody controllers and move_and_slide, Rigid/Static/Animatable/Area bodies, collision layers vs masks, raycasts and space queries, physics interpolation, Jolt. Use for "falls through the floor", "slides down slopes", "jitters", "is_on_floor always false", or a platformer or FPS controller.
+description: "Godot 4 physics API in 2D and 3D: CharacterBody2D/3D controllers and move_and_slide, RigidBody, StaticBody, AnimatableBody and Area signals, collision layers vs masks, raycasts and space queries, physics interpolation, Jolt. Read it before answering whenever a question or pasted .gd script involves a physics body, even when the fix looks obvious from memory (behavior and defaults changed across 4.3 to 4.7). Use for \"falls through the floor\", \"is_on_floor always false\", \"body_entered never fires\", \"slides down slopes\", \"player or camera jitters\", or a platformer or FPS controller."
 license: Apache-2.0 AND MIT
 ---
 
@@ -8,7 +8,7 @@ license: Apache-2.0 AND MIT
 
 Engine API for bodies, controllers, collisions and queries. Written for Godot 4.x, checked against 4.7. Version-gated facts are tagged inline (`4.6+`); per-minor changes live in the `godot` skill's version notes.
 
-Not for: why a jump feels floaty, coyote time and buffering as design, camera feel, fixed versus variable timestep as architecture (`game-craft`); tile collision painting and general scene work (`godot`); `.gdshader` (`godot-shaders`); networked physics (`godot-multiplayer`); C# syntax (`godot-csharp`).
+Not for: why a jump feels floaty, coyote time and buffering as design, camera feel (`game-feel`, or `game-craft` if that bundle is installed); fixed versus variable timestep as architecture (`game-architecture`, or `game-craft` for the bundle); tile collision painting and general scene work (`godot`); `.gdshader` (`godot-shaders`); networked physics (`godot-multiplayer`); C# syntax (`godot-csharp`).
 
 ## Orient first
 

@@ -6,7 +6,7 @@ The protocol is date-versioned and moves. This reference was checked against the
 
 ## Gather the inputs
 
-Read the repo, the existing API contract (OpenAPI, GraphQL schema, SDK), and any prior design notes first. Ask with AskUserQuestion only for what the files can't answer:
+Read the repo, the existing API contract (OpenAPI, GraphQL schema, SDK), and any prior design notes first. Ask the user only for what the files can't answer:
 
 - Which jobs do agents need done, and which of those write, delete, spend money, or message people?
 - Is the audience a developer's local tools (stdio) or unattended agents and many users (remote HTTP)?
@@ -52,10 +52,6 @@ Three layers change at different speeds, so version them separately:
 1. **Protocol revision.** Pin exact SDK versions and read the release notes on upgrade. The revision is negotiated, so one server can serve older and newer clients during a transition.
 2. **Your public API.** Renaming or removing a tool is a breaking change because agents find tools by name. Alias the old name and publish a deprecation window.
 3. **Names, descriptions, and schemas.** No spec standardizes this layer, and a wording change can alter which tool a model picks even when the schema is unchanged. Treat a description edit as a breaking change: review it like code, hash the full surface in CI to catch drift, and run a fixed set of golden prompts that must still select the right tools.
-
-## Optional: interactive UI
-
-MCP Apps lets a tool return an interactive HTML view. Read [MCP Apps](mcp-apps.md) only when text and structured output cannot carry the job.
 
 ## Deliver the design
 

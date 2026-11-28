@@ -2,9 +2,8 @@
 name: click-path-audit-vs-react
 description: A coupon button whose result is overwritten right after the click routes to click-path-audit, not react.
 tags: [routing]
-runs: 1
+runs: 3
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

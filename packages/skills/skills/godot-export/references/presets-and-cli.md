@@ -34,7 +34,6 @@ Rules:
 - The editor binary exports; an export template binary can't.
 - Relative output paths resolve against the project directory.
 - Exit status is non-zero on failure; check it and check the output file exists.
-- `--check-only` does nothing without `--script <file>`.
 
 ## export_presets.cfg
 

@@ -1,6 +1,6 @@
 ---
 name: production-readiness
-description: 'Gives an evidence-based ship-or-block verdict (Blocked, Risky or Caveats) before launch or after a merge, from local repo evidence (release surface, CI, migrations, rollback, idempotency, env validation, health checks, observability, e2e coverage). Use when asked whether something is ready to ship or what would break in production. Not for writing a staged rollout plan (rollout-plan).'
+description: 'Go/no-go verdict on whether an app, service or just-merged change can ship: Blocked, Risky or Caveats, placed by fixed rules (red CI caps at Risky; a non-idempotent payment webhook, an irreversible migration, an exposed secret or no rollback path is Blocked). Read this first, before opening the repo or answering, whenever the user asks "is this ready to launch", "good enough to go out" or "what will bite us in production", or wants a pre-launch look at CI, migrations, health checks, rollback and e2e coverage, including when they paste findings instead of pointing at a repo. Not for writing a staged rollout plan (rollout-plan) or for building the missing pieces.'
 ---
 
 # Production readiness
@@ -18,12 +18,12 @@ Not for scanner-based security audits (`security-scan`, if installed), rollout m
 
 ## 1. Establish the release surface
 
-Run the cheap local signals first.
+Run the cheap local signals first. `<base>` is the default branch (`git symbolic-ref --short refs/remotes/origin/HEAD`) or the last release tag.
 
 ```sh
 git status --short --branch
 git log --oneline --decorate -20
-git diff --stat origin/main...HEAD
+git diff --stat <base>...HEAD
 ```
 
 Name what is shipping: the branch or tag, the deployable units (services, workers, cron jobs, migrations), and who or what consumes them. If the user gave a PR or release branch, scope to it. Read package scripts, CI workflows, release scripts, Dockerfiles, and deploy manifests to learn how it reaches production.
@@ -41,7 +41,7 @@ Skip lenses the repo has no surface for, and say so. The checklist for each lens
 | Observability | Can you tell it broke within minutes, and find why? |
 | User paths | Are the launch-critical journeys covered end to end, with error and empty states? |
 
-Add the platform lenses (AWS, Kubernetes, Terraform, migrations) from the same reference when the repo contains those artifacts.
+Add the platform lenses (AWS, Kubernetes, Terraform) from the same reference when the repo contains those artifacts.
 
 ## 3. Pick the band
 

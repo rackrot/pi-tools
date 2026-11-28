@@ -1,6 +1,6 @@
 ---
 name: game-feel
-description: Tunes how a game feels to control, in any engine. Covers input buffering, coyote time, variable jump height, stick deadzones, rebinding, camera follow, look-ahead and shake, hit-stop, tweens, squash and stretch, knockback and jitter. Use for "feels floaty", "add juice", "the camera jitters", "controls feel laggy" or "add screen shake".
+description: Fixes and starting numbers for how a game feels to control, in any engine. Covers jump tuning (fall gravity, coyote time, input buffer, variable height), stick deadzones, rebinding, camera follow, look-ahead and shake, hit-stop, squash and stretch, knockback and jitter. Read before answering "the jump feels floaty", "my jump didn't register", "controls feel laggy", "hits feel weak", "add juice", "add screen shake" or "the camera jitters", including advice-only questions with no project files, because the tuning ranges and their order live in the skill.
 ---
 
 # Game feel
@@ -38,16 +38,16 @@ Not for: engine API such as nodes, tweens, InputMap or physics bodies (for Godot
 - Look-ahead: offset toward velocity or facing by 40 to 120 px, and ease the offset itself so a direction flip doesn't whip the view.
 - Clamp the visible rectangle to the level bounds, not the camera centre. On an axis where the level is smaller than the view, centre on that axis.
 - Update the camera after movement and physics. With physics interpolation, follow the target's interpolated transform.
-- Add shake last, as an additive offset on top of follow. Drive it with decaying trauma (`shake = trauma²`) and smooth noise, never a fresh random value each frame.
+- Add shake last, as an additive offset on top of follow. Drive it with decaying trauma (`shake = trauma²`) and smooth noise, never a fresh random value each frame. Hits add to trauma and clamp it at 1 (`trauma = min(trauma + a, 1)`); never set or reset it on a hit.
 - On a teleport, respawn or cut, reset smoothing so the camera doesn't sweep across the map.
 
 ## Juice (read `references/juice.md` for recipes and tier presets)
 
 - One satisfying hit is 5 to 8 small responses inside about 100 ms: sound, particles, flash, hit-stop, knockback, shake and a number pop. Start with 2 or 3 and add until it reads.
 - Exaggerate briefly, then return to rest. Juice that never settles becomes the new normal.
-- Scale everything by importance. Define small, medium and large presets and assign each event to one. A footstep is not a boss death.
+- Scale everything by importance. Define small, medium and large presets and assign each event to one. A footstep is not a boss death. Starting values: small is trauma 0.1 to 0.2 with no hit-stop; medium is trauma 0.3 to 0.5 with 0.04 to 0.06 s hit-stop; large is trauma 0.7 to 1.0 with 0.10 to 0.15 s hit-stop (full table in `references/juice.md` section 4).
 - Ease motion: overshoot (back or elastic) for a pop, ease-out for settling. Linear motion looks mechanical.
-- **Hit-stop:** drop time scale to near 0 for 40 to 150 ms, then restore it from a timer that ignores time scale. A scaled timer never fires at scale 0.
+- **Hit-stop:** drop time scale to near 0 for 40 to 150 ms, then restore it from a timer that ignores time scale. A scaled timer never fires at scale 0. An overlapping hit extends the current stop to the longer remaining time (`remaining = max(remaining, duration)`); it does not stack or restart.
 - Squash and stretch roughly preserve area: `(1.3, 0.7)` on land, then spring back.
 - Knockback: a short, clamped impulse away from the hit, with a brief control lockout of about 0.1 to 0.2 s.
 
@@ -64,7 +64,7 @@ Not for: engine API such as nodes, tweens, InputMap or physics bodies (for Godot
 - Do not multiply mouse delta by `dt`. It is already a distance for this frame, so scaling it makes look speed depend on frame rate. Stick look is a rate and does take `dt`.
 - Do not smooth first-person mouse look. Players feel the smoothing as input lag.
 - A 2D camera node may ignore rotation by default, which silently disables shake roll. Check the engine skill and enable rotation, or drop the roll.
-- Hit-stop on every frame of a held or multi-hit attack locks the game. Trigger it once per impact and cap the total per second.
+- Hit-stop on every frame of a held or multi-hit attack locks the game. Trigger it once per impact, and for held or multi-hit attacks cap the total stop per second. The extend-to-max rule for overlapping hits is correct as it is and needs no cap.
 - Buffered input must still pass through during hit-stop and short animations. Feedback that blocks input reads as lag.
 - Ship accessibility toggles: a screen-shake scale (0 to 100%), reduced flashing and reduced camera motion. Full remapping and hold-or-toggle options belong with them.
 
@@ -80,3 +80,4 @@ Not for: engine API such as nodes, tweens, InputMap or physics bodies (for Godot
 - `game-architecture`: the fixed-timestep loop and the state machines that controllers use.
 - `level-design`: player metrics depend on the jump and run values tuned here.
 - `game-playtest`: confirm the feel with real players.
+- `game-craft`: the umbrella for requests that span several game topics (feel plus performance plus saves); feel-only requests stay here.

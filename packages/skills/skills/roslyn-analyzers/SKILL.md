@@ -1,6 +1,6 @@
 ---
 name: roslyn-analyzers
-description: Writes, reviews and tests Roslyn diagnostic analyzers, code fix providers and incremental source generators, including Microsoft.CodeAnalysis version pinning and analyzer NuGet packaging. Use for a DiagnosticAnalyzer, CodeFixProvider or IIncrementalGenerator, an analyzer test harness, or a generator that recomputes on every keystroke.
+description: "Writes, reviews and tests Roslyn diagnostic analyzers, code fix providers and incremental source generators, and keeps a shipped analyzer loading in older compiler hosts (Microsoft.CodeAnalysis baseline pinning, analyzer NuGet packaging). Use whenever a task writes or changes a DiagnosticAnalyzer, CodeFixProvider or IIncrementalGenerator, including when the code is pasted in the chat and no repo is open; for an analyzer or generator test harness; for a generator that reruns on every keystroke; and for CS8032 \"An instance of analyzer cannot be created\" or \"Could not load file or assembly Microsoft.CodeAnalysis\", when an analyzer breaks on an older Visual Studio or SDK after a dependency bump."
 ---
 
 # Roslyn analyzers and source generators
@@ -12,7 +12,7 @@ Not for: fixing analyzer warnings or tuning `.editorconfig` severities in applic
 ## Orient
 
 - Read the analyzer, code-fix and test projects: target frameworks, `Directory.Packages.props` (central package management), the test framework, how diagnostic IDs are allocated, localization (`.resx`), release tracking (`AnalyzerReleases.Shipped.md`/`Unshipped.md`), and packaging. Keep established conventions unless they break a rule below.
-- Find existing analyzers and their helpers with codebase-memory (`search_graph` for `DiagnosticAnalyzer` subclasses, `trace_path` for callers) when the repo is indexed, else the C# language server (csharp-ls) or Grep.
+- Find existing analyzers and their helpers (`DiagnosticAnalyzer` subclasses and their callers) with a code graph or the C# language server (csharp-ls) when one is available, else Grep.
 - Run the narrowest test first, in the repo's runner syntax (VSTest `--filter` vs Microsoft.Testing.Platform options; see `dotnet-testing`).
 
 ## Design rules

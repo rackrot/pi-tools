@@ -17,7 +17,7 @@ Use one diagnostic at a time. The Go docs warn that tools interfere (precise mem
 | cpu | Which functions use CPU time | Samples on-CPU time only, so I/O waits and sleeps are invisible |
 | heap `-alloc_objects` | Where allocations happen, by count | Best first look for GC churn |
 | heap `-alloc_space` | Where bytes are allocated | Cumulative since start, including freed memory |
-| heap `-inuse_space` / `-inuse_objects` | What is live now | Use for leaks. Compare two snapshots with `-base` |
+| heap `-inuse_space` / `-inuse_objects` | What is live now | Use for leaks. Compare two snapshots with `-diff_base` |
 | goroutine | Where goroutines are parked | Many stacks at one call site means a leak or pileup |
 | block | Time blocked on channels, mutexes, timers | Off by default: `runtime.SetBlockProfileRate(rate)`; rate 1 records every event, and a higher value samples about one event per `rate` ns blocked |
 | mutex | Lock contention | Off by default: `runtime.SetMutexProfileFraction(rate)`; on average 1 in `rate` events is reported, 0 turns it off |
@@ -45,7 +45,7 @@ go tool pprof -peek 'Parse$' cpu.prof                  # callers and callees
 - `runtime.memmove` high: large copies, often slice growth without preallocation.
 - `alloc_objects` high with `inuse_space` low: short-lived garbage. `inuse_space` rising over time: a leak.
 
-To find a leak, take two heap profiles a few minutes apart and run `go tool pprof -sample_index=inuse_space -diff_base=first.prof second.prof`. `-base` subtracts instead of diffing. Profiles carry function names, so `-top`, `-list`, and `-peek` work on the `.prof` file alone. Pass the binary (for `go test`, the `pkg.test` it leaves behind) as the first argument only for `-disasm` and `weblist`.
+To find a leak, take two heap profiles a few minutes apart and run `go tool pprof -sample_index=inuse_space -diff_base=first.prof second.prof`. Both `-diff_base` and `-base` subtract the base profile; `-diff_base` is the one meant for comparing two snapshots. Profiles carry function names, so `-top`, `-list`, and `-peek` work on the `.prof` file alone. Pass the binary (for `go test`, the `pkg.test` it leaves behind) as the first argument only for `-disasm` and `weblist`.
 
 ## Wall-clock time that the CPU profile misses
 

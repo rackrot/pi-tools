@@ -54,18 +54,9 @@ A clash means two project instances (same or different project, different global
 </Target>
 ```
 
-This forks `(project, {_IsPublishing=true})` beside the `(project, {})` instance the solution builds, and both write the same files. If the call is in the project itself, set the flag as a static property and run Publish in the same instance, guarding against a cycle when Publish is the entry point:
+This forks `(project, {_IsPublishing=true})` beside the `(project, {})` instance the solution builds, and both write the same files. Repair it by removing the second invocation, or by running an explicit `dotnet publish` when publishing is the outcome you want. Running Publish in the same instance (a static `_IsPublishing` plus `AfterTargets="Build" DependsOnTargets="Publish"`) can work through `dotnet build` and `dotnet publish` yet fail with `MSB4006` under `dotnet msbuild -t:Publish`. If you use it, validate every supported entry command. See AP-22.
 
-```xml
-<PropertyGroup>
-  <_PublishWasInvokedDirectly Condition="'$(_IsPublishing)' == 'true'">true</_PublishWasInvokedDirectly>
-  <_IsPublishing>true</_IsPublishing>
-</PropertyGroup>
-<Target Name="PublishOnBuild" AfterTargets="Build" DependsOnTargets="Publish"
-        Condition="'$(_PublishWasInvokedDirectly)' != 'true'" />
-```
-
-If a consumer project publishes another project, move publish-on-build into the producer as above, and have the consumer only sequence it with `<ProjectReference Include="..\tool\tool.csproj" ReferenceOutputAssembly="false" />` and read its publish folder.
+If a consumer project publishes another project, have the producer own its publish, and have the consumer only sequence it with `<ProjectReference Include="..\tool\tool.csproj" ReferenceOutputAssembly="false" />` and read its publish folder.
 
 **`SetTargetFramework` restating a single-targeting project's own TFM.** `<ProjectReference Include="..\Tool\Tool.csproj" SetTargetFramework="TargetFramework=net8.0" />` on a project that already targets only `net8.0` forks a second instance at the same path. Remove the metadata. It is legitimate when the referenced project multi-targets, when it selects a different TFM (different path), or for a framework-incompatible reference, which needs:
 

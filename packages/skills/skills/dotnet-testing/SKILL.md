@@ -1,13 +1,13 @@
 ---
 name: dotnet-testing
-description: 'Writes, runs and fixes .NET tests in xUnit, NUnit, MSTest and TUnit: dotnet test syntax for VSTest vs Microsoft.Testing.Platform, filters, TRX and dumps, test-project wiring, TimeProvider and file-system seams, coverage. Use for running tests in a .NET repo, a filter that matches nothing, "VSTest or MTP?", or testing DateTime.Now code.'
+description: 'Runs, filters, writes and fixes .NET tests (xUnit, NUnit, MSTest, TUnit). Read it before answering any dotnet test question or writing a C# test, even with no repo to inspect: the command, filter and TRX, dump and coverage flags depend on SDK, framework and which of VSTest or MTP the repo uses now. Use for "run only this test class", a filter that matches nothing or runs everything, no .trx or coverage file, CI discovering zero tests, wiring a test project, which MSTest version has an API, and testing code that reads DateTime.UtcNow, files or HTTP. Not for migrating to xUnit v3, MSTest v3/v4 or Microsoft.Testing.Platform, or moving between test frameworks (dotnet-upgrade-guide).'
 ---
 
 # .NET testing
 
-Pick the test command from the repository's actual platform and framework, never from habit. A `dotnet test` line that is right for one project is often silently wrong for the next: a VSTest filter passed to an xUnit v3 project on MTP runs zero tests and still exits 0.
+Pick the test command from the repository's actual platform and framework, never from habit. A `dotnet test` line that is right for one project is often silently wrong for the next: a VSTest `--filter` given to an xUnit v3 project on MTP is either ignored (before `--` on the bridge, so the whole suite runs) or rejected (after `--` or in native mode, exit code 5). A run that matches nothing exits 8 on MTP but 0 on VSTest.
 
-Not for: what to test and how to shape a test (`unit-testing`), finding untested behavior (`test-gap-audit`), browser journeys (`e2e-testing`), moving between test frameworks or upgrading MSTest/xUnit majors (`dotnet-upgrade-guide`), build failures before tests run (`msbuild`), package versions (`nuget`).
+Not for: what to test and how to shape a test finding untested behavior (`test-gap-audit`), browser journeys, moving between test frameworks or upgrading MSTest/xUnit majors (`dotnet-upgrade-guide`), build failures before tests run (`msbuild`), package versions (`nuget`).
 
 ## 1. Detect before you type a command
 
@@ -73,7 +73,7 @@ Match the suite's framework, version, assertion style, mocking library and namin
 | Category | `[Trait("Category","X")]` | `[Category("X")]` | `[TestCategory("X")]` | `[Property("Category","X")]` |
 | Token | `TestContext.Current.CancellationToken` | `TestContext.CurrentContext.CancellationToken` | `TestContext.CancellationToken` (3.11+) | `CancellationToken` parameter |
 
-Version-gated APIs matter most in MSTest (3.x minors differ; v4 removed `Assert.ThrowsException` and `[ExpectedException]`): read [references/mstest.md](references/mstest.md) before editing MSTest code. Read [references/xunit-nunit-tunit.md](references/xunit-nunit-tunit.md) for xUnit v3, NUnit 4 and TUnit specifics and for ASP.NET Core integration tests with `WebApplicationFactory` and Testcontainers.
+Version-gated APIs matter most in MSTest (3.x minors differ; v4 removed `Assert.ThrowsException` and `[ExpectedException]`): read [references/mstest.md](references/mstest.md) before editing MSTest code or answering which MSTest version has an API. Read [references/xunit-nunit-tunit.md](references/xunit-nunit-tunit.md) for xUnit v3, NUnit 4 and TUnit specifics and for ASP.NET Core integration tests with `WebApplicationFactory` and Testcontainers.
 
 ## 6. Deterministic seams
 

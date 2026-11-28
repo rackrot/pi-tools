@@ -2,9 +2,7 @@
 name: msbuild-obj-clash
 description: An intermittent parallel-build file clash routes to msbuild, not nuget.
 tags: [routing]
-runs: 1
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

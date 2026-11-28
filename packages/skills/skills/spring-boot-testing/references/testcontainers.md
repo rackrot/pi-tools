@@ -13,7 +13,6 @@ It creates the matching `ConnectionDetails` bean from the container, so no `spri
 
 ```java
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
 class OrderRepositoryTest {
 
@@ -43,7 +42,6 @@ public class ContainersConfig {
 
 @DataJpaTest
 @Import(ContainersConfig.class)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class OrderRepositoryTest { }
 ```
 
@@ -68,6 +66,6 @@ Run the app's real migrations (Flyway/Liquibase run automatically in `@DataJpaTe
 
 ## Gotchas
 
-- `@DataJpaTest` replaces the `DataSource` with an embedded one unless `replace = NONE`. Without it `@ServiceConnection` is ignored.
+- On Boot 3.3 and older, `@DataJpaTest` replaces even a container `DataSource` with an embedded one unless `@AutoConfigureTestDatabase(replace = NONE)` is set. Boot 3.4+ detects the container and keeps it.
 - Docker must be reachable. A missing daemon fails the whole class; gate with `@Testcontainers(disabledWithoutDocker = true)` only if skipping is acceptable.
 - The Maven/Gradle test task needs the same Docker environment as the IDE, so check `DOCKER_HOST` in CI.

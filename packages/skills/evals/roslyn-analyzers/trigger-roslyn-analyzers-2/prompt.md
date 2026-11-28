@@ -2,9 +2,8 @@
 name: trigger-roslyn-analyzers-2
 description: "Fixing a non-incremental source generator loads roslyn-analyzers."
 tags: [trigger]
-runs: 1
+runs: 3
 max_turns: 6
-model: claude-sonnet-5-5
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 

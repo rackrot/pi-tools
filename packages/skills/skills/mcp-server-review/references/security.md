@@ -79,7 +79,7 @@ Spec basis: servers must validate all tool inputs.
 
 ### MCP-05 Official SDK
 
-- A remote server is built on an official SDK and the dependency is pinned and current. The official list and tiers are at <https://modelcontextprotocol.io/docs/sdk>. Tier 1 is the most complete and supported, and Tier 3 is the least mature, so note the tier of the SDK in use.
+- A remote server is built on an official SDK and the dependency is pinned and current. The official list and tiers are at <https://modelcontextprotocol.io/docs/2026-07-28/sdk>. Tier 1 is the most complete and supported, and Tier 3 is the least mature, so note the tier of the SDK in use.
 - A hand-rolled HTTP layer is `NEEDS INVESTIGATION` until the repo shows direct evidence for auth, validation, limits, and header checks.
 
 ### Client duties (when the target is a client)

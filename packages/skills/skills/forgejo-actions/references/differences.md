@@ -26,7 +26,7 @@ push, issues, issue_comment, pull_request, pull_request_target, release, schedul
 
 ## Forgejo-only
 
-`runs-on: lxc` and other non-Docker environments, `enable-openid-connect`, `enable-email-notifications`, reusable workflows referenced by URL on another Forgejo or GitHub instance (public repo required), and automatic cancellation of older `push` and `pull_request` runs of the same workflow when no `concurrency` is set.
+`runs-on: lxc` and other non-Docker environments, `enable-openid-connect`, `enable-email-notifications`, reusable workflows referenced by URL on another Forgejo or GitHub instance (public repo required), and automatic cancellation of older `push` and `pull_request` (synchronize) runs of the same workflow on the same branch when no `concurrency` is set; set `concurrency.cancel-in-progress: false` to keep them.
 
 ## Migrating a GitHub workflow
 

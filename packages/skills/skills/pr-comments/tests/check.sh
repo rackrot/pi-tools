@@ -24,9 +24,9 @@ check paged.md page1.json page2.json
 check empty.md empty.json
 check fence.md fence.json
 
-# fetch.sh must exit 0 with a "not fetched" line when nothing could be fetched, because
-# a non-zero exit aborts the skill. On a non-GitHub origin the line points at
-# references/forgejo.md. Stub gh (every call fails) and git (origin) on PATH.
+# fetch.sh must exit 0 with a "not fetched" line when nothing could be fetched, so the
+# agent reads the reason instead of an error. On a non-GitHub origin the line points at
+# /forgejo-pr-comments. Stub gh (every call fails) and git (origin) on PATH.
 fetch_case() {
   local label=$1 origin=$2 want_forgejo=$3 stubs out rc=0 got=false
   shift 3
@@ -36,7 +36,7 @@ fetch_case() {
   chmod +x "$stubs/gh" "$stubs/git"
   out=$(PATH="$stubs:$PATH" "$here/../fetch.sh" "$@" 2>/dev/null) || rc=$?
   rm -rf "$stubs"
-  [[ $out == *references/forgejo.md* ]] && got=true
+  [[ $out == *forgejo-pr-comments* ]] && got=true
   if [ "$rc" = 0 ] && [[ $out == "Review feedback not fetched:"* ]] && [ "$got" = "$want_forgejo" ]; then
     echo "ok   fetch.sh $label"
   else

@@ -1,6 +1,6 @@
 ---
 name: godot-multiplayer
-description: 'Builds and secures networked Godot 4 games: server-authoritative @rpc validation, ENet and WebSocket peers, MultiplayerSpawner and MultiplayerSynchronizer, lobbies, dedicated servers, interpolation and prediction. Use for @rpc, "multiplayer", "netcode" or a headless server in a Godot project.'
+description: 'Godot 4 networking, for any game that runs on more than one machine: host and join, server-authoritative @rpc validation, ENet and WebSocket peers, MultiplayerSpawner and MultiplayerSynchronizer, lobbies and the auth handshake, dedicated servers (headless runs, choosing server or client at boot, command-line config, Docker and systemd deployment), interpolation and prediction. Use for @rpc, "multiplayer", "netcode", "online co-op", a player that is missing or moves wrongly on another peer''s screen, or planning or reviewing a dedicated or headless server. Godot 4 networking defaults are easy to misremember, so read it before answering from memory.'
 license: Apache-2.0 AND MIT
 ---
 
@@ -8,7 +8,7 @@ license: Apache-2.0 AND MIT
 
 Written for Godot 4.x high-level multiplayer (`SceneMultiplayer`), checked against 4.7. Read the project's version from `config/features` in `project.godot` first. Server and clients must run the **same Godot version**, because the high-level protocol is only compatible within one version, so send a version string during the handshake.
 
-Not for: local split-screen (no networking), raw sockets and `PacketPeer` protocols, HTTP. Scene, node and GDScript basics belong to the `godot` skill, export presets to `godot-export`, and C# syntax to `godot-csharp`.
+Not for: local split-screen (no networking), raw sockets and `PacketPeer` protocols, HTTP. Scene, node and GDScript basics belong to the `godot` skill, export presets and building the server package (the 'Export as dedicated server' mode and its resource stripping) to `godot-export`, and C# syntax to `godot-csharp`.
 
 ## Rule one: the server decides
 
@@ -101,4 +101,4 @@ C# attribute form: `[Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, Tran
 - [references/replication-and-rpc.md](references/replication-and-rpc.md): `@rpc` and C# `[Rpc]` in full, `MultiplayerSpawner` (auto-spawn, `spawn_function`, a whitelisted client spawn request), `MultiplayerSynchronizer` setup and visibility, transfer modes and channels.
 - [references/join-and-disconnect.md](references/join-and-disconnect.md): the lobby flow, the authentication handshake with a version check, max-player limits and kicks, disconnect cleanup and reconnecting.
 - [references/sync-prediction.md](references/sync-prediction.md): state versus input sync, snapshot interpolation, client-side prediction and reconciliation, lag compensation, bandwidth.
-- [references/dedicated-server.md](references/dedicated-server.md): headless runs and the `dedicated_server` feature tag, the "Export as dedicated server" preset, server configuration from the command line, match flow, Docker and systemd.
+- [references/dedicated-server.md](references/dedicated-server.md): headless runs and the `dedicated_server` feature tag, choosing server or client at boot, server configuration from the command line, match flow, Docker and systemd.

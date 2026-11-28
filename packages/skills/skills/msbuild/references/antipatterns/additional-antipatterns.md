@@ -1,7 +1,6 @@
 # Additional MSBuild anti-patterns
 
-This continues the original catalog with AP-16 through AP-23. The same rule applies:
-verify the behavior and exceptions before changing a pattern.
+AP-16 through AP-23 continue [msbuild-antipatterns](../msbuild-antipatterns.md). Verify the behavior and exceptions before changing a pattern.
 
 ## AP-16: Exec for string or path operations
 
@@ -50,9 +49,7 @@ tools or stateful operations should become property functions.
 </ItemGroup>
 ```
 
-The original catalog incorrectly treated mixing Include and Update in one ItemGroup as a
-defect. Order and existence are what matter; splitting groups is neither necessary nor a fix
-for an update that still precedes its include.
+Include then Update in one ItemGroup is fine; only order and existence matter. Splitting groups does not fix an update that still precedes its include.
 
 ## AP-18: Apparently redundant transitive project references
 
@@ -186,8 +183,7 @@ collision if every relevant output is isolated.
 4. If different instances are intentional, isolate all relevant outputs/intermediate paths
    early enough for SDK and NuGet consumers, and use matching restore/build settings.
 
-**Publish-on-build needs special care.** The original example used a private `_IsPublishing`
-guard and `AfterTargets="Build" DependsOnTargets="Publish"`. That can work through `dotnet build`
+**Publish-on-build needs special care.** A private `_IsPublishing` guard with `AfterTargets="Build" DependsOnTargets="Publish"` can work through `dotnet build`
 and `dotnet publish` yet produce `MSB4006` through `dotnet msbuild -t:Publish`, because Publish
 already depends on Build. It is not a universal repair.
 

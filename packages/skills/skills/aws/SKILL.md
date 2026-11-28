@@ -1,13 +1,15 @@
 ---
 name: aws
-description: 'Settles the AWS account, region and identity in use, guides sign-in (SSO, aws login), and covers IAM (AccessDenied, policies, trust policies, STS limits), cost-query habits and AWS CLI v2 quirks (pagination, dry runs, env keys vs profile). Use for AWS credentials, SSO, expired tokens, IAM, AccessDenied, AWS costs, truncated aws output, or before an aws write command. Not for listing resources (aws-resource-query), incidents (aws-cloudwatch), reviews (aws-well-architected), IaC (terraform).'
+description: 'AWS identity, sign-in and IAM rules that are easy to get wrong from memory: which account, region and profile are active (without reading ~/.aws files), signing in (aws sso login, aws login), expired tokens, AccessDenied, writing or reviewing IAM and trust policies (PassRole, condition set operators, permissions boundaries vs resource policies, STS session limits), and Cost Explorer queries. Read before answering any AWS credential, IAM permission or policy-evaluation question, even when the policy is pasted in the chat. Not for command and script mechanics (aws-cli), listing resources (aws-resource-query), incidents (aws-cloudwatch), reviews (aws-well-architected), IaC (terraform).'
 ---
 
 # AWS
 
-General AWS habits: know which account and region you are in, get signed in without touching credential files, write IAM that fails closed, and query costs without arithmetic mistakes. Detail that does not fit here is in `references/` (`cli.md`, `cost.md`, `iam-edge-cases.md`).
+General AWS habits: know which account and region you are in, get signed in without touching credential files, write IAM that fails closed, and query costs without arithmetic mistakes. Detail that does not fit here is in `references/` (`cost.md`, `iam-edge-cases.md`).
 
 ## Context first
+
+Never read ~/.aws/credentials, ~/.aws/config or the SSO cache, not even to find the profile or region; use the commands below.
 
 When the account, region or identity is unknown, unclear or looks wrong, settle these before acting and keep them for the session. If the user already named them and calls work, skip this.
 
@@ -26,11 +28,11 @@ Read the caller `Arn` for the principal type:
 
 For an SSO principal, say early that creating IAM roles may fail. Look for an existing role before planning to create one, and if none fits, name the missing permission for whoever administers access.
 
-Do not run `aws configure list` (it masks keys to their last four characters but still shows part of them) or `aws configure export-credentials` (it prints them in full). Never read ~/.aws/credentials, ~/.aws/config or the SSO cache. Never print an access key, secret key or session token, in output or in an example.
+Do not run `aws configure list` (it masks keys to their last four characters but still shows part of them) or `aws configure export-credentials` (it prints them in full). Never print an access key, secret key or session token, in output or in an example.
 
 ## Signing in
 
-The user runs every login. A login opens a browser, so tell them the exact command and wait. In Claude Code the user can run it in this session by typing `! aws sso login --profile <profile>`. Afterwards re-run `get-caller-identity`.
+The user runs every login. A login opens a browser, so tell them the exact command and wait. If the harness has a shell escape, the user can run it in this session, for example `! aws sso login --profile <profile>`. Afterwards re-run `get-caller-identity`.
 
 | Situation | Command |
 | --- | --- |
@@ -58,7 +60,7 @@ Writing policies:
 - `GetSessionToken` credentials cannot call IAM APIs unless MFA was supplied, and can call only `AssumeRole` and `GetCallerIdentity` among STS operations.
 - Assuming a role in an opt-in Region needs that Region enabled in the account that owns the role, not the caller.
 
-Read `references/iam-edge-cases.md` for the same-account resource-policy bypass of boundaries, STS Region details, and what was checked.
+Read `references/iam-edge-cases.md` for the same-account resource-policy bypass of boundaries, STS Region details, actions that are admin-equivalent, and what was checked.
 
 ## Costs
 
@@ -74,7 +76,7 @@ Spend analysis and savings reviews of a whole workload go to `aws-well-architect
 
 ## CLI commands and scripts
 
-Before any create, update, delete, launch, terminate, put or attach command, show the exact command and wait for the user's go-ahead; pass `--region` explicitly. For truncated output, wrong credentials despite `--profile`, retries, waiters or a script, read `references/cli.md`.
+Before any create, update, delete, launch, terminate, put or attach command, show the exact command with `--region` passed explicitly and wait for the user's go-ahead; for truncated output, dry runs, retries, waiters, skeletons, scripts, or env keys vs `--profile`, use `aws-cli`.
 
 ## Routing
 
@@ -84,5 +86,7 @@ Before any create, update, delete, launch, terminate, put or attach command, sho
 | An alarm fired, errors, latency, what changed | `aws-cloudwatch` |
 | A Well-Architected or cost review of a workload | `aws-well-architected` |
 | Terraform or other IaC | `terraform` |
+| Writing or debugging an aws command or script, truncated output, a safe write | `aws-cli` |
+| CLI mechanics, scripts, write commands | `aws-cli` |
 
 If a named skill is not installed, say so and carry on with the AWS CLI.

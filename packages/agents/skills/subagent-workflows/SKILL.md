@@ -1,7 +1,7 @@
 ---
 
 name: subagent-workflows
-description: 'Runs, writes, saves and packages pi-subagents SubagentWorkflow scripts, and covers the workflows shipped with @rackrot/pi-agents (review-panel, gated-fix, audit-fanout, plan-slice-implement, config-rollout, pr-merge-queue, bug-remediation, test-generate, refactor-simplify, docs-sync, issue-triage, deep-research, spec-develop, feature-plan, prototype-variants). Use when work needs many subagents whose number is found at runtime, staged pipelines, or findings verified before reporting; when authoring or editing a workflow .js file; or when adding a workflow to this package. Not for one delegated task or a few named agents (use the Agent tool). Applies only when the SubagentWorkflow tool is available.'
+description: "Runs, writes, saves and packages SubagentWorkflow scripts; covers the @rackrot/pi-agents workflows (review-panel, gated-fix, audit-fanout, plan-slice-implement, config-rollout, pr-merge-queue, bug-remediation, test-generate, refactor-simplify, docs-sync, issue-triage, deep-research, spec-develop, feature-plan, prototype-variants). Use when the subagent count is found at runtime, for staged pipelines or findings verified before reporting, or when writing or debugging a workflow .js file. Not for one delegated task or a few named agents (use the Agent tool). Read it to plan or draft a workflow even when the SubagentWorkflow tool is not listed: it can be deferred (find it with tool_search)."
 ---
 
 # Subagent workflows
@@ -34,7 +34,7 @@ Installed with `@rackrot/pi-agents` (`packages/agents/workflows/`). Run one by n
 
 Every shipped workflow also takes `model` and `effort` (apply to every agent) and `agents` (per agent type or label, e.g. `{"reviewer": {"model": "provider/id", "effort": "high"}}`). Unset means inherit. The agents extension also fills `agents` from the user's `agentOverrides` when it loads, so a configured `reviewer` model applies without being passed; anything in `args` wins.
 
-`plan-slice-implement` isolates the session's own repo, so run it from the repo the plan is for, with the plan and its dependencies committed (worktree agents see only committed files) and a clean tree. `config-rollout` cannot use worktrees because its repos are other checkouts; it refuses dirty repos. Both ask for the gate command instead of guessing one. `bug-remediation`, `test-generate`, `refactor-simplify` and `docs-sync` (with `apply`) work serially on a new branch of the current checkout and need a clean tree. `docs-sync` and `issue-triage` only report unless asked; `spec-develop` and `feature-plan` return open questions or decisions and cannot ask mid-run, so answer and run again; `feature-plan` ends at the plan, which `plan-slice-implement` builds.
+`plan-slice-implement` isolates the session's own repo, so run it from the repo the plan is for, with the plan and its dependencies committed (worktree agents see only committed files) and a clean tree. For a plain 'implement this plan' request, follow the `implement-plan` skill (if installed); run `plan-slice-implement` only when the user asks for a workflow run or is continuing from `feature-plan`. `config-rollout` cannot use worktrees because its repos are other checkouts; it refuses dirty repos. Both ask for the gate command instead of guessing one. `bug-remediation`, `test-generate`, `refactor-simplify` and `docs-sync` (with `apply`) work serially on a new branch of the current checkout and need a clean tree. `docs-sync` and `issue-triage` only report unless asked; `spec-develop` and `feature-plan` return open questions or decisions and cannot ask mid-run, so answer and run again; `feature-plan` ends at the plan, which `plan-slice-implement` builds.
 
 Call `SubagentWorkflow` with `{name: "review-panel", args: {scope: "git diff main...HEAD"}}`. Pass `args` as a real JSON value, never a JSON string. Read each script's header comment for defaults.
 
@@ -48,7 +48,7 @@ Call `SubagentWorkflow` with `{name: "review-panel", args: {scope: "git diff mai
 
 ## Writing a script
 
-Full API, limits and troubleshooting: `references/script-api.md`. The upstream `workflow-authoring` skill carries the orchestration patterns (adversarial verify, judge panel, loop-until-dry); load it for those rather than restating them.
+Full API, limits and troubleshooting: `references/script-api.md`. The upstream `workflow-authoring` skill (if installed) carries the orchestration patterns (adversarial verify, judge panel, loop-until-dry); load it for those rather than restating them.
 
 Rules that cause real failures:
 
@@ -60,7 +60,7 @@ Rules that cause real failures:
 - Inside `pipeline`/`parallel` stages set `phase:` as an option, not the ambient `phase()`; give every call a unique `label`.
 - Any agent can return `null` (failure or skip). `.filter(Boolean)` after fan-outs, and read `agentError(label)` for the reason.
 - Use `schema` for results you will process; it is pressure, not a guarantee, so still handle `null`.
-- Verify by running: `gate: '<command>'` beats asking a model whether a fix works. `gate` cannot combine with `resume`, `schema`, `agentType`, `model`, `effort`, `isolation` or `disallowedTools` on a resumed call.
+- Verify by running: `gate: '<command>'` beats asking a model whether a fix works. A call with `resume` cannot also carry `gate`, `schema`, `agentType`, `model`, `effort`, `isolation` or `disallowedTools`; put the gate on the first call or on a separate verify agent.
 - `isolation: 'worktree'` only for parallel writers that would collide; never for a serial fix-then-verify chain.
 - Never drop work silently: `log()` what a cap or `max` excluded.
 - **A workflow's return value reaches the model through a size-limited notification** that cuts long results off. Return a compact summary and write the full report to a file with an agent (`out`).
@@ -75,7 +75,7 @@ Rules that cause real failures:
 
 `agentOverrides` (model, thinking, maxTurns) are applied to `Agent` tool calls by a hook. Workflow `agent()` calls bypass it, so the extension passes `model` and `thinking` (as `effort`) to `SubagentWorkflow` through `args.agents`, which the shipped workflows read. `maxTurns` and `thinking: off` have no workflow equivalent. A script you write only honors the settings if it reads `args.agents` (match keys case-insensitively); otherwise set `model` and `effort` on the call when a stage needs a specific tier, and omit them to inherit.
 
-## Adding a workflow to this package
+## Adding a workflow to this package (pi-tools repo only)
 
 1. Add `packages/agents/workflows/<name>.js`; `meta.name` must equal the filename. `pi.subagents.workflows` already points at the directory.
 2. Document `args` and defaults in the header comment, and add a row to the table above and in `packages/agents/README.md`.

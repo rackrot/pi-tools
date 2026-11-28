@@ -21,18 +21,14 @@ The C# form is the same calls: `OS.HasFeature("dedicated_server")`, `DisplayServ
 
 ## The server export preset
 
-- Add a separate preset for the server (platform **Linux**; "Linux/X11" is Godot 3 wording).
-- On its **Resources** tab, choose **Export as dedicated server**. It replaces visual resources (textures, meshes, materials, cubemaps, texture arrays and 3D textures) with placeholders that keep their references, so scenes still load and the PCK shrinks. Mark any visual resource the server really reads (for example a heightmap texture used for gameplay) as kept.
-- A normal export of the same project works too, but it ships every asset and must be started with `--headless` by hand.
-- Run the export from CI with `godot --headless --path . --export-release "Linux Server" build/server/game.x86_64`.
-- **The client build is readable.** Anything in the client PCK, server-only scripts included, can be extracted. Keep secrets (API keys, anti-cheat rules worth hiding) out of client presets with export filters, or keep them on the server only. PCK encryption slows extraction but does not prevent it.
-- C# servers: exports bundle the .NET runtime pieces they need, so the host does not need .NET installed. Ship the whole export folder.
+The server package comes from a separate Linux preset using the **Export as dedicated server** mode, which swaps textures, meshes and materials for placeholders that keep their references, so scenes still load on the server. A normal export also works, but it must be started with `--headless`. Setting up the preset, keeping resources and the CLI export command are covered by the `godot-export` skill.
 
 ## Server and client in one project
 
 - Put server-only systems (match logic, AI, scoring) and client-only systems (camera, HUD, audio, input) in separate branches and disable the other branch: `client_systems.process_mode = Node.PROCESS_MODE_DISABLED` on the server, and the reverse on clients.
 - A dedicated server is not a player: don't add id `1` to the player table, and let the first client (or a ready-up) start the match.
 - With `--headless`, rendering already uses the dummy driver. Calling `RenderingServer.set_render_loop_enabled(false)` on the server is optional extra insurance.
+- **The client build is readable.** Anything in the client PCK, server-only scripts included, can be extracted. Keep secrets (API keys, anti-cheat rules worth hiding) out of client presets with export filters, or keep them on the server only. PCK encryption slows extraction but does not prevent it.
 
 ## Configuration
 
@@ -119,3 +115,4 @@ WantedBy=multi-user.target
 - Godot prints to stdout and stderr, which the journal captures: `journalctl -u game -f`.
 - Open the UDP port in the host firewall and the cloud security group.
 - Export the server with debug off for production, and keep a debug build for diagnosing crashes.
+- C# servers: exports bundle the .NET runtime pieces they need, so the host does not need .NET installed. Ship the whole export folder.

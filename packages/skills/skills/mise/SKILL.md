@@ -1,11 +1,11 @@
 ---
 name: mise
-description: 'Configures and debugs mise (mise-en-place) for pinned tool versions, project env vars and tasks. Use when a task touches mise.toml, .mise.toml, mise.local.toml or .tool-versions, runs mise commands (use, install, exec, run, trust, env, tasks, activate), or hits "command not found" for a tool mise should provide. Not for Nix environments (devenv) or project dependency files such as package.json, pyproject.toml and uv.lock (language package-manager skills).'
+description: 'Configures, debugs and explains mise (mise-en-place): pinned tool versions, env vars, tasks and config trust. Defaults changed across releases (which version files are read, what needs trust), so answers from memory are often wrong. Use when a task or question involves mise.toml, mise.local.toml or .tool-versions, a mise command (use, install, exec, run, trust, env, activate), a "mise ERROR" message, or "command not found" for a mise tool in scripts, CI or non-interactive shells. Not for devenv.nix or other Nix shells, tool versions set through devcontainer.json or Dev Container Features (`devcontainer`), or project dependency files such as package.json, pyproject.toml and uv.lock.'
 ---
 
 # mise
 
-Not for devenv or Nix shells, and not for installing project dependencies; mise pins tool versions (node, python, uv, kubectl, ...) and project env and tasks, while `npm`, `uv` and `cargo` still manage the project's own dependencies. Run `mise --version` and `mise <command> --help` before relying on a flag or setting.
+Not for devenv or Nix shells, or devcontainer Features (`devcontainer`), and not for installing project dependencies; mise pins tool versions (node, python, uv, kubectl, ...) and project env and tasks, while `npm`, `uv` and `cargo` still manage the project's own dependencies. Run `mise --version` and `mise <command> --help` before relying on a flag or setting.
 
 ## Establish the state
 
@@ -16,9 +16,9 @@ Not for devenv or Nix shells, and not for installing project dependencies; mise 
 ## Tools
 
 - `mise use node@24` installs and records the request in config. `mise install` only installs what config already requests and never edits config; a tool installed that way is not on PATH until it is configured. `mise exec node@24 -- cmd` runs once without recording anything.
-- `mise use` writes to the nearest project config's lowest-precedence file. In a directory that only has `.tool-versions` it can write there, so check `git diff` for which file changed. `-g` writes the global config, which you should do only when the user asks.
+- `mise use` writes to the nearest project config's lowest-precedence file. In a directory that only has `.tool-versions`, it writes there; use `mise use --path mise.toml ...` to choose the file, or `--dry-run` to preview. `-g` writes the global config, which you should do only when the user asks.
 - Pin versions in committed config (`node = "24.4"` or a major) rather than `latest`. `mise use --pin` writes the resolved version.
-- Backend order of preference for CLI tools: `aqua:` and `github:` (prebuilt release assets), then language backends (`cargo:`, `npm:`, `pipx:`/`pypi:`, `go:`), which need the language runtime installed through mise first. `ubi:` is deprecated in favour of `github:` and slated for removal in 2027.1.0; migrate existing entries. Quote prefixed names as TOML keys: `"github:BurntSushi/ripgrep" = "15"`.
+- Backend order of preference for CLI tools: `aqua:` and `github:` (prebuilt release assets), then language backends (`cargo:`, `npm:`, `pipx:`/`pypi:`, `go:`), which need the language runtime installed through mise first. `ubi:` is deprecated (removed in 2027.1.0); migrate entries to `github:`, or `gitlab:`/`http:` for other hosts. Quote prefixed names as TOML keys: `"github:BurntSushi/ripgrep" = "15"`.
 - Migrating `.tool-versions`: translate each line to `[tools]` in `mise.toml`, run `mise install`, check `mise ls` shows the same versions, then delete `.tool-versions` only if the user wants asdf compatibility gone. Do not keep both with differing versions; `mise.toml` wins and asdf users silently diverge.
 - Version files like `.nvmrc` and `.python-version` are read only for tools listed in the `idiomatic_version_file_enable_tools` setting. Put the version in `mise.toml` instead of relying on them.
 
@@ -38,7 +38,7 @@ Not for devenv or Nix shells, and not for installing project dependencies; mise 
 
 ## Trust
 
-- mise loads only trusted config. A config with only `[tools]` plain versions and `[tasks]` (none listing `secrets`) and no template syntax needs no trust; `[env]` directives, templates and tasks with `secrets` do. `mise run`, `mise install` and `mise exec` trust the active config for you, which is exactly why you must read an unfamiliar `mise.toml` before running any of them.
+- mise loads only trusted config. A config with only `[tools]` plain versions and `[tasks]` (none listing `secrets`) and no template syntax needs no trust; `[env]` directives, templates and tasks with `secrets` do. Outside paranoid mode, `mise run` (and task shorthand like `mise build`), `mise install`, `mise exec` and `mise watch` record trust for every non-global config they load, parent directories included, so read an unfamiliar `mise.toml` before running any of them.
 - Treat a freshly cloned or generated `mise.toml` as untrusted code: it can source scripts and run tasks. Inspect it, then `mise trust` that one file. Avoid `mise trust --all` and `trusted_config_paths` wildcards unless the user asks. `mise trust --show` lists status.
 
 ## Shell integration for agents
