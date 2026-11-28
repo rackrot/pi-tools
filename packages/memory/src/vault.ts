@@ -1,7 +1,15 @@
-import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync } from "node:fs";
+import {
+	appendFileSync,
+	existsSync,
+	mkdirSync,
+	readdirSync,
+	readFileSync,
+	realpathSync,
+	statSync,
+} from "node:fs";
 import { basename, isAbsolute, join, posix, relative, resolve, sep } from "node:path";
 import type { MemoryConfig } from "./config.ts";
-import { git } from "./git.ts";
+import { commitPaths, git, gitConfig, gitInit, isRepoRoot } from "./git.ts";
 import { parseNote, safeName } from "./note.ts";
 
 export type ConfiguredConfig = MemoryConfig & { root: string };
@@ -132,6 +140,9 @@ function appendMissing(file: string, lines: string[]): string[] {
 	return add;
 }
 
+/** Files `initVault` may create or change at the root, committed by `setupVault`. */
+const INIT_FILES = [".gitignore", ".gitattributes"];
+
 /** Creates the agent folder skeleton and appends missing .gitignore / .gitattributes lines. */
 export function initVault(cfg: ConfiguredConfig): string[] {
 	const done: string[] = [];
@@ -147,4 +158,125 @@ export function initVault(cfg: ConfiguredConfig): string[] {
 		if (added.length) done.push(`${file}: added ${added.join(", ")}`);
 	}
 	return done;
+}
+
+export interface RootInfo {
+	exists: boolean;
+	isDir: boolean;
+	/** The root itself has `.obsidian/`. */
+	obsidian: boolean;
+	/** Subfolders that have `.obsidian/` (a parent of several vaults). */
+	childVaults: string[];
+	/** Name of the sync service when the real path looks like a cloud-synced folder. */
+	cloud?: string;
+}
+
+const CLOUD = [
+	["iCloud", /Mobile Documents|iCloud/i],
+	["Dropbox", /Dropbox/i],
+	["OneDrive", /OneDrive/i],
+	["Google Drive", /Google ?Drive/i],
+] as const;
+
+/** What the configured root looks like, without touching it. */
+export function inspectRoot(root: string): RootInfo {
+	const info: RootInfo = {
+		exists: existsSync(root),
+		isDir: false,
+		obsidian: false,
+		childVaults: [],
+	};
+	if (!info.exists) return info;
+	info.isDir = statSync(root).isDirectory();
+	if (!info.isDir) return info;
+	info.obsidian = existsSync(join(root, ".obsidian"));
+	if (!info.obsidian)
+		info.childVaults = readdirSync(root, { withFileTypes: true })
+			.filter((e) => e.isDirectory() && existsSync(join(root, e.name, ".obsidian")))
+			.map((e) => e.name);
+	const real = realpathSync(root);
+	info.cloud = CLOUD.find(([, re]) => re.test(real))?.[0];
+	return info;
+}
+
+/**
+ * Prepares the vault: optional `git init -b main`, agent skeleton, ignore lines, and an initial
+ * commit of only the files init changed (never the user's notes, never `-A`). Safe to re-run.
+ * Returns what was done, plus problems the user must fix themselves.
+ */
+export async function setupVault(
+	cfg: ConfiguredConfig,
+	opts: { init: boolean; separateGitDir?: string },
+): Promise<{ done: string[]; todo: string[] }> {
+	const done: string[] = [];
+	const todo: string[] = [];
+	mkdirSync(cfg.root, { recursive: true });
+	if (opts.init && !(await isRepoRoot(cfg.root))) {
+		await gitInit(cfg.root, opts.separateGitDir);
+		done.push(
+			opts.separateGitDir ? `git init (repository data in ${opts.separateGitDir})` : "git init",
+		);
+	}
+	done.push(...initVault(cfg));
+	if (!(await isRepoRoot(cfg.root))) return { done, todo };
+
+	// Files init changed this run; on a repo with no commits yet also those a failed earlier run left.
+	const unborn = !(await git(cfg.root, ["rev-parse", "-q", "--verify", "HEAD"]).catch(() => ""));
+	const paths = INIT_FILES.filter(
+		(f) => done.some((d) => d.startsWith(`${f}:`)) || (unborn && existsSync(join(cfg.root, f))),
+	);
+	if (
+		paths.length &&
+		!((await gitConfig(cfg.root, "user.name")) && (await gitConfig(cfg.root, "user.email")))
+	) {
+		todo.push(
+			"git has no user.name/user.email, so the initial commit was skipped. Run:",
+			'  git config --global user.name "Your Name"',
+			'  git config --global user.email "you@example.com"',
+			"then run /memory-init again.",
+		);
+	} else if (await commitPaths(cfg.root, paths, "memory: initialize agent folder"))
+		done.push(`committed ${paths.join(", ")}`);
+	return { done, todo };
+}
+
+/** "Next steps" lines for the current git state of the root. */
+export async function nextSteps(cfg: ConfiguredConfig): Promise<string[]> {
+	const q = JSON.stringify(cfg.root);
+	if (!(await isRepoRoot(cfg.root)))
+		return [
+			`${cfg.root} is not a git repo: notes work but are not versioned. Run /memory-init to set it up.`,
+		];
+	const remotes = (await git(cfg.root, ["remote"]).catch(() => "")).split("\n").filter(Boolean);
+	const branch =
+		(await git(cfg.root, ["branch", "--show-current"]).catch(() => "")).trim() || "main";
+	const upstream = await git(cfg.root, ["rev-parse", "--abbrev-ref", "@{u}"]).then(
+		(s) => s.trim(),
+		() => "",
+	);
+	const lines: string[] = [];
+	const tail = [
+		'`"push": "never"` keeps the vault local; `commitIntervalMinutes` sets the commit timer (0 = only at session end).',
+	];
+	if (!remotes.length) {
+		lines.push(
+			"No remote yet. To sync across devices or back up:",
+			"  1. Create an EMPTY private repo (Forgejo, GitHub, ...). Vault notes are private data.",
+			`  2. git -C ${q} remote add origin <url>`,
+			`  3. git -C ${q} push -u origin ${branch}`,
+			"Init does not commit your existing notes. Review `git status` and commit what you want in the repo before the first push.",
+			"Until then the agent only commits locally; pushes start once an upstream exists.",
+		);
+	} else if (!upstream) {
+		lines.push(
+			`Remote "${remotes[0]}" exists but ${branch} has no upstream. Run:`,
+			`  git -C ${q} push -u ${remotes[0]} ${branch}`,
+			"Review `git status` first: your existing notes are not committed by init.",
+		);
+	} else {
+		lines.push(
+			`Sync is active (upstream ${upstream}): pull --rebase at session start and end; commits ${cfg.commitIntervalMinutes ? `every ${cfg.commitIntervalMinutes} min and` : "only"} at session end; ${cfg.push === "session" ? "push at session end" : "no push (push: never)"}.`,
+		);
+	}
+	return [...lines, ...tail];
 }

@@ -2,13 +2,15 @@ import { execFile } from "node:child_process";
 import {
 	closeSync,
 	existsSync,
+	mkdirSync,
 	openSync,
+	readFileSync,
 	realpathSync,
 	rmSync,
 	statSync,
 	unlinkSync,
 } from "node:fs";
-import { basename, join } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
 
 const exec = promisify(execFile);
@@ -42,14 +44,55 @@ export async function isRepoRoot(root: string): Promise<boolean> {
 	}
 }
 
-export const gitInit = (root: string) => git(root, ["init", "-q"]);
+/** `git init -b main`; `separateGitDir` keeps the repository data outside `root` (for synced folders). */
+export function gitInit(root: string, separateGitDir?: string) {
+	if (separateGitDir) mkdirSync(dirname(separateGitDir), { recursive: true });
+	return git(root, [
+		"init",
+		"-q",
+		"-b",
+		"main",
+		...(separateGitDir ? ["--separate-git-dir", separateGitDir] : []),
+	]);
+}
+
+/** Trimmed `git config --get key`, or "" when unset. */
+export const gitConfig = (root: string, key: string) =>
+	git(root, ["config", "--get", key]).then(
+		(s) => s.trim(),
+		() => "",
+	);
+
+/** Stages exactly `paths` and commits only them. Resolves false when none of them changed. */
+export async function commitPaths(root: string, paths: string[], message: string) {
+	if (!paths.length) return false;
+	await git(root, ["add", "--", ...paths]);
+	if (!(await git(root, ["diff", "--cached", "--name-only", "--", ...paths])).trim()) return false;
+	await git(root, ["commit", "-q", "--only", "-m", message, "--", ...paths]);
+	return true;
+}
+
+/** The git directory; `.git` is a file pointing elsewhere with `--separate-git-dir`. */
+function gitDir(root: string): string {
+	const dot = join(root, ".git");
+	try {
+		if (statSync(dot).isFile())
+			return resolve(
+				root,
+				readFileSync(dot, "utf8")
+					.replace(/^gitdir:\s*/, "")
+					.trim(),
+			);
+	} catch {}
+	return dot;
+}
 
 const ACTIONS = ["add", "update", "archive"];
 const STALE_LOCK_MS = 2 * 60_000;
 
-/** Cross-process lock at `<root>/.git/pi-memory.lock` (created with O_EXCL, stale after 2 minutes). */
+/** Cross-process lock at `<git dir>/pi-memory.lock` (created with O_EXCL, stale after 2 minutes). */
 async function withLock<T>(root: string, fn: () => Promise<T>): Promise<T> {
-	const path = join(root, ".git", "pi-memory.lock");
+	const path = join(gitDir(root), "pi-memory.lock");
 	const deadline = Date.now() + 30_000;
 	for (;;) {
 		try {

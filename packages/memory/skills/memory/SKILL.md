@@ -31,3 +31,7 @@ Notes live in a git-backed Obsidian vault. Humans edit the same files, so treat 
 ## Scope
 
 `project` notes belong to the current repo; `global` notes apply to every project. Notes outside the agent folder are the user's: search and read them (`scope: vault`), never write there. Retire notes with `memory_archive`; nothing is deleted.
+
+## Setup
+
+If memory tools are missing or the vault is not a git repo, tell the user to run `/memory-init`; setup is described in the package README.

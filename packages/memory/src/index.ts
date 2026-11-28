@@ -1,19 +1,20 @@
 import { mkdirSync } from "node:fs";
-import { isAbsolute, resolve } from "node:path";
+import { basename, isAbsolute, join, resolve } from "node:path";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import {
 	type ExtensionAPI,
 	getAgentDir,
 	isToolCallEventType,
 } from "@earendil-works/pi-coding-agent";
+import { configPath } from "@rackrot/pi-core/config";
 import { registerConfigSection } from "@rackrot/pi-core/config-ui";
 import { callModel } from "@rackrot/pi-core/model-call";
 import { loadConfig } from "./config.ts";
-import { gitInit, isRepoRoot } from "./git.ts";
+import { isRepoRoot } from "./git.ts";
 import { buildInjection } from "./inject.ts";
 import { summarizeProject } from "./summary.ts";
 import { createMemory, kickEmbeddings, type Memory, registerTools } from "./tools.ts";
-import { type ConfiguredConfig, guardReason, initVault } from "./vault.ts";
+import { type ConfiguredConfig, guardReason, inspectRoot, nextSteps, setupVault } from "./vault.ts";
 
 /**
  * Long-term memory in a git-managed Obsidian vault. Without `memory.root` in the global config
@@ -127,25 +128,81 @@ export default function (pi: ExtensionAPI) {
 	});
 
 	pi.registerCommand("memory-init", {
-		description: "Prepare the memory vault: git init, .gitignore/.gitattributes, agent folder",
+		description:
+			"Set up the memory vault: check the root, git init, agent folder, ignore lines, initial commit, next steps",
 		handler: async (_args, ctx) => {
+			const say = (lines: string[], level: "info" | "warning" | "error" = "info") =>
+				ctx.ui.notify(lines.join("\n"), level);
 			const cfg = configured(ctx.cwd);
 			if (!cfg)
-				return ctx.ui.notify('Set "memory.root" in the global rackrot config first.', "warning");
-			mkdirSync(cfg.root, { recursive: true });
-			const done: string[] = [];
-			if (
-				!(await isRepoRoot(cfg.root)) &&
-				(await ctx.ui.confirm("Memory", `${cfg.root} is not a git repo. Run git init?`))
-			) {
-				await gitInit(cfg.root);
-				done.push("git init");
+				return say(
+					[
+						"memory.root is not set. Add it to the global config (do not guess a location):",
+						`  ${configPath("global", ctx.cwd)}`,
+						'  { "memory": { "root": "~/Documents/Obsidian" } }',
+						"Create the file with /rackrot-init or edit it with /rackrot-config memory, then run /memory-init again.",
+					],
+					"warning",
+				);
+
+			let info = inspectRoot(cfg.root);
+			if (info.exists && !info.isDir) return say([`${cfg.root} is not a directory.`], "error");
+			if (!info.exists) {
+				if (!(await ctx.ui.confirm("Memory", `${cfg.root} does not exist. Create it?`))) return;
+				mkdirSync(cfg.root, { recursive: true });
+				info = inspectRoot(cfg.root);
 			}
-			done.push(...initVault(cfg));
-			ctx.ui.notify(
-				done.length ? `memory: ${done.join("; ")}` : "memory: vault already set up",
-				"info",
-			);
+			const notes: string[] = [];
+			if (info.obsidian)
+				notes.push(
+					`${cfg.root} is an existing Obsidian vault; only ${cfg.agentDir}/ will be written.`,
+				);
+			else if (info.childVaults.length)
+				notes.push(
+					`${cfg.root} has no .obsidian but contains vaults (${info.childVaults.join(", ")}). ${cfg.agentDir}/ will be created at the root, outside any of them. Consider pointing memory.root at one vault.`,
+				);
+			if (notes.length) say(notes, "warning");
+
+			let init = false;
+			let separateGitDir: string | undefined;
+			if (!(await isRepoRoot(cfg.root))) {
+				init = await ctx.ui.confirm(
+					"Memory",
+					`${cfg.root} is not a git repo. Run git init -b main?`,
+				);
+				if (init && info.cloud) {
+					say(
+						[
+							`${cfg.root} looks like a ${info.cloud} folder. A .git directory inside synced folders is known to corrupt.`,
+						],
+						"warning",
+					);
+					if (
+						await ctx.ui.confirm(
+							"Memory",
+							`Keep the git data outside the synced folder (git init --separate-git-dir)? Recommended for ${info.cloud}.`,
+						)
+					)
+						separateGitDir = join(
+							getAgentDir(),
+							"rackrot",
+							"memory",
+							"git",
+							`${basename(cfg.root)}.git`,
+						);
+				}
+			} else if (info.cloud)
+				say(
+					[
+						`${cfg.root} is inside a ${info.cloud} folder and already has .git. Syncing .git is known to corrupt; consider git init --separate-git-dir (an existing .git is not moved here).`,
+					],
+					"warning",
+				);
+
+			const { done, todo } = await setupVault(cfg, { init, separateGitDir });
+			say([done.length ? `Done: ${done.join("; ")}` : "Vault already set up; nothing to change."]);
+			if (todo.length) say(todo, "warning");
+			say(await nextSteps(cfg));
 		},
 	});
 

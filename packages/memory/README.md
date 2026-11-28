@@ -3,38 +3,98 @@
 Long-term memory for the pi agent: Markdown notes with YAML frontmatter in a git repo that doubles as an
 Obsidian vault. The agent searches, reads, writes and archives notes with tools; humans edit the same files.
 
+## Setup
+
+### 1. Install
+
 ```bash
 pi install npm:@rackrot/pi-memory
 ```
 
-## Setup
+### 2. Choose a root
 
-Add to the **global** rackrot config (`<agentDir>/rackrot/config.json(c)`). `memory.root` is read from the global
-layer only, so a project config can never redirect where the agent writes. Other keys may also be set in
-`<cwd>/.pi/rackrot.json(c)`.
+`memory.root` is the directory the agent searches and (under `<agentDir>/`) writes. Pick one of three cases.
 
-```json
+**A new, dedicated vault.** Any empty directory, e.g. `~/Vault`. `/memory-init` creates the git repo and the agent folder. Open it in Obsidian later if you like.
+
+**An existing Obsidian vault**, e.g. `~/Documents/Obsidian/MyVault`.
+
+- The agent can search and read every `.md` in it (not `.obsidian`, `.git`, `.trash`, `node_modules`, or the archive).
+- It writes only under `<root>/Agent/` (the `agentDir`). `.obsidian/` is never created or modified, and pi's built-in `write`/`edit` are blocked for `.git`, `.obsidian` and the archive. Shell commands are not inspected.
+- In Obsidian you will see an `Agent/` folder. Its notes are normal Markdown with frontmatter and `[[links]]`, so graph view and Dataview queries work on them.
+- You and the agent edit the same files. The agent only stages the paths it wrote (never `git add -A`), so your uncommitted edits are never swept into its commits. If you change a note the agent has read, its next write to it is refused until it re-reads it (the stale-write guard).
+
+**A parent folder of several vaults**, e.g. `~/Documents/Obsidian`. This works, but `Agent/` is created at the parent, outside every vault, and the whole tree is indexed. `/memory-init` warns about this; usually it is better to point `root` at one vault.
+
+### 3. Configure
+
+`memory.root` is read from the **global** config only (a project config can never redirect where the agent writes); `~` is expanded. The file is `<agentDir>/rackrot/config.json` (or `.jsonc`), where `<agentDir>` is pi's agent dir (`~/.pi/agent`). Create it with `/rackrot-init` or edit it with `/rackrot-config memory`. All other keys may also go in `<cwd>/.pi/rackrot.json(c)`; the project layer wins.
+
+```jsonc
 {
 	"memory": {
-		"root": "~/Vault",
-		"agentDir": "Agent",
-		"projects": "Projects",
-		"autoInject": true,
-		"commitIntervalMinutes": 5,
-		"push": "session",
+		"root": "~/Documents/Obsidian/MyVault", // required, global config only
+		"agentDir": "Agent", // folder under root the agent writes to
+		"projects": "Projects", // folder under agentDir, one subfolder per project
+		"project": "my-app", // optional: override the slug derived from the git remote
+		"autoInject": true, // add overview, open handoffs and pinned notes to the system prompt
+		"commitIntervalMinutes": 5, // 0 = commit only at session end
+		"push": "session", // "session" pushes at session end; "never" keeps it local
 		"injectBudgetChars": 12000,
-		"summary": { "model": "anthropic/claude-haiku-5-5", "minChanges": 3, "timeoutSeconds": 60 },
-		"embedding": { "provider": "onnx", "model": "Xenova/bge-small-en-v1.5" }
+		"embedding": { "provider": "onnx", "model": "Xenova/bge-small-en-v1.5" }, // {"provider": "none"} = BM25 only
+		"summary": {
+			"model": "anthropic/claude-haiku-5-5", // no default: unset skips the summary worker
+			"enabled": true,
+			"minChanges": 3,
+			"timeoutSeconds": 60
+		}
 	}
 }
 ```
 
-`project` overrides the project slug. `embedding` and optional `reranker` fall back to `skillIndex.embedding` and
-`skillIndex.reranker`, then to the default onnx model; `{"provider": "none"}` turns vectors off (BM25 only).
-`/rackrot-config memory` edits the scalars. Without `memory.root` the package does nothing except offer `/memory-init`.
+`embedding` and optional `reranker` fall back to `skillIndex.embedding` / `skillIndex.reranker`, then to the default onnx model. Without `memory.root` the package does nothing except offer `/memory-init`.
 
-Run `/memory-init` once: it offers `git init` when the root is not a repo, appends missing lines (never rewriting
-existing ones) to `.gitignore` and `.gitattributes`, and creates the agent folder.
+### 4. Run `/memory-init`
+
+One command for the whole setup; safe to re-run.
+
+1. `memory.root` unset: prints the config path and a JSON snippet, nothing else.
+2. Checks the root: offers to create it if missing, rejects a file. Reports whether it is an existing Obsidian vault (only `Agent/` is written) or a parent of several vaults.
+3. Warns when the root sits in iCloud (`Mobile Documents`), Dropbox, OneDrive or Google Drive, where `.git` is known to corrupt. When creating a new repo there it asks whether to keep the git data outside the folder (`git init --separate-git-dir`, stored under `<agentDir>/rackrot/memory/git/`); default is no. An existing `.git` is never moved.
+4. Not a git repo: asks, then `git init -b main`. Global git config is never changed.
+5. Creates `<agentDir>/` and `<agentDir>/<projects>/`, and appends missing lines to `.gitignore` and `.gitattributes` (existing lines are never rewritten).
+6. Commits only `.gitignore` / `.gitattributes` as `memory: initialize agent folder` (explicit paths). Your notes are **not** committed. If git has no `user.name`/`user.email` the commit is skipped and the exact `git config` commands are printed; run `/memory-init` again afterwards.
+7. Prints next steps based on the real state (no remote, remote without upstream, or sync active). Re-running on a set-up vault makes no new commit.
+
+### 5. Add a remote and push
+
+Optional; without a remote the agent still commits locally.
+
+```bash
+git -C "<root>" remote add origin <url>
+git -C "<root>" push -u origin main
+```
+
+Create an **empty, private** repo first (Forgejo, GitHub, ...): vault notes are private data. Review `git status` and commit the notes you want in the repo yourself before the first push, since init does not. Once the branch has an upstream, the agent pushes at session end (`push: "session"`). If the root is in a synced folder, see the warning above and do not put `.git` there.
+
+### 6. Several devices
+
+On each device clone the repo, set `memory.root` to the clone, and run `/memory-init`. At session start the agent runs `git pull --rebase --autostash` (needs an upstream), and again at session end before pushing. On a conflict the rebase is aborted, you are notified, and auto-commit and push are disabled for that session. Resolve it by hand in the vault (`git pull --rebase`, fix, `git push`); the next session syncs again. Pushes are never forced.
+
+### 7. Obsidian git plugin and mobile
+
+Don't run obsidian-git's auto-commit/auto-push on the same device while the agent's commit timer is active, unless you accept that both of them commit and pull in the same repo (they serialise only on the agent's own lock). On mobile, sync through whatever you already use; the agent only needs the files and, on desktop, the git repo.
+
+### 8. Troubleshooting
+
+| Symptom                                           | Cause / fix                                                                                                                                  |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nothing happens, only `/memory-init` exists       | `memory.root` is unset in the global config. Run `/memory-init` for the exact steps.                                                         |
+| "is not a git repo; notes are not versioned"      | Run `/memory-init`, or `git init` yourself. Notes still work without versioning.                                                             |
+| "git sync disabled for this session" after a push | Push rejected (no upstream, remote ahead, auth). Fix in the vault with `git pull --rebase` / `git push -u origin main`; restart the session. |
+| First search is slow, or downloads files          | The onnx embedding model downloads on first use. Set `embedding.provider` to `none` to skip it.                                              |
+| Search says it fell back to BM25                  | Embeddings failed or are off (`provider: none`); results are keyword-only. Check the embedding config and network.                           |
+| `memory_write` refuses to update a note           | It was not read in this session, or the file changed since it was read. `memory_read` it again, then write.                                  |
 
 ## Layout
 
@@ -82,12 +142,6 @@ never `-A`), so your uncommitted work in the vault is never swept into agent com
 `pull --rebase --autostash`; at the end, push when `push` is `session`. Never force. A pull conflict aborts the
 rebase, notifies you and disables auto-commit and push for the session; a push failure does the same. Git work is
 serialised with `<root>/.git/pi-memory.lock`. A root that is not a git repo still works, without versioning.
-
-## Existing Obsidian vault
-
-Point `root` at it. The agent can search and read all of it but writes only under `<agentDir>/`; `.obsidian/` is never
-created or modified, and pi's built-in `write`/`edit` are blocked for `.git`, `.obsidian` and the archive.
-Shell commands and `apply_patch` are not inspected.
 
 ## Limits
 

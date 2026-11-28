@@ -16,7 +16,7 @@ import {
 	memoryWrite,
 	type WriteParams,
 } from "../src/tools.ts";
-import type { ConfiguredConfig } from "../src/vault.ts";
+import { type ConfiguredConfig, nextSteps, setupVault } from "../src/vault.ts";
 
 const sh = (cwd: string, ...args: string[]) =>
 	execFileSync("git", ["-C", cwd, ...args], { encoding: "utf8" });
@@ -262,4 +262,33 @@ test("summary worker skips below minChanges and after a human edit", async () =>
 	writeFileSync(edited.abs, `${readFileSync(edited.abs, "utf8")}\nHuman addition\n`);
 	assert.match(await summarizeProject(edited.m, never), /^skipped: .*edited/);
 	assert.match(readFileSync(edited.abs, "utf8"), /Human addition/);
+});
+
+test("init commits only its own files, leaves user notes untracked, and is idempotent", async () => {
+	const root = join(tmp(), "Vault");
+	mkdirSync(join(root, ".obsidian"), { recursive: true });
+	writeFileSync(join(root, "human.md"), "# mine\n");
+	writeFileSync(join(root, ".obsidian", "app.json"), "{}");
+	const cfg = { root, agentDir: "Agent", projects: "Projects" } as ConfiguredConfig;
+	const env = { GIT_CONFIG_GLOBAL: join(tmp(), "gitconfig") };
+	Object.assign(process.env, env);
+	execFileSync("git", ["config", "-f", env.GIT_CONFIG_GLOBAL, "user.name", "t"]);
+	execFileSync("git", ["config", "-f", env.GIT_CONFIG_GLOBAL, "user.email", "t@example.com"]);
+
+	const first = await setupVault(cfg, { init: true });
+	assert.ok(first.done.includes("git init"));
+	assert.ok(existsSync(join(root, "Agent", "Projects")));
+	assert.match(readFileSync(join(root, ".gitignore"), "utf8"), /\.trash\//);
+	assert.equal(sh(root, "log", "--format=%s").trim(), "memory: initialize agent folder");
+	assert.deepEqual(sh(root, "ls-files").trim().split("\n").sort(), [
+		".gitattributes",
+		".gitignore",
+	]);
+	assert.match(sh(root, "status", "--porcelain"), /\?\? human\.md/);
+	assert.match((await nextSteps(cfg)).join("\n"), /remote add origin/);
+
+	await setupVault(cfg, { init: true });
+	assert.equal(sh(root, "rev-list", "--count", "HEAD").trim(), "1");
+	sh(root, "remote", "add", "origin", join(tmp(), "none.git"));
+	assert.match((await nextSteps(cfg)).join("\n"), /push -u origin main/);
 });
